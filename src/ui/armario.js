@@ -1,8 +1,8 @@
 // Pestaña Armario: rejilla de prendas, ficha de prenda (con foto) y el modo «¿Lo compro?».
-import { $, el, boton, radios, val, setVal } from "../lib/dom.js";
+import { $, el, boton, radios, val, vals, setVal } from "../lib/dom.js";
 import { app, estado } from "../state.js";
-import { CATS, CATN, CORTES, ABRIGOS, EST, TEJ, FORMAL_DE } from "../data/constants.js";
-import { activas, byId, usos, estiloDe, tejidoDe, palDe, evalua } from "../lib/engine.js";
+import { CATS, CATN, CORTES, ABRIGOS, EST, TEJ, FORMAL_DE, TEMPORADAS } from "../data/constants.js";
+import { activas, byId, usos, estiloDe, tejidoDe, palDe, evalua, temporadaDe } from "../lib/engine.js";
 import { clasifica, consejoColor, familia, lab } from "../lib/color.js";
 import { hayIA, imagenParaIA, preguntaJSON, abreImagen } from "../lib/ai.js";
 import { textoPerfil } from "../lib/analysis.js";
@@ -16,6 +16,10 @@ let formCasa = null;
 export function initArmario() {
   radios($("a-cat"), "a-cat", CATS, "arriba"); radios($("a-corte"), "a-corte", CORTES, "fluida");
   radios($("a-estilo"), "a-estilo", EST, "casual"); radios($("a-tejido"), "a-tejido", TEJ, "algodon"); radios($("a-abrigo"), "a-abrigo", ABRIGOS, "2");
+  radios($("a-temporada"), "a-temporada", TEMPORADAS, [], { multi: true });
+  // La temporada se deduce sola de lo que vas rellenando hasta que la tocas tú
+  $("a-form").addEventListener("change", (e) => { if (e.target.name === "a-temporada") { app.ui.tempTocada = true; if (!vals("a-temporada").length) e.target.checked = true; } else if (!app.ui.tempTocada) marcaTemporada(null); });
+  $("a-nombre").addEventListener("input", () => { if (!app.ui.tempTocada) marcaTemporada(null); });
   radios($("a-filter"), "a-filter", [["todo", "Todo"], ...CATS], "todo");
   document.querySelectorAll('input[name="a-filter"]').forEach((i) => i.addEventListener("change", () => { app.ui.filter = i.value; pintaArmario(); }));
   $("a-add").addEventListener("click", () => { app.ui.pendiente = null; abreForm(null); });
@@ -89,7 +93,13 @@ export async function abreForm(p, pre, modo) {
   pintaPrevia(fid ? await app.store.urlFoto(fid) : mini);
   if (pre) $("a-form-msg").textContent = ui.prefoto ? "He rellenado los datos. Revísalos y pulsa Guardar." : "He rellenado los datos. Hazle una foto, revísalos y pulsa Guardar.";
   if (ui.modo === "compra") $("a-form-msg").textContent = "Hazle una foto (o rellena los datos a mano) y pulsa Analizar. No se guarda en tu armario.";
+  ui.tempTocada = !!(p && Array.isArray(p.temporada) && p.temporada.length); marcaTemporada(ui.tempTocada ? p : null);
   infoColor(); f.hidden = false; f.scrollIntoView({ block: "start" });
+}
+function marcaTemporada(p) {
+  const x = p || { nombre: $("a-nombre").value, tipo: $("a-tipo").value, cat: val("a-cat"), abrigo: +(val("a-abrigo") || 2), tejido: val("a-tejido") };
+  const t = temporadaDe(x).t;
+  document.querySelectorAll('input[name="a-temporada"]').forEach((i) => { i.checked = t.includes(i.value); });
 }
 export function cierraForm() { $("a-form").hidden = true; Object.assign(app.ui, { editing: null, photo: null, prefoto: null, modo: null, pendiente: null }); }
 function cancelaForm() { const volver = !!app.ui.pendiente; cierraForm(); if (volver) ver("hoy"); }
@@ -159,7 +169,8 @@ function leeForm() {
   const col = $("a-color").value.toUpperCase(), c = clasifica(col, estado.PAL), estilo = val("a-estilo") || "casual";
   if (!nombre && app.ui.modo === "compra") nombre = $("a-tipo").value.trim() || "Prenda que he visto";
   if (!nombre) { $("a-form-msg").textContent = "Ponle un nombre para reconocerla después."; $("a-nombre").focus(); return null; }
-  return { nombre: nombre.slice(0, 60), cat: val("a-cat") || "arriba", tipo: $("a-tipo").value.trim().slice(0, 40), color: col, colorN: c.n, fam: familia(col),
+  const temp = app.ui.tempTocada ? vals("a-temporada") : [];
+  return { temporada: temp.length === 4 ? [] : temp, nombre: nombre.slice(0, 60), cat: val("a-cat") || "arriba", tipo: $("a-tipo").value.trim().slice(0, 40), color: col, colorN: c.n, fam: familia(col),
     corte: val("a-corte") || "fluida", estilo, tejido: val("a-tejido") || "algodon", abrigo: +(val("a-abrigo") || 2), formal: FORMAL_DE[estilo], notas: $("a-notas").value.trim().slice(0, 120) };
 }
 

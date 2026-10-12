@@ -20,6 +20,11 @@ export const BANDAS = [
 // Tiempo por defecto según el mes (hemisferio norte)
 export const MESBANDA = ["frio", "frio", "fresco", "fresco", "templado", "calor", "calor", "calor", "calor", "templado", "fresco", "frio"];
 
+// Estaciones del año (temporada de las prendas)
+export const TEMPORADAS = [["primavera", "Primavera"], ["verano", "Verano"], ["otono", "Otoño"], ["invierno", "Invierno"]];
+export const TEMPN = { primavera: "primavera", verano: "verano", otono: "otoño", invierno: "invierno" };
+export const estacionHoy = (d = new Date()) => ["invierno", "invierno", "primavera", "primavera", "primavera", "verano", "verano", "verano", "otono", "otono", "otono", "invierno"][d.getMonth()];
+
 export const OCAS = [
   { id: "diario", n: "Diario", s: "lunes a jueves", d: "una tarde entre semana, casual", f: [1, 2] },
   { id: "finde", n: "Tarde de finde", s: "viernes a domingo", d: "una tarde de viernes, sábado o domingo: un punto más arreglada que a diario, sin llegar a cita", f: [1.5, 2.5] },

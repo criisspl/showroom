@@ -27,7 +27,8 @@ Está pensada para que la use cualquiera: no hay que registrarse, ni instalar na
 - **Looks siempre completos:** si te falta una pieza (calzado, capa…), el look la muestra igualmente como sugerencia en tus colores y te pregunta si tienes algo así. Si dices que sí, la añades al armario y entra en el look; si dices que no, queda apuntado y puedes pasarla a tu lista de deseos.
 - **Todo el día fuera:** marca varias ocasiones (por ejemplo, oficina y luego cervezas) y dos tiempos (mañana fresca, tarde templada). El outfit sirve para todo, con una capa que se puede quitar y un consejo para pasar de un plan a otro.
 - **Lo monto yo:** elige tú las prendas y la app te dice si pega con la ocasión y el tiempo, qué funciona, qué falla y qué cambiarías por otras de tu armario.
-- **Valora los outfits:** con «Sí» o «No, me falla esto», y la app aprende tus gustos.
+- **Estación del año:** cada prenda sabe de qué temporada es (se deduce sola y se puede cambiar). En invierno no te propone sandalias ni shorts, y en verano nada de pana ni jerséis.
+- **Valora los outfits:** con «Sí» o «No, me falla esto», y la app aprende tus gustos. Un look al que dices que no desaparece y no vuelve a salir.
 - **¿Lo compro?:** haz una foto a una prenda en la tienda y te da un veredicto según tu paleta, tu cuerpo, tu estética y lo que ya tienes.
 - **Deseos:** las prendas que te faltan, en tus colores, con referencias de Pinterest.
 - **Historial:** lo que te has puesto, lo que has guardado y lo que la app ha aprendido de ti.

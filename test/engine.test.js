@@ -104,3 +104,27 @@ test("oficina casual acepta un look casual; la formal pide una prenda arreglada"
   assert.equal(formal.v, "no");
   assert.ok(formal.mal.some((t) => /oficina formal/.test(t)));
 });
+
+import { temporadaDe, fueraTemporada } from "../src/lib/engine.js";
+
+test("temporada deducida del nombre, sin falsos positivos", () => {
+  assert.deepEqual(temporadaDe({ nombre: "Sandalias planas", cat: "calzado", abrigo: 1 }).t, ["primavera", "verano"]);
+  assert.deepEqual(temporadaDe({ nombre: "Mallas acampanado marrón", cat: "abajo", abrigo: 2 }).t.length, 4);
+  assert.deepEqual(temporadaDe({ nombre: "Abrigo de lana", cat: "capa", abrigo: 3 }).t, ["otono", "invierno"]);
+  assert.equal(fueraTemporada({ nombre: "Short vaquero", cat: "abajo", abrigo: 1 }, "invierno"), null);
+  assert.equal(fueraTemporada({ nombre: "Short vaquero", cat: "abajo", abrigo: 1 }, "otono"), 2.5);
+  assert.equal(fueraTemporada({ nombre: "Camiseta", cat: "arriba", temporada: ["verano"] }, "otono"), null);
+});
+
+test("en invierno no propone prendas de verano", () => {
+  setEstado({ P: [...P.map((p) => ({ ...p })), { id: "s1", nombre: "Short vaquero", cat: "abajo", color: "#9DB7D5", abrigo: 1, estilo: "casual", tejido: "vaquero" }] });
+  for (let sd = 0; sd < 4; sd++) for (const r of monta("diario", "fresco", false, sd, null, "invierno")) assert.ok(!r.ids.includes("s1"));
+  const j = juzga(["t2", "s1"], { oca: "diario", banda: "templado", est: "invierno" });
+  assert.ok(j.mal.some((t) => /más de primavera y verano que de invierno/.test(t)));
+});
+
+test("un «no» descarta el look para siempre, también en otra ocasión", () => {
+  const r = monta("diario", "templado", false, 0)[0];
+  setEstado({ V: [{ id: "v", key: r.key, voto: "no", ocasion: "diario", banda: "templado", motivos: ["ocasion"] }] });
+  for (const oca of ["diario", "finde", "viaje"]) assert.ok(!monta(oca, "templado", false, 0).some((o) => o.key === r.key), oca);
+});
