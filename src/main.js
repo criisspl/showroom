@@ -1,0 +1,38 @@
+// Punto de entrada: abre la base de datos, carga el perfil y conecta las pantallas.
+import "./styles.css";
+import { creaStore } from "./lib/store.js";
+import { app, setPerfil, repinta } from "./state.js";
+import { setEstado } from "./lib/engine.js";
+import { normaliza } from "./lib/analysis.js";
+import { ver } from "./ui/comun.js";
+import { initHoy } from "./ui/hoy.js";
+import { initArmario } from "./ui/armario.js";
+import { initDeseos } from "./ui/deseos.js";
+import { initHistorial } from "./ui/historial.js";
+import { initAnalisis } from "./ui/analisis.js";
+import { initBienvenida } from "./ui/bienvenida.js";
+import { initAjustes } from "./ui/ajustes.js";
+
+async function arranca() {
+  try { app.store = await creaStore(); }
+  catch (e) {
+    document.body.textContent = "Este navegador no permite guardar datos (IndexedDB). Prueba con otro navegador o sal del modo privado.";
+    return;
+  }
+  app.ajustes = { ...app.ajustes, ...((await app.store.kget("ajustes")) || {}) };
+  const p = await app.store.kget("perfil");
+  if (p) { try { setPerfil(normaliza(p, p.respuestas || {}, p.origen || "ia")); } catch (e) { setPerfil(null); } }
+
+  initHoy(); initArmario(); initDeseos(); initHistorial(); initAnalisis(); initBienvenida(); initAjustes();
+  document.querySelectorAll(".a-tabs button").forEach((b) => b.addEventListener("click", () => ver(b.getAttribute("data-tab"))));
+
+  app.store.on("prendas", (a) => { setEstado({ P: a }); repinta("armario", "historial", "deseos", "hoy"); });
+  app.store.on("outfits", (a) => { setEstado({ O: a }); repinta("historial"); });
+  app.store.on("votos", (a) => { setEstado({ V: a }); repinta("historial"); });
+  app.store.on("deseos", (a) => { app.D = Object.fromEntries(a.map((d) => [d.id, d])); repinta("deseos"); });
+  repinta("ajustes", "analisis");
+
+  let t0 = "hoy"; try { t0 = localStorage.getItem("armario-tab") || "hoy"; } catch (e) { /* sin almacenamiento */ }
+  ver(app.perfil ? (document.querySelector('.panel[data-panel="' + t0 + '"]') ? t0 : "hoy") : "bienvenida");
+}
+arranca();

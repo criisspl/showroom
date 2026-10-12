@@ -1,0 +1,17 @@
+{
+  "name": "armario",
+  "version": "1.0.0",
+  "description": "Asesora de imagen y armario virtual con IA: análisis de color, cuerpo y estilo, y outfits con tu propia ropa.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "devDependencies": {
+    "vite": "8.3.4"
+  },
+  "license": "MIT"
+}
