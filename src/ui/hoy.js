@@ -1,9 +1,9 @@
 // Pestaña Hoy: elegir una o varias ocasiones y el tiempo, montar outfits completos (con lo que falta
 // sugerido desde Deseos), valorarlos, y «Lo monto yo»: la persona elige prendas y la app dice si pega.
-import { $, el, boton, radios, val, vals, hoyISO, fechaLarga } from "../lib/dom.js";
+import { $, el, boton, radios, val, vals, hoyISO, fechaLarga, pinA } from "../lib/dom.js";
 import { app, estado } from "../state.js";
 import { OCAS, BANDAS, MESBANDA, CATN, S_OCA, MOT, TEMPORADAS, TEMPN, estacionHoy } from "../data/constants.js";
-import { monta, byId, activas, estiloDe, tejidoDe, famDe, palDe, casan, clave2, ocaDe, bandaDe, capaHace, juzga, mejora, claveDe, fueraTemporada, txtTemporada, setEstado } from "../lib/engine.js";
+import { monta, byId, activas, estiloDe, tejidoDe, famDe, palDe, casan, clave2, ocaDe, bandaDe, capaHace, juzga, mejora, claveDe, fueraTemporada, txtTemporada, setEstado, esVirtual } from "../lib/engine.js";
 import { clasifica, familia, harm } from "../lib/color.js";
 import { hayIA, preguntaJSON } from "../lib/ai.js";
 import { textoPerfil } from "../lib/analysis.js";
@@ -131,7 +131,7 @@ function piezaHueco(h) {
   const it = el("li", "hueco");
   const pic = h.icono ? icono(h.icono, h.color) : el("div"); pic.className = "a-th a-th-w"; if (!h.icono) pic.style.background = h.color;
   it.appendChild(pic);
-  it.appendChild(el("small", null, h.estado === "quiero" ? "En tu lista" : h.estado === "no" ? "No la tienes" : h.estado === "tengo" ? "Dices que la tienes" : "Te falta"));
+  it.appendChild(el("small", null, h.estado === "quiero" ? "En tu lista" : h.estado === "no" ? "No la tienes" : h.estado === "tengo" ? "Dices que la tienes" : h.virtual ? "¿La tienes?" : "Te falta"));
   it.appendChild(el("span", null, h.nombre + (h.colorN && !h.generico ? ", en " + h.colorN.toLowerCase() : "")));
   return it;
 }
@@ -147,6 +147,7 @@ function pregunta(q, dest) {
   row.appendChild(boton("Sí, la tengo", "a-btn", () => anadeAlLook(q, dest)));
   row.appendChild(boton("No", "a-btn ghost", async () => {
     if (q.id) await ponDeseo(q.id, "no"); else app.ui.noGen[q.nombre] = 1;
+    if (q.virtual && typeof dest === "number") { sustituye(dest, q.nombre); return; }
     app.ui.ultNo = { dest, id: q.id, nombre: q.nombre };
     repintaDest(dest);
   }));
@@ -168,6 +169,60 @@ export async function vuelveConPrenda(pd, nid) {
   else if (app.ui.res && app.ui.res[pd.dest]) { const o = app.ui.res[pd.dest].o; o.ids = reemplaza(o.ids); repintaHoy(pd.dest); }
 }
 
+/* ---------- Looks con prendas que quizá tienes y no has subido ---------- */
+// Básicos que casi todo el mundo tiene, en neutros de tu paleta. Si dices que no, no vuelven a salir.
+function basicos() {
+  const neu = estado.PAL.filter((x) => x.tipo === "neutro"), n = (i, d) => (neu[i] || d);
+  const claro = n(0, { n: "Crema", hex: "#F3E9D4" }), medio = n(1, { n: "Camel", hex: "#C19A6B" }), oscuro = n(neu.length - 1, { n: "Chocolate", hex: "#4E3326" });
+  const B = (id, nombre, cat, tipo, icono, col, estilo, tejido, abrigo, corte) => ({ id, nombre, cat, tipo, icono, color: col.hex, estilo, tejido, abrigo, corte, formal: estilo === "arreglado" ? 2 : 1, basico: true });
+  const vaq = { hex: "#5F7FA3" };
+  return [
+    B("b-camiseta-clara", "Camiseta básica " + claro.n.toLowerCase(), "arriba", "camiseta", "camiseta", claro, "casual", "algodon", 1, "fluida"),
+    B("b-camisa-clara", "Camisa " + claro.n.toLowerCase(), "arriba", "camisa", "camisa", claro, "arreglado", "algodon", 1, "fluida"),
+    B("b-jersey-medio", "Jersey fino " + medio.n.toLowerCase(), "arriba", "jersey", "jersey", medio, "casual", "punto", 2, "fluida"),
+    B("b-vaquero-recto", "Vaquero recto azul medio", "abajo", "vaquero", "vaquero", vaq, "casual", "vaquero", 2, "fluida"),
+    B("b-pantalon-oscuro", "Pantalón recto " + oscuro.n.toLowerCase(), "abajo", "pantalón", "pantalon-ancho", oscuro, "arreglado", "algodon", 2, "fluida"),
+    B("b-falda-vaquera", "Falda vaquera midi", "abajo", "falda", "falda-midi", vaq, "casual", "vaquero", 1, "fluida")
+  ];
+}
+function virtuales() {
+  const A = activas(), out = [];
+  basicos().forEach((b) => {
+    const st = estadoDe(b.id); if (st === "no" || st === "quiero") return;
+    const f = familia(b.color);
+    if (A.some((p) => p.cat === b.cat && famDe(p) === f && (p.nombre + " " + (p.tipo || "")).toLowerCase().includes(b.tipo))) return; // ya tienes una parecida
+    out.push({ ...b, virtual: true });
+  });
+  // Prendas de Deseos que dijiste que tienes pero no has subido
+  deseos().forEach((w) => {
+    if (estadoDe(w.id) !== "tengo" || estado.P.some((p) => p.deseo === w.id)) return;
+    out.push({ id: w.id, virtual: true, nombre: w.n, cat: w.cat, tipo: w.tipo, color: w.cols[0][1], colorN: w.cols[0][0], icono: w.icono, estilo: w.estilo, tejido: w.tejido, abrigo: w.abrigo, corte: w.corte, formal: w.formal });
+  });
+  return out;
+}
+/** Un look con UNA prenda de base que quizá tienes y el resto de tu armario. */
+function montaConVirtual(c, evitar) {
+  const vs = virtuales().filter((v) => PRINC[v.cat]); if (!vs.length) return null;
+  vs.forEach((v) => { estado.virt[v.id] = v; });
+  const real = estado.P; let r = null;
+  try {
+    estado.P = real.concat(vs);
+    for (let sd = 0; sd < 5 && !r; sd++) r = monta(c.oca, c.banda, c.lluvia, sd + (app.ui.seed || 0), evitar, c.est).find((o) => o.ids.filter(esVirtual).length === 1 && !(evitar || []).includes(o.key)) || null;
+  } finally { estado.P = real; }
+  if (r) r.conVirtual = true;
+  return r;
+}
+
+/* ---------- Pinterest por look ---------- */
+const OCA_PIN = { diario: "casual", finde: "fin de semana", oficina: "oficina casual", "oficina-formal": "oficina elegante", casa: "en casa", cita: "cita", noche: "noche", evento: "boda invitada", viaje: "viaje", concierto: "concierto" };
+const ORDEN = { vestido: 0, arriba: 1, abajo: 2, capa: 3, calzado: 4, accesorio: 5 };
+function pinOutfit(ps, c) {
+  const oca = ocaDe(c.oca), o0 = oca.multi ? oca.multi[0] : oca;
+  const piezas = ps.filter((p) => ORDEN[p.cat] < 5).sort((a, b) => ORDEN[a.cat] - ORDEN[b.cat]).slice(0, 4)
+    .map((p) => ((p.tipo || p.nombre.split(" ")[0]) + (p.basico ? "" : " " + (p.colorN || clasifica(p.color, estado.PAL).n))).toLowerCase());
+  return ("outfit " + piezas.join(" ") + " " + (OCA_PIN[o0.id] || "") + " " + (TEMPN[c.est] || "")).replace(/\s+/g, " ").trim();
+}
+
 /* ---------- Tarjeta de outfit ---------- */
 function transicion(oca) {
   if (!oca.multi) return null;
@@ -181,16 +236,23 @@ function transicion(oca) {
 function tarjeta(o, n, c, origen, idx) {
   const li = el("article", "a-fit"), oca = ocaDe(c.oca), banda = bandaDe(c.banda);
   li.appendChild(el("p", "who", (origen === "ia" ? "Propuesta de la IA · " : origen === "yo" ? "Tu look · " : "Opción " + n + " · ") + lugarDe(c)));
-  if (o.nuevo) li.appendChild(el("p", "a-note hueco-n", "Te enseño este en lugar del que no te convencía; ese no vuelve a salir."));
+  if (o.nuevo) li.appendChild(el("p", "a-note hueco-n", o.nuevo === true ? "Te enseño este en lugar del que no te convencía; ese no vuelve a salir." : o.nuevo));
   const hs = huecos(o, c), ul = el("ul", "a-pieces"), dots = el("div", "dots"), ps = o.ids.map(byId).filter(Boolean);
-  o.ids.forEach((id) => {
-    const p = byId(id), it = el("li"); it.appendChild(thumb(p)); it.appendChild(el("small", null, p ? CATN[p.cat] : "")); it.appendChild(el("span", null, p ? p.nombre : "Prenda eliminada")); ul.appendChild(it);
+  // Prendas que quizá tienes: se pintan como sugerencia y se preguntan primero
+  const vq = ps.filter((p) => p.virtual).map((p) => ({ id: p.id, nombre: p.nombre, cat: p.cat, color: p.color, colorN: p.colorN, icono: p.icono, virtual: true, estado: estadoDe(p.id),
+    porque: p.basico ? "Es un básico que va genial con este look. Si lo tienes, súbelo y lo uso más veces." : "Dijiste que la tienes: súbela y la uso en tus looks.",
+    pre: { nombre: p.nombre, cat: p.cat, tipo: p.tipo, color: p.color, corte: p.corte, abrigo: p.abrigo, estilo: p.estilo, tejido: p.tejido } }));
+  if (vq.length) li.appendChild(el("p", "a-note hueco-n", "Con algo que quizá tienes y no has subido."));
+  o.ids.slice().sort((a, b) => ((byId(a) ? ORDEN[byId(a).cat] : 9) - (byId(b) ? ORDEN[byId(b).cat] : 9))).forEach((id) => {
+    const p = byId(id), it = el("li");
+    if (p && p.virtual) { const h = vq.find((x) => x.id === id); ul.appendChild(piezaHueco(h.estado === "tengo" ? h : { ...h, estado: null })); return; } it.appendChild(thumb(p)); it.appendChild(el("small", null, p ? CATN[p.cat] : "")); it.appendChild(el("span", null, p ? p.nombre : "Prenda eliminada")); ul.appendChild(it);
     if (p && p.cat !== "accesorio" && p.cat !== "calzado") { const i = el("i"); i.style.background = p.color; dots.appendChild(i); }
   });
   hs.forEach((h) => ul.appendChild(piezaHueco(h)));
   li.appendChild(ul);
   if (o.esquema) { dots.appendChild(el("span", null, o.esquema)); li.appendChild(dots); }
   if (o.mezcla) li.appendChild(el("p", "a-mix", o.mezcla));
+  if (ps.length) { const pr = el("div", "a-row a-pin"); pr.appendChild(pinA(pinOutfit(ps, c), "Ver looks así en Pinterest")); li.appendChild(pr); }
   if (o.porque) li.appendChild(el("p", "a-msg", o.porque));
   const tips = el("ul", "a-tips"), tr = transicion(oca);
   if (tr) tips.appendChild(el("li", null, tr));
@@ -208,7 +270,11 @@ function tarjeta(o, n, c, origen, idx) {
     else if (h.estado === "tengo") { p.appendChild(document.createTextNode("Dijiste que tienes " + h.nombre.toLowerCase() + ", pero no está en tu armario. ")); p.appendChild(boton("Añadirla ahora", "a-link", () => anadeAlLook(h, idx))); }
     li.appendChild(p);
   });
-  const pend = hs.find((h) => !h.propia && !h.estado && !(h.generico && app.ui.noGen[h.nombre]));
+  vq.filter((h) => h.estado === "tengo").forEach((h) => {
+    const p = el("p", "a-note hueco-n"); p.appendChild(document.createTextNode("Dijiste que tienes " + h.nombre.toLowerCase() + ", pero no está en tu armario. "));
+    p.appendChild(boton("Añadirla ahora", "a-link", () => anadeAlLook(h, idx))); li.appendChild(p);
+  });
+  const pend = vq.find((h) => !h.estado) || hs.find((h) => !h.propia && !h.estado && !(h.generico && app.ui.noGen[h.nombre]));
   const q = pend || (hs.length ? null : o.falta || (origen === "ia" ? null : sugiere(o, c)));
   if (q) li.appendChild(pregunta(q, idx));
   const un = app.ui.ultNo;
@@ -226,7 +292,7 @@ function acciones(ids, c, origen) {
   const row = el("div", "a-row");
   const guarda = (extra, btn, hecho) => {
     btn.disabled = true;
-    app.store.add("outfits", { prendas: ids, ocasion: c.oca, banda: c.banda, lluvia: c.lluvia, creada: new Date().toISOString(), origen: origen || "local", fav: false, fecha: null, ...extra })
+    app.store.add("outfits", { prendas: ids.filter((id) => !esVirtual(id)), ocasion: c.oca, banda: c.banda, lluvia: c.lluvia, creada: new Date().toISOString(), origen: origen || "local", fav: false, fecha: null, ...extra })
       .then(() => { btn.textContent = hecho; }, (e) => { btn.disabled = false; falla(e); });
   };
   const b1 = boton("Me lo pongo hoy", "a-btn"), b2 = boton("Guardar", "a-btn ghost");
@@ -253,12 +319,12 @@ function repintaHoy(scrollA) {
   if (scrollA != null) { const t = out.querySelector('[data-idx="' + scrollA + '"]'); if (t) t.scrollIntoView({ block: "start" }); }
 }
 /** Cambia el look rechazado por otro que no estuviera ya en pantalla. */
-function sustituye(idx) {
+function sustituye(idx, sinPrenda) {
   if (!app.ui.res || !app.ui.res[idx]) return;
   const c = app.ui.resCtx, vistos = app.ui.res.map((r) => r.o.key || claveDe(r.o.ids));
-  let nuevo = null;
+  let nuevo = app.ui.res[idx].o.conVirtual ? montaConVirtual(c, vistos) : null;
   for (let sd = 0; sd < 6 && !nuevo; sd++) nuevo = monta(c.oca, c.banda, c.lluvia, sd, vistos, c.est).find((r) => !vistos.includes(r.key)) || null;
-  if (nuevo) { nuevo.nuevo = true; app.ui.res[idx] = { o: nuevo, origen: "local" }; } else app.ui.res.splice(idx, 1);
+  if (nuevo) { nuevo.nuevo = sinPrenda ? "Como no tienes " + sinPrenda.charAt(0).toLowerCase() + sinPrenda.slice(1) + ", te propongo este otro." : true; app.ui.res[idx] = { o: nuevo, origen: "local" }; } else app.ui.res.splice(idx, 1);
   app.ui.ultNo = null; repintaHoy(nuevo ? idx : null);
 }
 export function montar(otra) {
@@ -275,6 +341,9 @@ export function montar(otra) {
     out.appendChild(d); return;
   }
   app.ui.resCtx = c; app.ui.res = res.map((o) => ({ o, origen: "local" }));
+  // La tercera opción, con algo que quizá tengas y no has subido
+  const v = montaConVirtual(c, app.ui.last.concat(otra ? app.ui.lastV || [] : []));
+  if (v) { if (app.ui.res.length >= 3) app.ui.res[2] = { o: v, origen: "local" }; else app.ui.res.push({ o: v, origen: "local" }); app.ui.lastV = (app.ui.lastV || []).concat(v.key).slice(-12); }
   repintaHoy();
 }
 

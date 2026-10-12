@@ -25,6 +25,8 @@ Está pensada para que la use cualquiera: no hay que registrarse, ni instalar na
   - Nunca junta registros que chocan (un chándal con un top de fiesta, por ejemplo) y tiene en cuenta tejidos, formas y colores.
   - Si a un look le falta algo, te pregunta «¿Tienes algo así?».
 - **Looks siempre completos:** si te falta una pieza (calzado, capa…), el look la muestra igualmente como sugerencia en tus colores y te pregunta si tienes algo así. Si dices que sí, la añades al armario y entra en el look; si dices que no, queda apuntado y puedes pasarla a tu lista de deseos.
+- **Prendas que no has subido:** una de las opciones incluye un básico que probablemente tienes (vaquero recto, camisa, jersey fino…) o una prenda que dijiste que tienes. Si es así, la subes y entra en el look; si no, desaparece y no vuelve a salir.
+- **Pinterest en cada look:** cada outfit trae un enlace a Pinterest con sus prendas, colores, ocasión y estación, para ver cómo queda en fotos reales.
 - **Todo el día fuera:** marca varias ocasiones (por ejemplo, oficina y luego cervezas) y dos tiempos (mañana fresca, tarde templada). El outfit sirve para todo, con una capa que se puede quitar y un consejo para pasar de un plan a otro.
 - **Lo monto yo:** elige tú las prendas y la app te dice si pega con la ocasión y el tiempo, qué funciona, qué falla y qué cambiarías por otras de tu armario.
 - **Estación del año:** cada prenda sabe de qué temporada es (se deduce sola y se puede cambiar). En invierno no te propone sandalias ni shorts, y en verano nada de pana ni jerséis.

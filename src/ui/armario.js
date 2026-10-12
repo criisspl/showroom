@@ -193,6 +193,7 @@ async function guardaPrenda(ev) {
       if (f && viejo && viejo.foto && viejo.foto !== f.foto) app.store.delFoto(viejo.foto);
     } else {
       Object.assign(d, { creada: new Date().toISOString(), activa: true, foto: d.foto || null, mini: d.mini || null });
+      if (app.ui.pendiente && app.ui.pendiente.wid) d.deseo = app.ui.pendiente.wid;
       nid = await app.store.add("prendas", d);
     }
     const pd = app.ui.pendiente;

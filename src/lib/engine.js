@@ -3,12 +3,13 @@
 import { OCAS, BANDAS, S_PAR, S_OCA, T_PAR, par, ESTN, TEJN, CATN, TEMPN } from "../data/constants.js";
 import { clasifica, familia, harm, lab } from "./color.js";
 
-export const estado = { P: [], O: [], V: [], PAL: [], perfil: null, L: null };
+export const estado = { P: [], O: [], V: [], PAL: [], perfil: null, L: null, virt: {} };
 export function setEstado(patch) { Object.assign(estado, patch); if ("V" in patch) estado.L = null; }
 
 export const VISTE = { arriba: 1, abajo: 1, vestido: 1, capa: 1 };
 export const activas = () => estado.P.filter((p) => p.activa !== false);
-export const byId = (id) => estado.P.find((p) => p.id === id) || null;
+export const byId = (id) => estado.P.find((p) => p.id === id) || estado.virt[id] || null;
+export const esVirtual = (id) => { const p = byId(id); return !!(p && p.virtual); };
 export const txt = (p) => ((p.nombre || p.n || "") + " " + (p.tipo || "")).toLowerCase();
 export const famDe = (p) => p.fam || familia(p.color || "#C19A6B");
 export const palDe = (p) => clasifica(p.color || "#C19A6B", estado.PAL).tipo;
