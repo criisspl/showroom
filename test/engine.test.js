@@ -128,3 +128,13 @@ test("un «no» descarta el look para siempre, también en otra ocasión", () =>
   setEstado({ V: [{ id: "v", key: r.key, voto: "no", ocasion: "diario", banda: "templado", motivos: ["ocasion"] }] });
   for (const oca of ["diario", "finde", "viaje"]) assert.ok(!monta(oca, "templado", false, 0).some((o) => o.key === r.key), oca);
 });
+
+import { condiciones } from "../src/lib/engine.js";
+test("condiciones: montaña, playa, viento", () => {
+  const tacon = { nombre: "Salones de tacón", cat: "calzado", abrigo: 1 }, sand = { nombre: "Sandalias planas", cat: "calzado", abrigo: 1 };
+  assert.ok(condiciones(tacon, { entorno: "montana" }).some(([p]) => p >= 4));
+  assert.ok(condiciones(sand, { entorno: "playa" }).some(([p]) => p < 0));
+  assert.ok(condiciones({ nombre: "Falda plisada", cat: "abajo" }, { viento: true }).some(([, t]) => /levantar/.test(t || "")));
+  const r = monta("viaje", "fresco", false, 0, null, "otono", { entorno: "montana" });
+  for (const o of r) assert.ok(!o.ids.includes("b3") && !o.ids.includes("v1"), "nada de faldas ni vestidos en la montaña");
+});

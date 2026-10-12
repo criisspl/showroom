@@ -1,6 +1,6 @@
 // Motor de outfits: decide qué prendas casan (registro, tejido, forma, color, ocasión y tiempo)
 // y aprende de las valoraciones de la persona.
-import { OCAS, BANDAS, S_PAR, S_OCA, T_PAR, par, ESTN, TEJN, CATN, TEMPN } from "../data/constants.js";
+import { OCAS, BANDAS, S_PAR, S_OCA, T_PAR, par, ESTN, TEJN, CATN, TEMPN, ENTN } from "../data/constants.js";
 import { clasifica, familia, harm, lab } from "./color.js";
 
 export const estado = { P: [], O: [], V: [], PAL: [], perfil: null, L: null, virt: {} };
@@ -63,6 +63,42 @@ export function fueraTemporada(p, est) {
   if ((veraniega && est === "invierno") || (invernal && est === "verano")) return null;
   return 2.5;
 }
+/* ---------- Condiciones: viento, humedad y dónde vas a estar ---------- */
+/** Penalizaciones (y algún premio, en negativo) de una prenda según las condiciones del día: [puntos, texto]. */
+export function condiciones(p, cd, calido) {
+  const out = []; if (!cd) return out;
+  const t = txt(p), tej = tejidoDe(p), n = p.nombre.charAt(0).toLowerCase() + p.nombre.slice(1), N = n.charAt(0).toUpperCase() + n.slice(1);
+  const tacon = /tac[oó]n|salones?|stiletto|aguja/.test(t), tacFino = /aguja|stiletto|salones?/.test(t) || (tacon && !/ancho|bajo|cuña/.test(t));
+  const sand = /sandal|chancl|alpargat/.test(t), botas = /bota|botín|botin/.test(t), plano = /zapatilla|bota|botín|botin|trekking|mocas/.test(t) && !tacon;
+  const falda = p.cat === "vestido" || /falda|minifalda/.test(t), vuelo = falda && (/vuelo|plisad|volante|lencer|gasa|mini|campana|satén|saten/.test(t) || tej === "ligero" || tej === "saten");
+  if (cd.viento) {
+    if (vuelo) out.push([1.5, "Con viento, " + n + " se te va a levantar."]);
+    if (/sombrero|pamela/.test(t)) out.push([2, "Con viento, " + n + " sale volando."]);
+    if (p.cat === "capa" && /vaquer|bomber|gabardina|trench|chaqueta|cazadora|piel/.test(t)) out.push([-0.6, null]);
+  }
+  if (cd.humedad) {
+    if (calido && p.cat !== "accesorio" && (tej === "saten" || tej === "piel" || tej === "felpa")) out.push([1.2, "Con calor húmedo, " + n + " no transpira."]);
+    if (/(^|\s)ante(\s|$)/.test(t)) out.push([1, "La humedad estropea el ante (" + n + ")."]);
+    if (calido && (/lino|algod/.test(t) || tej === "algodon")) out.push([-0.4, null]);
+  }
+  if (cd.entorno === "montana") {
+    if (p.cat === "calzado") { if (tacon) out.push([4, "En la montaña, mejor calzado plano y cerrado que " + n + "."]); else if (sand) out.push([2.5, "Para la montaña, mejor calzado cerrado que " + n + "."]); else if (plano) out.push([-1, null]); }
+    if (estiloDe(p) === "fiesta") out.push([4, N + " no pega en la montaña."]);
+    if (falda) out.push([2.5, "En la montaña, mejor pantalón que " + n + ": para andar y subir, más cómodo."]);
+  }
+  if (cd.entorno === "playa") {
+    if (botas) out.push([2, N + " dan demasiado calor para la playa."]);
+    if (tacFino) out.push([2, "En la arena, " + n + " se hunden."]);
+    if (p.cat !== "accesorio" && p.cat !== "calzado" && (/pana|felpa/.test(t) || tej === "felpa" || tej === "piel")) out.push([1.5, N + " es pesado para la playa."]);
+    if (sand) out.push([-1, null]);
+  }
+  if (cd.entorno === "pueblo") {
+    if (tacFino) out.push([1.5, "Por el empedrado del pueblo, mejor tacón ancho o plano que " + n + "."]);
+    if (p.cat === "calzado" && plano) out.push([-0.4, null]);
+  }
+  return out;
+}
+export function penCond(p, cd, calido) { let s = 0; for (const [pts] of condiciones(p, cd, calido)) { if (pts >= 4) return null; s += pts; } return s; }
 export const txtTemporada = (p) => { const x = temporadaDe(p).t; return x.length === 4 ? "todo el año" : x.map((e) => TEMPN[e]).join(" y "); };
 export const clave2 = (a, b) => [a, b].sort().join("|");
 
@@ -128,11 +164,12 @@ export function bandaDe(id) {
   const cal = bs[0], fr = bs[bs.length - 1];
   return { id: bs.map((b) => b.id).join("+"), n: "De " + fr.n.toLowerCase() + " a " + cal.n.toLowerCase(), s: "de " + fr.s + " a " + cal.s, t: cal.t * 0.7 + fr.t * 0.3, capa: fr, calido: cal, multi: true };
 }
-export function capaHace(c) { const b = bandaDe(c.banda), bc = b.capa || b; return bc.id === "frio" || bc.id === "fresco" || (bc.id === "templado" && c.lluvia); }
+export function capaHace(c) { const b = bandaDe(c.banda), bc = b.capa || b, cd = c.cond || {}; return bc.id === "frio" || bc.id === "fresco" || (bc.id === "templado" && c.lluvia) || ((cd.viento || cd.entorno === "montana") && bc.id !== "calor"); }
 
 /* ---------- Montar outfits ---------- */
-export function monta(ocaId, bandaId, lluvia, seed, evitar, est) {
-  const oca = ocaDe(ocaId), banda = bandaDe(bandaId), bc = banda.capa || banda;
+export function monta(ocaId, bandaId, lluvia, seed, evitar, est, cond) {
+  const oca = ocaDe(ocaId), banda = bandaDe(bandaId), bc = banda.capa || banda, calido = /calor|templado/.test((banda.calido || banda).id);
+  const capaSi = bc.id === "frio" || bc.id === "fresco" || (bc.id === "templado" && lluvia) || (cond && (cond.viento || cond.entorno === "montana") && bc.id !== "calor");
   const A = activas(), by = (c) => A.filter((p) => p.cat === c), SO = S_OCA[oca.id], l = L();
   const tops = by("arriba"), bots = by("abajo"), dress = by("vestido"), capas = by("capa"), shoes = by("calzado"), accs = by("accesorio");
   const rec = {};
@@ -144,7 +181,7 @@ export function monta(ocaId, bandaId, lluvia, seed, evitar, est) {
     let s = 0;
     const k = ps.map((p) => p.id).join("+");
     if (l.veto[k] || l.veto[k + "|o:" + oca.id] || l.veto[k + "|b:" + banda.id]) return null;
-    for (const p of ps) { const ft = fueraTemporada(p, est); if (ft === null) return null; s -= ft; }
+    for (const p of ps) { const ft = fueraTemporada(p, est), pc = penCond(p, cond, calido); if (ft === null || pc === null) return null; s -= ft + pc; }
     s += l.par[k] || 0; ps.forEach((p) => { s += l.pie[p.id + "|" + oca.id] || 0; });
     if (ps.length === 2) s += (l.est[clave2(estiloDe(ps[0]), estiloDe(ps[1]))] || 0) + (l.tej[clave2(tejidoDe(ps[0]), tejidoDe(ps[1]))] || 0) + (l.col[clave2(famDe(ps[0]), famDe(ps[1]))] || 0) + (l.cor[clave2(ps[0].corte || "fluida", ps[1].corte || "fluida")] || 0);
     let so = 0;
@@ -184,8 +221,8 @@ export function monta(ocaId, bandaId, lluvia, seed, evitar, est) {
     let b = null, bs = -1.2;
     const kk = ref.map((p) => p.id).join("+");
     list.forEach((p) => {
-      const o = SO[estiloDe(p)], ft = fueraTemporada(p, est); if (o === null || ft === null || l.comp[p.id + "|" + kk]) return;
-      let s = o + fn(p) - ft + (l.pie[p.id + "|" + oca.id] || 0);
+      const o = SO[estiloDe(p)], ft = fueraTemporada(p, est), pc = penCond(p, cond, calido); if (o === null || ft === null || pc === null || l.comp[p.id + "|" + kk]) return;
+      let s = o + fn(p) - ft - pc + (l.pie[p.id + "|" + oca.id] || 0);
       for (const r of ref) { const c = casan(p, r); if (c === null) return; s += c / ref.length + (harm(famDe(p), famDe(r)) / ref.length) * 0.6; }
       if (seed) s += Math.random() * 0.4;
       if (s > bs) { bs = s; b = p; }
@@ -195,7 +232,7 @@ export function monta(ocaId, bandaId, lluvia, seed, evitar, est) {
   const yaAcc = {}, tipsCuerpo = (estado.perfil && estado.perfil.cuerpo && estado.perfil.cuerpo.tips) || [];
   return out.map((c, idx) => {
     const ps = c.ps.slice(), tips = [], warn = [], encasa = oca.id === "casa";
-    if (!encasa && (bc.id === "frio" || bc.id === "fresco" || (bc.id === "templado" && lluvia))) {
+    if (!encasa && capaSi) {
       const capa = mejor(capas, c.ps, (p) => -Math.abs((+p.abrigo || 2) - bc.t) * 0.96 + (palDe(p) === "evita" ? -0.2 : 0.3));
       if (capa) ps.push(capa); else if (bc.id !== "templado") warn.push("No tienes una capa que encaje con este look.");
     }
@@ -353,6 +390,10 @@ export function juzga(ids, c) {
   });
   ps.forEach((p) => { if (corto(p) && bc.id === "frio") fallo(1.5, Cap(nomP(p)) + " se queda corto para el frío (salvo con medias gruesas).", [p]); });
   if (mal.length === nT) bien.push(banda.multi ? "Va bien para el cambio de temperatura" + (capas.length ? ": capa por la mañana y fuera cuando suba." : ".") : "Va bien para el tiempo que hace.");
+  // Viento, humedad y entorno
+  const cd = c.cond || {}, nC = mal.length, calidoJ = /calor|templado/.test(cal.id);
+  ps.forEach((p) => condiciones(p, cd, calidoJ).forEach(([pts, t]) => { if (t && pts > 0) fallo(pts, t, [p]); }));
+  if (mal.length === nC && (cd.viento || cd.humedad || (cd.entorno && cd.entorno !== "ciudad"))) bien.push("Preparado para " + [cd.viento ? "el viento" : "", cd.humedad ? "la humedad" : "", cd.entorno && cd.entorno !== "ciudad" ? (cd.entorno === "pueblo" ? "el " : "la ") + ENTN[cd.entorno] : ""].filter(Boolean).join(", ") + ".");
   // Estación del año
   const malT = ps.filter((p) => fueraTemporada(p, c.est) !== 0);
   malT.forEach((p) => fallo(fueraTemporada(p, c.est) === null ? 4 : 2, Cap(nomP(p)) + (/^\S+s\b/i.test(p.nombre) ? " son" : " es") + " más de " + txtTemporada(p) + " que de " + TEMPN[c.est] + ".", [p]));

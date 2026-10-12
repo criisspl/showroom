@@ -352,3 +352,4 @@ body{margin:0}
 .a-ancla-otra summary{cursor:pointer;font-size:.9rem}
 .a-ancla-otra .a-row{align-items:end}
 .a-ancla-otra input[type=color]{width:56px;height:40px;padding:2px;border-radius:10px}
+.a-conds{display:flex;flex-wrap:wrap;gap:4px 16px}
