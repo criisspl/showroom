@@ -2,93 +2,109 @@
 
 Una app web para descubrir **tu paleta de color, tu tipo de cuerpo y tu estética**, subir tu ropa y que te **monte outfits** según la ocasión y el tiempo. También te dice si una prenda que has visto **merece la pena comprarla**.
 
-Funciona entera en el navegador: no hay servidor ni cuentas, y tus datos se quedan en tu dispositivo.
+Está pensada para que la use cualquiera: no hay que registrarse, ni instalar nada de una tienda, ni poner claves.
+
+## Privacidad: tus datos no salen de tu móvil
+
+- **Sin cuentas ni base de datos.** El perfil, la ropa, las fotos, los outfits y las valoraciones se guardan solo en el navegador de cada persona (IndexedDB). Nadie más puede verlos, tampoco quien publica la app.
+- **El análisis se hace en el propio móvil.** Marcas tu piel, tus ojos y tu pelo en un selfie, respondes unas preguntas y la app calcula tu estación, tu tipo de cuerpo y tu estética sin enviar nada a ningún sitio.
+- **La IA es opcional y siempre se pide permiso.** Si alguien quiere un análisis más completo, o que la IA rellene los datos de una prenda a partir de la foto, la app avisa de que la foto se envía a un servicio de IA externo y pide aceptarlo. El servidor de la app solo hace de intermediario: no guarda nada.
+- **Fuentes propias.** La app no carga fuentes ni scripts de terceros.
+- **Copias de seguridad.** Cada persona puede descargar una copia (`.armario.json`) y restaurarla en otro dispositivo.
 
 ## Qué hace
 
-- **Análisis de imagen con IA**: con un selfie con luz natural, una foto de cuerpo entero (opcional), fotos de inspiración y unas preguntas, saca:
-  - colorimetría: estación, subtono, paleta, neutros, colores que conviene evitar y con qué cambiarlos, metales y combinaciones 60·30·10
-  - tipo de cuerpo con lo que te favorece, lo que conviene evitar y trucos
-  - rostro, cejas y gafas; maquillaje; cortes y colores de pelo
-  - tu estética, con su fórmula y búsquedas de Pinterest
-- **Sin IA**: si ya conoces tu estación (12 estaciones) y tu tipo de cuerpo (10 tipos Kibbe), puedes empezar eligiéndolos en una lista.
-- **Armario**: sube tus prendas con foto. La IA puede rellenar sola los datos de cada prenda: categoría, color, corte, registro (deportivo, casual, arreglado, fiesta) y tejido.
-- **Hoy**: monta tres outfits según la ocasión (diario, tarde de finde, oficina, cita, noche, evento…) y el tiempo que hace.
-  - Nunca junta registros que chocan (un chándal con un top de fiesta, por ejemplo) y tiene en cuenta los tejidos, las formas y los colores.
+- **Análisis en el móvil, sin IA:**
+  - **Color:** a partir de los colores que marcas en el selfie (y, si quieres, algo blanco para corregir la luz) y de tus respuestas (venas, joyas, sol, ojos, pelo), calcula tu subtono, tu claridad y tu contraste. Con eso te asigna una de las 12 estaciones y te sugiere las dos vecinas por si dudas.
+  - **Cuerpo:** saca tu tipo de cuerpo (Kibbe, 10 tipos) por puntos según tu estatura y tus respuestas, y tu silueta si das tus medidas.
+  - **Estética:** a partir de las palabras que elijas (romántica, natural, clásica, minimalista, urbana, llamativa, vintage, sexy), con su fórmula, looks, maquillaje, colores de pelo y prendas clave en tus colores.
+- **Análisis con IA (opcional):** cara, cejas, gafas, cortes de pelo, maquillaje y una estética con nombre propio, a partir de tus fotos.
+- **Ya sé mi estación:** si ya te han hecho un análisis de color, eliges tu estación y tu tipo de cuerpo directamente.
+- **Armario:** sube tus prendas con foto. El color principal se detecta en el móvil.
+- **Hoy:** te monta tres outfits según la ocasión (diario, tarde de finde, oficina, cita, noche, evento…) y el tiempo.
+  - Nunca junta registros que chocan (un chándal con un top de fiesta, por ejemplo) y tiene en cuenta tejidos, formas y colores.
   - Si a un look le falta algo, te pregunta «¿Tienes algo así?».
-- **Valora los outfits**: dile «Sí, me lo pondría» o «No, me falla esto» y la app aprende tus gustos.
-- **¿Lo compro?**: haz una foto a una prenda en la tienda y te da un veredicto según tu paleta, tu cuerpo, tu estética y lo que ya tienes. Si te dice que sí, la apunta en tu lista de deseos.
-- **Deseos**: prendas que te faltan, en tus colores, con referencias de Pinterest.
-- **Historial**: lo que te has puesto, los outfits guardados y lo que la app ha aprendido de ti.
-- **Copia de seguridad**: exporta e importa todo (fotos incluidas) en un archivo `.armario.json`.
+- **Valora los outfits:** con «Sí» o «No, me falla esto», y la app aprende tus gustos.
+- **¿Lo compro?:** haz una foto a una prenda en la tienda y te da un veredicto según tu paleta, tu cuerpo, tu estética y lo que ya tienes.
+- **Deseos:** las prendas que te faltan, en tus colores, con referencias de Pinterest.
+- **Historial:** lo que te has puesto, lo que has guardado y lo que la app ha aprendido de ti.
 
-## La IA: gratuita y la eliges tú
+## Dispositivos compatibles
 
-La app no trae ninguna IA de serie. Cada persona pega **su propia clave** de un proveedor compatible con la API de OpenAI (`chat/completions`) que entienda imágenes. Estos proveedores tienen plan gratuito:
+| | Mínimo |
+|---|---|
+| iPhone y iPad | iOS / iPadOS 15 o posterior (Safari, o Chrome para iOS) |
+| Android | Chrome 90+, Samsung Internet 15+, Firefox 94+ |
+| Ordenador | Chrome o Edge 90+, Firefox 94+, Safari 15+ |
 
-| Proveedor | Modelo por defecto | Notas |
-|---|---|---|
-| [Mistral](https://console.mistral.ai/api-keys) | `mistral-small-latest` | Empresa europea. El modelo Small entiende fotos. |
-| [Groq](https://console.groq.com/keys) | `meta-llama/llama-4-scout-17b-16e-instruct` | Muy rápido; elige un modelo con visión. |
-| [OpenRouter](https://openrouter.ai/keys) | `openrouter/free` | Elige al azar entre modelos gratuitos. Tiene un límite de peticiones al día. |
-| [Google Gemini](https://aistudio.google.com/apikey) | `gemini-flash-latest` | Las condiciones de Google no permiten el plan gratuito en la UE, Suiza ni Reino Unido. |
-| Otro | — | Cualquier servicio compatible: pon la URL y el modelo en Ajustes. |
+- **Se instala como una app:** se puede añadir a la pantalla de inicio desde el navegador, con su icono, a pantalla completa y sin pasar por ninguna tienda.
+  - En **Android**, la app muestra un botón «Instalar» en Ajustes.
+  - En **iPhone**, explica cómo hacerlo: Compartir → «Añadir a pantalla de inicio».
+- **iPhone:** conviene instalarla, porque Safari puede borrar los datos de las webs que no se abren en 7 días. Las apps añadidas a la pantalla de inicio no tienen ese límite. Además, la app pide al navegador que no borre sus datos.
+- **Funciona sin conexión** (menos la IA), gracias a un service worker.
+- **Fotos:** en iPhone, Safari convierte las fotos HEIC a JPEG al elegirlas. Si algún navegador no puede abrir una foto, la app lo dice y sugiere el formato «Más compatible».
+- La interfaz está pensada para móvil (pantallas desde 320 px) y respeta la muesca y la barra inferior del iPhone.
 
-Antes de elegir, ten en cuenta:
+## La IA opcional
 
-- **Privacidad**: tus fotos y respuestas se envían directamente desde tu navegador al proveedor que elijas. En los planes gratuitos, el proveedor suele poder usar esos datos para mejorar sus modelos. Lee sus condiciones.
-- **Edad**: estos servicios son para mayores de 18 años.
-- **Planes y límites**: los planes gratuitos y sus límites cambian con frecuencia. Si un modelo deja de existir, cámbialo en Ajustes.
-- **CORS**: la app llama al proveedor desde el navegador. Si un servicio bloquea esas llamadas, usa otro o pon un proxy propio como «Otro».
+La app trae su propio servidor intermediario (`worker/`, en Cloudflare Workers). La clave de la IA está en un secreto de Cloudflare, nunca en el navegador ni en el repo, así que **las personas que usan la app no tienen que poner nada**.
 
-La clave se guarda solo en tu navegador (IndexedDB) y **no se incluye en las copias de seguridad**.
+- **Proveedor principal:** [Groq](https://console.groq.com/keys), con plan gratuito y el modelo con visión `meta-llama/llama-4-scout-17b-16e-instruct`.
+- **Reserva opcional:** [Mistral](https://console.mistral.ai/api-keys) (`mistral-small-latest`), que se usa si Groq se satura.
+- **Anti-abuso:**
+  - máximo 8 peticiones por minuto por persona
+  - solo acepta llamadas desde la propia web
+  - solo reenvía texto y hasta 5 fotos, de 6 MB en total como máximo
+  - el modelo y los límites los decide el servidor, no el navegador
+- **Cupo gratuito:** es compartido. Cuando se llena, la app lo explica y el análisis en el móvil sigue funcionando.
+- **Clave propia:** quien quiera puede poner la suya en Ajustes (Mistral, Groq, OpenRouter, Gemini o cualquier servicio compatible con la API de OpenAI).
 
-## Usarla
+## Publicarla (gratis) en Cloudflare
 
-La forma más fácil es la versión publicada en GitHub Pages: `https://<tu-usuario>.github.io/<repo>/`.
+1. Crea una cuenta gratuita en [Cloudflare](https://dash.cloudflare.com/sign-up).
+2. Ve a **Workers & Pages → Create → Import a repository**, conecta GitHub y elige este repo. Llama al proyecto `armario` (igual que `name` en `wrangler.jsonc`) y deja los valores por defecto: *Build command* `npm run build` y *Deploy command* `npx wrangler deploy`.
+3. Crea una clave gratuita en [Groq](https://console.groq.com/keys).
+4. En el Worker, ve a **Settings → Variables and Secrets → Add**, elige el tipo **Secret**, ponle el nombre `IA_CLAVE` y pega la clave.
+   - Opcional: añade también `IA2_CLAVE` con una clave de Mistral como reserva.
+5. Listo: la app queda en `https://armario.<tu-subdominio>.workers.dev`. Cada push a `main` la vuelve a publicar.
 
-En local (necesitas Node 20 o posterior):
+Sin `IA_CLAVE`, la app funciona igual; solo se desactiva la IA integrada.
+
+## Desarrollo
+
+Necesitas Node 20 o posterior.
 
 ```bash
 npm install
-npm run dev       # servidor de desarrollo
-npm test          # pruebas unitarias
-npm run build     # genera dist/
-npm run preview   # sirve dist/
+npm run dev        # la web, con recarga en caliente
+npm run dev:api    # la web + el servidor de la IA en local (pon IA_CLAVE en .dev.vars)
+npm test           # pruebas unitarias (motor, color, análisis local y servidor)
+npm run build      # genera dist/
+npm run deploy     # publica en Cloudflare desde tu ordenador
 ```
-
-## Publicar en GitHub Pages
-
-El repo trae un workflow (`.github/workflows/deploy.yml`) que, en cada push a `main`, pasa las pruebas, compila y publica la app.
-
-Para activarlo la primera vez, ve en GitHub a **Settings → Pages → Build and deployment → Source** y elige **GitHub Actions**.
 
 ## Estructura
 
 ```
 index.html            pantallas de la app
+public/               icono, manifest y service worker (app instalable y sin conexión)
+worker/               servidor de Cloudflare: sirve la web y hace de intermediario con la IA
 src/main.js           arranque
-src/state.js          estado compartido de la interfaz
 src/lib/
-  ai.js               cliente de IA (proveedores, imágenes, JSON)
-  analysis.js         preguntas, prompt del análisis, normalización y perfil manual
+  local.js            análisis en el móvil: color desde el selfie, cuerpo y estética
+  analysis.js         preguntas, análisis con IA y normalización del perfil
+  ai.js               cliente de IA (integrada o con clave propia) y lectura de fotos
   color.js            color en CIELAB, familias, paleta y clasificación
   engine.js           motor de outfits, aprendizaje de valoraciones y «¿Lo compro?»
   store.js            IndexedDB: colecciones, fotos y copias de seguridad
-  dom.js              utilidades de interfaz
-src/data/
-  constants.js        ocasiones, tiempo, registros, tejidos y tablas de compatibilidad
-  presets.js          12 estaciones, 10 tipos de cuerpo y catálogo de prendas básicas
-  icons.js            iconos SVG de prendas
+src/data/             estaciones, tipos de cuerpo, estéticas, maquillaje e iconos
 src/ui/               una pantalla por archivo
 test/                 pruebas con node:test
 ```
 
-## Tus datos
+## Aviso
 
-Todo vive en el navegador donde usas la app. Si borras los datos del navegador, se pierden: haz una copia de vez en cuando desde **Ajustes → Exportar copia**.
-
-Los archivos `*.armario.json` están en `.gitignore` para que no subas tus datos al repo sin querer.
+Las recomendaciones son orientativas y no sustituyen a una asesora de imagen profesional. El análisis de color con una foto depende mucho de la luz: lo mejor es luz natural de día, de frente y sin filtros.
 
 ## Licencia
 

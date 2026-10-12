@@ -1,4 +1,9 @@
 // Punto de entrada: abre la base de datos, carga el perfil y conecta las pantallas.
+// Fuentes servidas desde la propia app (sin peticiones a Google): más privado y funciona sin conexión
+import "@fontsource/caprasimo/latin-400.css";
+import "@fontsource/caveat/latin-500.css";
+import "@fontsource/caveat/latin-700.css";
+import "@fontsource-variable/dm-sans/opsz.css";
 import "./styles.css";
 import { creaStore } from "./lib/store.js";
 import { app, setPerfil, repinta } from "./state.js";
@@ -12,6 +17,7 @@ import { initHistorial } from "./ui/historial.js";
 import { initAnalisis } from "./ui/analisis.js";
 import { initBienvenida } from "./ui/bienvenida.js";
 import { initAjustes } from "./ui/ajustes.js";
+import { initInstala, protegeDatos } from "./ui/instala.js";
 
 async function arranca() {
   try { app.store = await creaStore(); }
@@ -23,7 +29,7 @@ async function arranca() {
   const p = await app.store.kget("perfil");
   if (p) { try { setPerfil(normaliza(p, p.respuestas || {}, p.origen || "ia")); } catch (e) { setPerfil(null); } }
 
-  initHoy(); initArmario(); initDeseos(); initHistorial(); initAnalisis(); initBienvenida(); initAjustes();
+  initHoy(); initArmario(); initDeseos(); initHistorial(); initAnalisis(); initBienvenida(); initAjustes(); initInstala();
   document.querySelectorAll(".a-tabs button").forEach((b) => b.addEventListener("click", () => ver(b.getAttribute("data-tab"))));
 
   app.store.on("prendas", (a) => { setEstado({ P: a }); repinta("armario", "historial", "deseos", "hoy"); });
@@ -32,6 +38,7 @@ async function arranca() {
   app.store.on("deseos", (a) => { app.D = Object.fromEntries(a.map((d) => [d.id, d])); repinta("deseos"); });
   repinta("ajustes", "analisis");
 
+  if (app.perfil) protegeDatos();
   let t0 = "hoy"; try { t0 = localStorage.getItem("armario-tab") || "hoy"; } catch (e) { /* sin almacenamiento */ }
   ver(app.perfil ? (document.querySelector('.panel[data-panel="' + t0 + '"]') ? t0 : "hoy") : "bienvenida");
 }

@@ -6,7 +6,7 @@
   --moss:#4F5B33; --moss-ink:#F7F3E4; --copper:#A94A1B; --copper-ink:#FFF4E6; --butter:#F0DC9A;
   --tape:rgba(232,205,120,.78); --shadow:rgba(46,34,16,.2); --bad:#A23A2A;
   --display:"Caprasimo","Cooper Black","Rockwell Extra Bold",Georgia,serif;
-  --body:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --body:"DM Sans Variable","DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --note:"Caveat","Segoe Script","Bradley Hand",cursive;
 }
 :root[data-theme="dark"]{
@@ -305,3 +305,18 @@ body{padding-bottom:calc(74px + env(safe-area-inset-bottom,0px))}
 
 .panel[hidden],[hidden]{display:none!important}
 body{margin:0}
+
+/* Selfie: marcar piel, ojos, pelo y blanco */
+.selfie-in{aspect-ratio:auto;min-height:120px}
+.marca{display:grid;gap:10px}
+.marca-t{margin:0;font-weight:700;font-size:1rem}
+.marca-img{position:relative;width:fit-content;max-width:100%;margin-inline:auto;border-radius:14px;overflow:hidden;touch-action:manipulation;cursor:crosshair;line-height:0}
+.marca-img img{display:block;width:auto;max-width:100%;height:auto;max-height:65vh;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.marca-img .pto{position:absolute;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px #000;pointer-events:none}
+.marca-img .pto b{position:absolute;left:24px;top:-2px;line-height:1.3;font-size:.7rem;color:#fff;background:rgba(0,0,0,.6);padding:1px 5px;border-radius:6px;white-space:nowrap}
+.marca-res{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.marca-res li{display:flex;align-items:center;gap:6px;font-size:.8rem}
+.marca-res i{width:22px;height:22px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+.a-check{display:flex;gap:8px;align-items:flex-start;font-size:.9rem;margin:6px 0}
+.a-check input{margin-top:3px;width:18px;height:18px;flex:none}
+.opts-r.varias input:checked+span{background:#A94A1B;border-color:#A94A1B}

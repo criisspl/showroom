@@ -1,0 +1,17 @@
+{
+  "name": "Armario · tu asesora de imagen",
+  "short_name": "Armario",
+  "description": "Análisis de color, cuerpo y estilo con IA, armario virtual y outfits con tu propia ropa.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E3E4CF",
+  "theme_color": "#E3E4CF",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

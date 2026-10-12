@@ -5,3 +5,7 @@ dist/
 # Copias de seguridad personales: no se suben
 *.armario.json
 mis-datos/
+
+# Secretos locales de Cloudflare
+.dev.vars
+.wrangler/

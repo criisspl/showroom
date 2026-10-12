@@ -4,7 +4,7 @@ import { app, estado } from "../state.js";
 import { CATS, CATN, CORTES, ABRIGOS, EST, TEJ, FORMAL_DE } from "../data/constants.js";
 import { activas, byId, usos, estiloDe, tejidoDe, palDe, evalua } from "../lib/engine.js";
 import { clasifica, consejoColor, familia, lab } from "../lib/color.js";
-import { hayIA, imagenParaIA, preguntaJSON } from "../lib/ai.js";
+import { hayIA, imagenParaIA, preguntaJSON, abreImagen } from "../lib/ai.js";
 import { textoPerfil } from "../lib/analysis.js";
 import { thumb, ver, falla } from "./comun.js";
 import { pintaDeseos } from "./deseos.js";
@@ -117,7 +117,7 @@ async function eligeFoto(file) {
   const msg = $("a-form-msg"); if (!file) return;
   msg.textContent = "Abriendo la foto…";
   try {
-    const bm = await createImageBitmap(file);
+    const bm = await abreImagen(file);
     const big = lienzo(bm, 900), col = dominante(bm);
     const blob = await new Promise((r) => big.toBlob(r, "image/jpeg", 0.84));
     if (bm.close) bm.close();

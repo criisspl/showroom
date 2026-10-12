@@ -4,6 +4,7 @@ import { $, el, boton, radios, val, pinA } from "../lib/dom.js";
 import { app } from "../state.js";
 import { OCAS } from "../data/constants.js";
 import { ver } from "./comun.js";
+import { abreIA } from "./bienvenida.js";
 
 const sec = (id, titulo, frase) => { const s = el("section", "b"); s.id = id; s.appendChild(el("h2", null, titulo)); if (frase) s.appendChild(el("p", "verdict", frase)); return s; };
 const chips = (items, cls = "chips") => { const u = el("ul", cls); items.filter(Boolean).forEach((x) => u.appendChild(el("li", null, x))); return u; };
@@ -34,6 +35,10 @@ export function pintaAnalisis() {
   });
   w.appendChild(fic);
   if (p.resumen) w.appendChild(el("p", "a-note", p.resumen));
+  if (p.origen !== "ia") {
+    const k = el("div", "card a-cta"); k.appendChild(el("p", null, p.origen === "local" ? "Este análisis se ha hecho en tu móvil. Si quieres más detalle (cara, cejas, gafas, cortes de pelo y una estética a tu medida), puedes hacerlo con IA." : "Has empezado con tu estación y tu tipo de cuerpo. Puedes hacer un análisis más completo cuando quieras."));
+    k.appendChild(boton("Análisis más completo con IA", "a-btn ghost", abreIA)); w.appendChild(k);
+  }
   const toc = el("div", "toc");
   [["an-color", "Color"], ["an-cuerpo", "Cuerpo"], ["an-rostro", "Rostro"], ["an-maqui", "Maquillaje"], ["an-pelo", "Pelo"], ["an-estetica", "Estética"], ["an-looks", "Looks"], ["an-inspo", "Inspo"]].forEach(([id, t]) => {
     const a = el("a", null, t); a.href = "#" + id; a.addEventListener("click", (ev) => { ev.preventDefault(); const x = $(id); if (x) x.scrollIntoView({ block: "start" }); }); toc.appendChild(a);
@@ -43,6 +48,7 @@ export function pintaAnalisis() {
   // Color
   const sc = sec("an-color", "Color", [c.estacion, c.intensidad].filter(Boolean).join(": "));
   if (c.explicacion) sc.appendChild(el("p", null, c.explicacion));
+  if ((c.alternativas || []).length && p.origen !== "ia") sc.appendChild(el("p", "a-note", "Estaciones vecinas que también podrían ser las tuyas: " + c.alternativas.join(" y ") + "."));
   const card = el("div", "card"); card.appendChild(sub("Tus mejores colores")); card.appendChild(swatches(c.paleta || []));
   if ((c.neutros || []).length) { card.appendChild(sub("Neutros")); card.appendChild(swatches(c.neutros)); }
   if ((c.metales || []).length) { card.appendChild(sub("Metales")); card.appendChild(chips(c.metales, "chips mini")); }

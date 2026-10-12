@@ -4,7 +4,7 @@ import { construyePaleta } from "./lib/color.js";
 
 export const app = {
   store: null,
-  ajustes: { proveedor: "mistral", modelo: "", url: "", clave: "" },
+  ajustes: { proveedor: "integrada", modelo: "", url: "", clave: "" },
   perfil: null,
   D: {},                // deseos guardados por id (estado de cada prenda deseada)
   ui: { filter: "todo", wfil: "top", wcol: {}, seed: 0, last: [], preg: {}, editing: null, photo: null, prefoto: null, modo: null },

@@ -11,10 +11,10 @@ export function initAjustes() {
   const nota = () => {
     const p = PROVEEDORES[sel.value]; $("s-prov-nota").textContent = p.nota;
     $("s-modelo").placeholder = p.modelo || "nombre-del-modelo"; $("s-url").placeholder = p.url || "https://…/v1/chat/completions";
-    $("s-url-f").hidden = sel.value !== "otro"; const a = $("s-clave-link"); a.href = p.clave || "#"; a.hidden = !p.clave;
+    $("s-propia").hidden = !!p.sinClave; $("s-url-f").hidden = sel.value !== "otro"; const a = $("s-clave-link"); a.href = p.clave || "#"; a.hidden = !p.clave;
   };
   sel.addEventListener("change", nota);
-  app.pinta.ajustes = () => { sel.value = app.ajustes.proveedor || "mistral"; $("s-modelo").value = app.ajustes.modelo || ""; $("s-url").value = app.ajustes.url || ""; $("s-clave").value = app.ajustes.clave || ""; nota(); };
+  app.pinta.ajustes = () => { sel.value = config(app.ajustes).id; $("s-modelo").value = app.ajustes.modelo || ""; $("s-url").value = app.ajustes.url || ""; $("s-clave").value = app.ajustes.clave || ""; nota(); };
   $("s-guarda").addEventListener("click", guarda);
   $("s-prueba").addEventListener("click", prueba);
   $("s-exporta").addEventListener("click", exporta);
@@ -30,11 +30,13 @@ export function initAjustes() {
 
 async function guarda() {
   app.ajustes = { proveedor: $("s-prov").value, modelo: $("s-modelo").value.trim(), url: $("s-prov").value === "otro" ? $("s-url").value.trim() : "", clave: $("s-clave").value.trim() };
-  await app.store.kset("ajustes", app.ajustes); $("s-msg").textContent = "Guardado."; repinta("hoy");
+  await app.store.kset("ajustes", app.ajustes);
+  $("s-msg").textContent = app.ajustes.proveedor !== "integrada" && !app.ajustes.clave ? "Sin clave se usa la IA de la app." : "Guardado.";
+  repinta("hoy");
 }
 async function prueba() {
   await guarda(); const m = $("s-msg"); m.textContent = "Probando…";
-  try { await pregunta(app.ajustes, { texto: "Responde solo con la palabra: ok", json: false }); m.textContent = "Conexión correcta con " + config(app.ajustes).modelo + "."; }
+  try { await pregunta(app.ajustes, { texto: "Responde solo con la palabra: ok", json: false }); const cfg = config(app.ajustes); m.textContent = "Conexión correcta" + (cfg.modelo ? " con " + cfg.modelo : "") + "."; }
   catch (e) { m.textContent = e.message; }
 }
 async function exporta() {

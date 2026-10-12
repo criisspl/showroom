@@ -4,11 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Armario · tu asesora de imagen con IA</title>
-  <meta name="description" content="Análisis de color, cuerpo y estilo con IA, armario virtual y outfits con tu propia ropa. Todo se guarda en tu navegador.">
+  <meta name="description" content="Análisis de color, cuerpo y estilo con IA, armario virtual y outfits con tu propia ropa. Gratis y sin registrarte.">
   <meta name="theme-color" content="#E3E4CF">
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Caveat:wght@500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Armario">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 <body>
 <p class="a-status" id="a-status" role="status" hidden></p>
@@ -19,38 +23,48 @@
   <header class="intro">
     <p class="eyebrow">Tu asesora de imagen</p>
     <h1>Armario</h1>
-    <p>Cuéntame cómo eres y te hago tu análisis: tu paleta de color, tu tipo de cuerpo, tu estética y las prendas que te faltan. Después, sube tu ropa y te monto outfits según la ocasión y el tiempo.</p>
+    <p>Te hago tu análisis de imagen: tu paleta de color, tu tipo de cuerpo, tu estética y las prendas que te faltan. Después subes tu ropa y te monto outfits según la ocasión y el tiempo.</p>
+    <p class="aviso">Todo se hace y se guarda en este móvil: sin cuentas, y tus fotos no salen de aquí.</p>
   </header>
 
-  <div class="card paso" id="paso-ia">
-    <h2><span class="n">1</span>Elige tu IA</h2>
-    <p class="a-msg">La app no tiene servidor: usa una IA con tu propia clave gratuita. La clave se queda en este navegador.</p>
-    <label class="a-f"><span>Proveedor</span><select id="b-prov"></select></label>
-    <p class="a-msg" id="b-prov-nota"></p>
-    <label class="a-f"><span>Tu clave</span><input type="password" id="b-clave" autocomplete="off" placeholder="Pega aquí tu clave"><small><a id="b-clave-link" href="#" target="_blank" rel="noopener">Consigue una clave gratis ↗</a></small></label>
-    <p class="aviso">Tus fotos y respuestas se envían al proveedor que elijas para hacer el análisis. En los planes gratuitos los proveedores pueden usar esos datos para mejorar sus modelos: revisa sus condiciones. Para mayores de 18 años.</p>
+  <div class="card paso">
+    <h2><span class="n">1</span>Tu selfie</h2>
+    <p class="a-msg">De frente, con luz natural de día (junto a una ventana), sin filtros y, si puedes, sin maquillaje.</p>
+    <label class="foto-in selfie-in" id="b-selfie-in"><b>Elegir o hacer selfie</b><input type="file" id="b-selfie" accept="image/*"></label>
+    <div class="marca" id="b-marca" hidden>
+      <p class="marca-t" id="b-marca-t"></p>
+      <div class="marca-img" id="b-marca-img"><img id="b-marca-foto" alt="Tu selfie"></div>
+      <ul class="marca-res" id="b-marca-res"></ul>
+      <div class="a-row"><button type="button" class="a-btn ghost" id="b-marca-salta" hidden>No hay nada blanco</button><button type="button" class="a-btn ghost" id="b-marca-otra">Volver a marcar</button><label class="a-btn ghost" style="position:relative">Cambiar foto<input type="file" id="b-selfie2" accept="image/*" style="position:absolute;inset:0;opacity:0"></label></div>
+    </div>
   </div>
 
   <div class="card paso">
-    <h2><span class="n">2</span>Tus fotos</h2>
-    <p class="a-msg">Con luz natural, de frente y sin filtros. El selfie, sin maquillaje si puedes.</p>
-    <div class="fotos" id="b-fotos"></div>
-  </div>
-
-  <div class="card paso">
-    <h2><span class="n">3</span>Sobre ti</h2>
+    <h2><span class="n">2</span>Sobre ti</h2>
     <div id="b-preguntas" class="paso"></div>
   </div>
 
   <div class="card paso">
+    <h2><span class="n">3</span>Tu análisis</h2>
     <div class="a-row"><button type="button" class="a-btn" id="b-analiza">Hacer mi análisis</button></div>
-    <div class="progreso" id="b-prog" hidden><span class="a-msg" id="b-prog-t">Analizando…</span><span class="barra"><i></i></span></div>
     <p class="a-msg" id="b-msg"></p>
   </div>
 
+  <details class="card paso" id="b-ia">
+    <summary><b>Análisis más completo con IA</b> · opcional</summary>
+    <p class="a-msg">La IA mira tus fotos y te da un análisis más detallado: tu cara, tus cejas, gafas, cortes de pelo, maquillaje y una estética con nombre propio. No necesitas cuenta ni clave.</p>
+    <p class="aviso">Para hacerlo, tus fotos y respuestas se envían a un servicio de inteligencia artificial externo. Esta app no las guarda en ningún servidor. Para mayores de 18 años.</p>
+    <div class="fotos" id="b-fotos"></div>
+    <div id="b-preguntas-ia" class="paso"></div>
+    <label class="a-check"><input type="checkbox" id="b-acepto"> <span>Acepto enviar mis fotos y respuestas a la IA para hacer el análisis</span></label>
+    <div class="a-row"><button type="button" class="a-btn" id="b-analiza-ia">Hacer el análisis con IA</button></div>
+    <div class="progreso" id="b-prog" hidden><span class="a-msg" id="b-prog-t">Analizando…</span><span class="barra"><i></i></span></div>
+    <p class="a-msg" id="b-msg-ia"></p>
+  </details>
+
   <details class="card paso" id="b-manual">
-    <summary><b>Prefiero hacerlo sin IA</b></summary>
-    <p class="a-msg">Si ya conoces tu estación de color y tu tipo de cuerpo, elígelos y empiezo con eso. Podrás hacer el análisis con IA más adelante.</p>
+    <summary><b>Ya sé mi estación y mi tipo de cuerpo</b></summary>
+    <p class="a-msg">Si ya te han hecho un análisis de color, elige tu estación y tu tipo de cuerpo y empiezo con eso.</p>
     <label class="a-f"><span>Estación de color</span><select id="m-estacion"></select></label>
     <label class="a-f"><span>Tipo de cuerpo (Kibbe)</span><select id="m-cuerpo"></select></label>
     <label class="a-f"><span>Nombre de tu estética (opcional)</span><input type="text" id="m-estetica" maxlength="60" placeholder="Por ejemplo: romántica vintage"></label>
@@ -87,7 +101,7 @@
   <form class="card a-form" id="a-form" hidden novalidate>
     <h2 id="a-form-t">Nueva prenda</h2>
     <label class="a-photo"><input type="file" id="a-file" accept="image/*"><span class="a-prev" id="a-prev"></span></label>
-    <div class="a-row"><button type="button" class="a-btn ghost" id="a-auto" hidden>Rellenar con IA</button><span class="a-msg" id="a-auto-msg"></span></div>
+    <div class="a-row"><button type="button" class="a-btn ghost" id="a-auto" hidden>Rellenar con IA (envía la foto)</button><span class="a-msg" id="a-auto-msg"></span></div>
     <label class="a-f"><span>Nombre</span><input type="text" id="a-nombre" maxlength="60" placeholder="Falda midi de satén" autocomplete="off"></label>
     <fieldset class="pick"><legend>Categoría</legend><div class="opts-r" id="a-cat"></div></fieldset>
     <label class="a-f"><span>Tipo</span><input type="text" id="a-tipo" maxlength="40" placeholder="camiseta, vaquero, botas…" autocomplete="off"></label>
@@ -150,12 +164,19 @@
   <header class="a-head"><p class="eyebrow">Tu app</p><h1 class="a-h1">Ajustes</h1></header>
   <div class="card paso">
     <h2>Inteligencia artificial</h2>
-    <label class="a-f"><span>Proveedor</span><select id="s-prov"></select></label>
+    <label class="a-f"><span>Qué IA usar</span><select id="s-prov"></select></label>
     <p class="a-msg" id="s-prov-nota"></p>
+    <div id="s-propia">
     <label class="a-f"><span>Modelo</span><input type="text" id="s-modelo" autocomplete="off"><small>Tiene que entender imágenes para analizar fotos.</small></label>
     <label class="a-f" id="s-url-f"><span>URL de la API</span><input type="url" id="s-url" autocomplete="off" placeholder="https://…/v1/chat/completions"></label>
     <label class="a-f"><span>Tu clave</span><input type="password" id="s-clave" autocomplete="off"><small><a id="s-clave-link" href="#" target="_blank" rel="noopener">Consigue una clave ↗</a></small></label>
+    </div>
     <div class="a-row"><button type="button" class="a-btn" id="s-guarda">Guardar</button><button type="button" class="a-btn ghost" id="s-prueba">Probar conexión</button><span class="a-msg" id="s-msg"></span></div>
+  </div>
+  <div class="card paso" id="s-instala" hidden>
+    <h2>Instálala en tu móvil</h2>
+    <p class="a-msg" id="s-instala-t"></p>
+    <div class="a-row"><button type="button" class="a-btn" id="s-instala-b" hidden>Instalar</button></div>
   </div>
   <div class="card paso">
     <h2>Tus datos</h2>
