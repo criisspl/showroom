@@ -55,3 +55,43 @@ test("evalua da un veredicto para una prenda nueva", () => {
   const v = evalua({ nombre: "Falda midi de punto", cat: "abajo", color: "#708238", formal: 2, abrigo: 2 }, []);
   assert.ok(v && typeof v === "object");
 });
+
+import { ocaDe, bandaDe, juzga, mejora, capaHace } from "../src/lib/engine.js";
+
+test("varias ocasiones: solo vale lo que vale en todas", () => {
+  const o = ocaDe("oficina+finde");
+  assert.equal(o.n, "Oficina + Tarde de finde");
+  assert.equal(o.multi.length, 2);
+  assert.ok(o.f[0] <= o.f[1]);
+  for (const r of monta("oficina+finde", "fresco+templado", false, 0)) assert.ok(!r.ids.includes("b1"), "nada de chándal si hay oficina");
+});
+
+test("dos tiempos: la capa se decide por la parte fría", () => {
+  const b = bandaDe("templado+frio");
+  assert.equal(b.capa.id, "frio"); assert.equal(b.calido.id, "templado");
+  assert.ok(capaHace({ banda: "templado+frio" }));
+  assert.ok(!capaHace({ banda: "calor" }));
+  const r = monta("diario", "calor+frio", false, 0);
+  assert.ok(r.some((o) => o.ids.includes("c1")), "con frío por la mañana añade la chaqueta");
+});
+
+test("juzga: chándal con lentejuelas no pega y propone cambios", () => {
+  const c = { oca: "diario", banda: "templado", lluvia: false };
+  const j = juzga(["t1", "b1"], c);
+  assert.equal(j.v, "no");
+  assert.ok(j.mal.some((t) => /mundos distintos/.test(t)));
+  const m = mejora(["t1", "b1"], c, j);
+  assert.ok(m && m.cambios.length >= 1);
+  assert.ok(juzga(m.ids, c).raw > j.raw);
+});
+
+test("juzga: un look coherente pega", () => {
+  const j = juzga(["t3", "b3", "z1"], { oca: "diario", banda: "templado", lluvia: false });
+  assert.notEqual(j.v, "no");
+  assert.ok(j.bien.length >= 2);
+});
+
+test("juzga: avisa de sandalias con lluvia y de la capa que falta con frío", () => {
+  const j = juzga(["t3", "b3", "z1"], { oca: "diario", banda: "frio", lluvia: false });
+  assert.ok(j.mal.some((t) => /capa|frío/.test(t)));
+});

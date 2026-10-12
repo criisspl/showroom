@@ -82,12 +82,20 @@
 <section class="panel" id="tab-hoy" data-panel="hoy" hidden>
  <div class="wrap">
   <header class="a-head"><p class="eyebrow" id="a-fecha">Hoy</p><h1 class="a-h1">¿Qué me pongo?</h1></header>
+  <div class="opts-r a-modo" id="a-modo" role="radiogroup" aria-label="Modo"></div>
   <div class="card a-ctl">
-    <fieldset class="pick"><legend>Ocasión</legend><div class="opts-r" id="a-oca"></div></fieldset>
-    <fieldset class="pick"><legend>Tiempo en la calle</legend><div class="opts-r" id="a-temp"></div>
+    <fieldset class="pick"><legend>Ocasión</legend><p class="pick-h">¿Todo el día fuera? Marca varias, en orden.</p><div class="opts-r" id="a-oca"></div></fieldset>
+    <fieldset class="pick"><legend>Tiempo en la calle</legend><p class="pick-h">Si va a cambiar, marca dos: el de la mañana y el de la tarde.</p><div class="opts-r" id="a-temp"></div>
       <label class="a-check"><input type="checkbox" id="a-lluvia"><span>Llueve</span></label></fieldset>
-    <div class="a-row"><button type="button" class="a-btn" id="a-montar">Montar outfits</button><button type="button" class="a-btn ghost" id="a-ia" hidden>Pedir a la IA</button></div>
+    <div class="a-row" id="a-prop-row"><button type="button" class="a-btn" id="a-montar">Montar outfits</button><button type="button" class="a-btn ghost" id="a-ia" hidden>Pedir a la IA</button></div>
   </div>
+  <div class="card a-yo" id="a-yo" hidden>
+    <h2>Lo monto yo</h2>
+    <p class="a-msg">Elige las prendas de tu look y te digo si pega con la ocasión y el tiempo que has marcado arriba.</p>
+    <div id="a-yo-pick"></div>
+    <div class="a-row a-yo-bar"><button type="button" class="a-btn" id="a-yo-go" disabled>¿Pega?</button><button type="button" class="a-btn ghost" id="a-yo-clear">Empezar de nuevo</button></div>
+  </div>
+  <div id="a-yo-out" class="a-out" aria-live="polite" hidden></div>
   <div id="a-out" class="a-out" aria-live="polite"></div>
  </div>
 </section>

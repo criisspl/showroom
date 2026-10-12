@@ -24,6 +24,9 @@ Está pensada para que la use cualquiera: no hay que registrarse, ni instalar na
 - **Hoy:** te monta tres outfits según la ocasión (diario, tarde de finde, oficina, cita, noche, evento…) y el tiempo.
   - Nunca junta registros que chocan (un chándal con un top de fiesta, por ejemplo) y tiene en cuenta tejidos, formas y colores.
   - Si a un look le falta algo, te pregunta «¿Tienes algo así?».
+- **Looks siempre completos:** si te falta una pieza (calzado, capa…), el look la muestra igualmente como sugerencia en tus colores y te pregunta si tienes algo así. Si dices que sí, la añades al armario y entra en el look; si dices que no, queda apuntado y puedes pasarla a tu lista de deseos.
+- **Todo el día fuera:** marca varias ocasiones (por ejemplo, oficina y luego cervezas) y dos tiempos (mañana fresca, tarde templada). El outfit sirve para todo, con una capa que se puede quitar y un consejo para pasar de un plan a otro.
+- **Lo monto yo:** elige tú las prendas y la app te dice si pega con la ocasión y el tiempo, qué funciona, qué falla y qué cambiarías por otras de tu armario.
 - **Valora los outfits:** con «Sí» o «No, me falla esto», y la app aprende tus gustos.
 - **¿Lo compro?:** haz una foto a una prenda en la tienda y te da un veredicto según tu paleta, tu cuerpo, tu estética y lo que ya tienes.
 - **Deseos:** las prendas que te faltan, en tus colores, con referencias de Pinterest.

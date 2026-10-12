@@ -320,3 +320,29 @@ body{margin:0}
 .a-check{display:flex;gap:8px;align-items:flex-start;font-size:.9rem;margin:6px 0}
 .a-check input{margin-top:3px;width:18px;height:18px;flex:none}
 .opts-r.varias input:checked+span{background:#A94A1B;border-color:#A94A1B}
+
+/* Modo de Hoy, varias ocasiones, huecos y «Lo monto yo» */
+.a-modo{margin:0 0 12px}
+.a-modo span{font-weight:700;padding:9px 16px;background:var(--card)}
+.a-modo input:checked+span{background:#33261B;border-color:#33261B;color:#fff}
+.pick-h{margin:0 0 6px;font-size:.78rem;color:var(--card-soft)}
+.a-pieces li.hueco .a-th{border:2px dashed #A94A1B;background:#FBF6EA;display:grid;place-items:center;padding:6px}
+.a-pieces li.hueco .a-th svg{width:100%;height:100%;display:block}
+.a-pieces li.hueco small{color:#A94A1B}
+.a-pieces li.hueco.propia .a-th{border-color:#4F5B33;padding:0}
+.a-pieces li.hueco.propia small{color:#4F5B33}
+.hueco-n{margin:0;font-size:.84rem}
+.a-link{font:inherit;font-weight:700;color:#A94A1B;background:none;border:0;padding:0;text-decoration:underline;cursor:pointer}
+.a-yo{display:grid;gap:10px;margin-top:12px}
+.a-yo h2{margin:0;font-family:var(--display);font-weight:400;font-size:1.3rem}
+.yo-cat{display:grid;gap:6px}
+.yo-cat>small{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--card-soft)}
+.yo-grid{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scroll-snap-type:x proximity}
+.yo-p{flex:none;width:78px;display:grid;gap:4px;position:relative;cursor:pointer;scroll-snap-align:start}
+.yo-p input{position:absolute;opacity:0;pointer-events:none}
+.yo-p .a-th{border:2px solid transparent;border-radius:12px}
+.yo-p input:checked~.a-th{border-color:#4F5B33;box-shadow:0 0 0 2px #4F5B33}
+.yo-p input:focus-visible~.a-th{outline:2px solid #A94A1B;outline-offset:2px}
+.yo-p span{font-size:.68rem;line-height:1.15;overflow-wrap:anywhere}
+.a-yo-bar{position:sticky;bottom:calc(70px + env(safe-area-inset-bottom,0px));background:var(--card);padding:8px 0;z-index:5}
+#a-yo-out{margin-top:12px}

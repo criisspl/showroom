@@ -2,13 +2,13 @@
 import { $, el, boton, hoyISO, fechaLarga } from "../lib/dom.js";
 import { app, estado } from "../state.js";
 import { OCAS, BANDAS, ESTN, TEJN, FAMN, CORN } from "../data/constants.js";
-import { activas, byId, usos, aprende } from "../lib/engine.js";
+import { activas, byId, usos, aprende, ocaDe, bandaDe } from "../lib/engine.js";
 import { thumb, falla } from "./comun.js";
 
 export function initHistorial() { app.pinta.historial = pintaHistorial; }
 
 function fila(o, modo) {
-  const li = el("li", "a-fit"), oca = OCAS.find((x) => x.id === o.ocasion), banda = BANDAS.find((x) => x.id === o.banda);
+  const li = el("li", "a-fit"), oca = o.ocasion ? ocaDe(o.ocasion) : null, banda = o.banda ? bandaDe(o.banda) : null;
   li.appendChild(el("p", "who", (o.fecha ? fechaLarga(o.fecha) + " · " : "") + (oca ? oca.n : "") + (banda ? " · " + banda.n.toLowerCase() : "") + (o.lluvia ? " con lluvia" : "")));
   const ul = el("ul", "a-pieces");
   (o.prendas || []).forEach((id) => { const p = byId(id), it = el("li"); it.appendChild(thumb(p)); it.appendChild(el("span", null, p ? p.nombre : "Prenda eliminada")); ul.appendChild(it); });

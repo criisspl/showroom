@@ -35,7 +35,7 @@ async function arranca() {
   app.store.on("prendas", (a) => { setEstado({ P: a }); repinta("armario", "historial", "deseos", "hoy"); });
   app.store.on("outfits", (a) => { setEstado({ O: a }); repinta("historial"); });
   app.store.on("votos", (a) => { setEstado({ V: a }); repinta("historial"); });
-  app.store.on("deseos", (a) => { app.D = Object.fromEntries(a.map((d) => [d.id, d])); repinta("deseos"); });
+  app.store.on("deseos", (a) => { app.D = Object.fromEntries(a.map((d) => [d.id, d])); repinta("deseos", "hoy"); });
   repinta("ajustes", "analisis");
 
   if (app.perfil) protegeDatos();

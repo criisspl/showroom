@@ -8,6 +8,7 @@ import { hayIA, imagenParaIA, preguntaJSON, abreImagen } from "../lib/ai.js";
 import { textoPerfil } from "../lib/analysis.js";
 import { thumb, ver, falla } from "./comun.js";
 import { pintaDeseos } from "./deseos.js";
+import { vuelveConPrenda } from "./hoy.js";
 
 const VERD = { si: "Cómprala", quiza: "Piénsatelo", no: "Mejor no" };
 let formCasa = null;
@@ -17,10 +18,10 @@ export function initArmario() {
   radios($("a-estilo"), "a-estilo", EST, "casual"); radios($("a-tejido"), "a-tejido", TEJ, "algodon"); radios($("a-abrigo"), "a-abrigo", ABRIGOS, "2");
   radios($("a-filter"), "a-filter", [["todo", "Todo"], ...CATS], "todo");
   document.querySelectorAll('input[name="a-filter"]').forEach((i) => i.addEventListener("change", () => { app.ui.filter = i.value; pintaArmario(); }));
-  $("a-add").addEventListener("click", () => abreForm(null));
+  $("a-add").addEventListener("click", () => { app.ui.pendiente = null; abreForm(null); });
   $("a-buy").addEventListener("click", () => { ver("deseos"); abreForm(null, null, "compra"); });
   $("w-buy").addEventListener("click", () => abreForm(null, null, "compra"));
-  $("a-cancel").addEventListener("click", cierraForm);
+  $("a-cancel").addEventListener("click", cancelaForm);
   $("a-form").addEventListener("submit", guardaPrenda);
   $("a-file").addEventListener("change", function () { eligeFoto(this.files && this.files[0]); });
   $("a-color").addEventListener("input", infoColor);
@@ -90,7 +91,8 @@ export async function abreForm(p, pre, modo) {
   if (ui.modo === "compra") $("a-form-msg").textContent = "Hazle una foto (o rellena los datos a mano) y pulsa Analizar. No se guarda en tu armario.";
   infoColor(); f.hidden = false; f.scrollIntoView({ block: "start" });
 }
-export function cierraForm() { $("a-form").hidden = true; Object.assign(app.ui, { editing: null, photo: null, prefoto: null, modo: null }); }
+export function cierraForm() { $("a-form").hidden = true; Object.assign(app.ui, { editing: null, photo: null, prefoto: null, modo: null, pendiente: null }); }
+function cancelaForm() { const volver = !!app.ui.pendiente; cierraForm(); if (volver) ver("hoy"); }
 
 /* ---------- Fotos ---------- */
 function lienzo(src, max) {
@@ -171,6 +173,7 @@ async function guardaPrenda(ev) {
   if (app.ui.modo === "compra") { analiza(); return; }
   const d = leeForm(), msg = $("a-form-msg"), btn = $("a-save"), id = app.ui.editing, viejo = id ? byId(id) : null; if (!d) return;
   btn.disabled = true; msg.textContent = "Guardando…";
+  let nid = null;
   try {
     const f = await fotoParaGuardar();
     if (f) { d.foto = f.foto; d.mini = f.mini; }
@@ -179,9 +182,12 @@ async function guardaPrenda(ev) {
       if (f && viejo && viejo.foto && viejo.foto !== f.foto) app.store.delFoto(viejo.foto);
     } else {
       Object.assign(d, { creada: new Date().toISOString(), activa: true, foto: d.foto || null, mini: d.mini || null });
-      await app.store.add("prendas", d);
+      nid = await app.store.add("prendas", d);
     }
-    cierraForm(); if (app.ui.vuelveA) { ver(app.ui.vuelveA); app.ui.vuelveA = null; }
+    const pd = app.ui.pendiente;
+    cierraForm();
+    if (pd && nid) await vuelveConPrenda(pd, nid);
+    else if (app.ui.vuelveA) { ver(app.ui.vuelveA); app.ui.vuelveA = null; }
   } catch (e) { msg.textContent = ""; falla(e); }
   btn.disabled = false;
 }

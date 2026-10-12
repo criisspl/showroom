@@ -77,9 +77,38 @@ export function aprende() {
 }
 const L = () => estado.L || (estado.L = aprende());
 
+/* ---------- Contexto: una o varias ocasiones, uno o dos tiempos ---------- */
+/** "oficina+finde" → ocasión combinada: solo vale lo que vale en todas, con un margen de formalidad común. */
+export function ocaDe(id) {
+  let os = String(id || "diario").split("+").map((x) => OCAS.find((o) => o.id === x)).filter(Boolean);
+  if (!os.length) os = [OCAS[0]];
+  if (os.length === 1) return os[0];
+  const key = os.map((o) => o.id).join("+");
+  if (!S_OCA[key]) {
+    const so = {};
+    ["deportivo", "casual", "arreglado", "fiesta"].forEach((e) => {
+      const v = os.map((o) => S_OCA[o.id][e]);
+      so[e] = v.includes(null) ? null : Math.min(...v) * 0.6 + (v.reduce((a, b) => a + b, 0) / v.length) * 0.4;
+    });
+    S_OCA[key] = so;
+  }
+  const f0 = Math.max(...os.map((o) => o.f[0])), f1 = Math.max(f0, Math.min(...os.map((o) => o.f[1])));
+  return { id: key, n: os.map((o) => o.n).join(" + "), d: "todo el día fuera, sin pasar por casa: " + os.map((o) => o.n.toLowerCase()).join(" y después "), f: [f0, f1], multi: os };
+}
+/** "fresco+templado" → la base se elige para la parte cálida y la capa para la fría. */
+export function bandaDe(id) {
+  let bs = String(id || "templado").split("+").map((x) => BANDAS.find((b) => b.id === x)).filter(Boolean);
+  if (!bs.length) bs = [BANDAS[2]];
+  if (bs.length === 1) return bs[0];
+  bs.sort((a, b) => a.t - b.t);
+  const cal = bs[0], fr = bs[bs.length - 1];
+  return { id: bs.map((b) => b.id).join("+"), n: "De " + fr.n.toLowerCase() + " a " + cal.n.toLowerCase(), s: "de " + fr.s + " a " + cal.s, t: cal.t * 0.7 + fr.t * 0.3, capa: fr, calido: cal, multi: true };
+}
+export function capaHace(c) { const b = bandaDe(c.banda), bc = b.capa || b; return bc.id === "frio" || bc.id === "fresco" || (bc.id === "templado" && c.lluvia); }
+
 /* ---------- Montar outfits ---------- */
 export function monta(ocaId, bandaId, lluvia, seed, evitar) {
-  const oca = OCAS.find((o) => o.id === ocaId) || OCAS[0], banda = BANDAS.find((b) => b.id === bandaId) || BANDAS[2];
+  const oca = ocaDe(ocaId), banda = bandaDe(bandaId), bc = banda.capa || banda;
   const A = activas(), by = (c) => A.filter((p) => p.cat === c), SO = S_OCA[oca.id], l = L();
   const tops = by("arriba"), bots = by("abajo"), dress = by("vestido"), capas = by("capa"), shoes = by("calzado"), accs = by("accesorio");
   const rec = {};
@@ -94,12 +123,12 @@ export function monta(ocaId, bandaId, lluvia, seed, evitar) {
     s += l.par[k] || 0; ps.forEach((p) => { s += l.pie[p.id + "|" + oca.id] || 0; });
     if (ps.length === 2) s += (l.est[clave2(estiloDe(ps[0]), estiloDe(ps[1]))] || 0) + (l.tej[clave2(tejidoDe(ps[0]), tejidoDe(ps[1]))] || 0) + (l.col[clave2(famDe(ps[0]), famDe(ps[1]))] || 0) + (l.cor[clave2(ps[0].corte || "fluida", ps[1].corte || "fluida")] || 0);
     let so = 0;
-    for (const p of ps) { const o = SO[estiloDe(p)]; if (o === null) return null; if (oca.id === "evento" && estiloDe(p) === "casual") return null; so += o; }
+    for (const p of ps) { const o = SO[estiloDe(p)]; if (o === null) return null; if (/evento/.test(oca.id) && estiloDe(p) === "casual") return null; so += o; }
     s += (so / ps.length) * 2.2;
     if (oca.id === "casa") ps.forEach((p) => { const t = tejidoDe(p); s += t === "vaquero" ? -0.6 : t === "felpa" || t === "algodon" ? 0.3 : 0; });
     if (/cita|noche|evento|finde/.test(oca.id) && !ps.some((p) => /arreglado|fiesta/.test(estiloDe(p)))) s -= oca.id === "finde" ? 1.2 : 1.5;
     s += ps.reduce((t, p) => t + wfit(p), 0) / ps.length;
-    ps.forEach((p) => { if (corto(p)) s += (banda.id === "frio" ? -2 : banda.id === "fresco" ? -0.8 : banda.id === "calor" ? 0.4 : 0) + (oca.id === "evento" ? -1.2 : oca.id === "oficina" ? -0.6 : 0); });
+    ps.forEach((p) => { if (corto(p)) s += (bc.id === "frio" ? -2 : bc.id === "fresco" ? -0.8 : bc.id === "calor" ? 0.4 : 0) + (/evento/.test(oca.id) ? -1.2 : /oficina/.test(oca.id) ? -0.6 : 0); });
     if (ps.length === 2) {
       const c = casan(ps[0], ps[1]); if (c === null) return null;
       s += c * 1.4 + harm(famDe(ps[0]), famDe(ps[1])) * 0.7;
@@ -141,14 +170,14 @@ export function monta(ocaId, bandaId, lluvia, seed, evitar) {
   const yaAcc = {}, tipsCuerpo = (estado.perfil && estado.perfil.cuerpo && estado.perfil.cuerpo.tips) || [];
   return out.map((c, idx) => {
     const ps = c.ps.slice(), tips = [], warn = [], encasa = oca.id === "casa";
-    if (!encasa && (banda.id === "frio" || banda.id === "fresco" || (banda.id === "templado" && lluvia))) {
-      const capa = mejor(capas, c.ps, (p) => wfit(p) * 1.2 + (palDe(p) === "evita" ? -0.2 : 0.3));
-      if (capa) ps.push(capa); else if (banda.id !== "templado") warn.push("No tienes una capa que encaje con este look.");
+    if (!encasa && (bc.id === "frio" || bc.id === "fresco" || (bc.id === "templado" && lluvia))) {
+      const capa = mejor(capas, c.ps, (p) => -Math.abs((+p.abrigo || 2) - bc.t) * 0.96 + (palDe(p) === "evita" ? -0.2 : 0.3));
+      if (capa) ps.push(capa); else if (bc.id !== "templado") warn.push("No tienes una capa que encaje con este look.");
     }
     const z = encasa ? null : mejor(shoes, c.ps, (p) => {
       const t = txt(p); let s = 0;
-      if (/sandal|chancl|alparg/.test(t)) s += banda.id === "calor" ? 1.2 : banda.id === "templado" ? 0.2 : -2;
-      if (/bota|botín|botin/.test(t)) s += banda.id === "calor" ? -1.2 : 0.8;
+      if (/sandal|chancl|alparg/.test(t)) s += bc.id === "calor" ? 1.2 : bc.id === "templado" ? 0.2 : -2;
+      if (/bota|botín|botin/.test(t)) s += bc.id === "calor" ? -1.2 : 0.8;
       if (lluvia) s += /bota|botín|botin|zapatill/.test(t) ? 0.8 : -1;
       if (estiloDe(p) === "deportivo" && c.ps.some((q) => q.cat === "vestido" || /falda/.test(txt(q)))) s -= 1.5;
       return s;
@@ -156,8 +185,8 @@ export function monta(ocaId, bandaId, lluvia, seed, evitar) {
     if (z) ps.push(z); else if (!encasa) warn.push("No tienes calzado que encaje con este look.");
     const ac = encasa ? null : mejor(accs, c.ps, (p) => {
       const t = txt(p); let s = (palDe(p) === "evita" ? -0.3 : 0.4) - (yaAcc[p.id] ? 0.8 : 0);
-      if (/gorro|bufanda|guante/.test(t)) s += banda.id === "frio" ? 0.8 : banda.id === "fresco" ? 0 : -4;
-      if (/gafas/.test(t)) s += /noche|evento|casa/.test(oca.id) ? -4 : banda.id === "calor" ? 0.5 : 0;
+      if (/gorro|bufanda|guante/.test(t)) s += bc.id === "frio" ? 0.8 : bc.id === "fresco" ? 0 : -4;
+      if (/gafas/.test(t)) s += /noche|evento|casa/.test(oca.id) ? -4 : (banda.calido || banda).id === "calor" ? 0.5 : 0;
       return s;
     });
     if (ac) { ps.push(ac); yaAcc[ac.id] = 1; }
@@ -234,3 +263,116 @@ export function evalua(n, deseos) {
   };
 }
 export { lab };
+
+/* ---------- «Lo monto yo»: ¿pega? ---------- */
+const PRINC = { arriba: 1, abajo: 1, vestido: 1 };
+const nomP = (p) => p.nombre.charAt(0).toLowerCase() + p.nombre.slice(1);
+const Cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+const colN = (p) => (p.colorN || clasifica(p.color || "#C19A6B", estado.PAL).n).toLowerCase();
+export function claveDe(ids) {
+  const ps = ids.map(byId).filter(Boolean), d = ps.find((p) => p.cat === "vestido"); if (d) return d.id;
+  const t = ps.find((p) => p.cat === "arriba"), b = ps.find((p) => p.cat === "abajo");
+  return t && b ? t.id + "+" + b.id : ps.map((p) => p.id).join("+");
+}
+
+/**
+ * Juzga un look montado por la persona. c = { oca, banda, lluvia } (oca y banda pueden ser combinados con «+»).
+ * Devuelve { s (0-10), raw, v: "si"|"quiza"|"no", bien[], mal[], culpa{idPrenda: puntos} }.
+ */
+export function juzga(ids, c) {
+  const oca = ocaDe(c.oca), banda = bandaDe(c.banda), bc = banda.capa || banda, cal = banda.calido || banda, SO = S_OCA[oca.id];
+  const ps = ids.map(byId).filter(Boolean), mal = [], bien = [], culpa = {};
+  let s = 10, grave = false;
+  if (!ps.length) return null;
+  const fallo = (pts, t, quien = []) => { s -= pts; mal.push(t); if (pts >= 4) grave = true; quien.forEach((p) => { culpa[p.id] = (culpa[p.id] || 0) + pts; }); };
+  const by = (cat) => ps.filter((p) => p.cat === cat);
+  const dress = by("vestido"), tops = by("arriba"), bots = by("abajo"), capas = by("capa"), shoes = by("calzado"), base = ps.filter((p) => PRINC[p.cat]);
+  if (!dress.length && !(tops.length && bots.length)) fallo(2, tops.length ? "Falta la parte de abajo." : bots.length ? "Falta la parte de arriba." : "Falta la base: algo de arriba y algo de abajo, o un vestido.");
+  if (dress.length && bots.length) fallo(1, "Vestido y parte de abajo a la vez: solo funciona si el vestido hace de blusón.", bots);
+  if (bots.length > 1) fallo(3, "Dos partes de abajo a la vez.", bots.slice(1));
+  // Registro y tejido, por parejas
+  const vis = ps.filter((p) => p.cat !== "accesorio");
+  let choques = 0;
+  for (let i = 0; i < vis.length; i++) for (let j = i + 1; j < vis.length; j++) {
+    const p = vis[i], q = vis[j], ep = estiloDe(p), eq = estiloDe(q);
+    if (par(S_PAR, ep, eq) === null) { choques++; fallo(4, Cap(nomP(p)) + " (" + ESTN[ep].toLowerCase() + ") y " + nomP(q) + " (" + ESTN[eq].toLowerCase() + ") son de mundos distintos.", [p, q]); continue; }
+    if (VISTE[p.cat] && VISTE[q.cat] && par(T_PAR, tejidoDe(p), tejidoDe(q)) === null) { choques++; fallo(3, "El tejido de " + nomP(p) + " (" + TEJN[tejidoDe(p)].toLowerCase() + ") no casa con el de " + nomP(q) + " (" + TEJN[tejidoDe(q)].toLowerCase() + ").", [p, q]); }
+  }
+  if (!choques && vis.length > 1) {
+    const es = [...new Set(vis.map(estiloDe))];
+    bien.push(es.length === 1 ? "Todo en registro " + ESTN[es[0]].toLowerCase() + ": coherente." : "Los registros conviven bien (" + es.map((e) => ESTN[e].toLowerCase()).join(" y ") + ") y los tejidos casan.");
+  }
+  // Ocasión
+  const nOca = mal.length;
+  ps.forEach((p) => {
+    const v = SO[estiloDe(p)];
+    if (v === null) fallo(4, Cap(nomP(p)) + " no es para " + oca.n.toLowerCase() + ".", [p]);
+    else if (/evento/.test(oca.id) && estiloDe(p) === "casual" && p.cat !== "accesorio") fallo(2, Cap(nomP(p)) + " se queda demasiado informal para un evento.", [p]);
+    else if (v <= -1.2) fallo(1, Cap(nomP(p)) + " no es lo más apropiado para " + oca.n.toLowerCase() + ".", [p]);
+  });
+  if (/cita|noche|evento|finde/.test(oca.id) && !ps.some((p) => /arreglado|fiesta/.test(estiloDe(p)))) fallo(1.5, "Para " + oca.n.toLowerCase() + " le falta un punto arreglado: una prenda más cuidada o un accesorio con brillo.");
+  if (mal.length === nOca) bien.push(oca.multi ? "Te sirve para todo el día: " + oca.n.toLowerCase() + "." : "Encaja con «" + oca.n + "».");
+  // Tiempo
+  const nT = mal.length;
+  base.forEach((p) => { if (cal.id === "calor" && +p.abrigo === 3) fallo(2, Cap(nomP(p)) + " da demasiado calor" + (banda.multi ? " para las horas de calor." : "."), [p]); });
+  if (!capas.length && capaHace(c)) {
+    if (bc.id === "frio" && base.every((p) => (+p.abrigo || 2) <= 1)) fallo(2.5, "Con frío y sin capa vas a pasar frío: añade una chaqueta o un abrigo.");
+    else fallo(1.5, (banda.multi ? "Para la parte fresca del día" : "Para este tiempo") + " te falta una capa.");
+  }
+  capas.forEach((p) => { if (cal.id === "calor" && !banda.multi && +p.abrigo >= 2) fallo(1.5, Cap(nomP(p)) + " sobra con este calor.", [p]); });
+  shoes.forEach((p) => {
+    const t = txt(p);
+    if (/sandal|chancl/.test(t) && (bc.id === "frio" || bc.id === "fresco" || c.lluvia)) fallo(2, Cap(nomP(p)) + " no van con " + (c.lluvia ? "lluvia." : "este frío."), [p]);
+    if (c.lluvia && /(^|\s)ante(\s|$)/.test(t)) fallo(1.5, "Con lluvia, " + nomP(p) + " de ante sufren.", [p]);
+  });
+  ps.forEach((p) => { if (corto(p) && bc.id === "frio") fallo(1.5, Cap(nomP(p)) + " se queda corto para el frío (salvo con medias gruesas).", [p]); });
+  if (mal.length === nT) bien.push(banda.multi ? "Va bien para el cambio de temperatura" + (capas.length ? ": capa por la mañana y fuera cuando suba." : ".") : "Va bien para el tiempo que hace.");
+  // Color
+  const col = ps.filter((p) => p.cat !== "accesorio" && p.cat !== "calzado");
+  if (col.length >= 2) {
+    let peor = null, ph = 9, sum = 0, n = 0;
+    for (let i = 0; i < col.length; i++) for (let j = i + 1; j < col.length; j++) { const h = harm(famDe(col[i]), famDe(col[j])); sum += h; n++; if (h < ph) { ph = h; peor = [col[i], col[j]]; } }
+    if (ph < 1.0) fallo(1.5, "El " + colN(peor[0]) + " y el " + colN(peor[1]) + " no terminan de casar: un neutro tuyo entre los dos lo arregla.", [peor[1]]);
+    else bien.push(sum / n >= 1.8 ? "Colores: combinación estrella de tu paleta." : "Los colores combinan bien.");
+  }
+  const cara = tops[0] || dress[0];
+  if (cara && palDe(cara) === "evita") fallo(1, "El " + colN(cara) + " junto a la cara no es de tu paleta: acércale un pañuelo, un collar o una capa de tus colores.", [cara]);
+  else if (cara) bien.push("Junto a la cara llevas un color tuyo (" + colN(cara) + ").");
+  // Forma
+  const amplias = base.filter((p) => p.corte === "amplia");
+  if (amplias.length >= 2 && !amplias.every((p) => tejidoDe(p) === "felpa")) fallo(1, "Dos prendas anchas: mete la de arriba por delante o cambia una por otra más ajustada.", [amplias[0]]);
+  // Lo aprendido de tus valoraciones
+  const l = L(), k = claveDe(ids);
+  if (l.veto[k] || l.veto[k + "|o:" + oca.id] || l.veto[k + "|b:" + banda.id]) fallo(3, "Me dijiste que esta combinación no te convence.");
+  else if ((l.par[k] || 0) > 0) bien.push("Ya me dijiste que este te gusta.");
+  const raw = s; s = Math.max(0, Math.round(s * 2) / 2);
+  return { raw, s, v: grave || s < 6 ? "no" : mal.length ? "quiza" : "si", mal, bien, culpa };
+}
+
+/** Hasta dos cambios de prenda y, si falta, añade capa o calzado del armario. */
+export function mejora(ids, c, j) {
+  let cur = ids.slice(), cj = j;
+  const cambios = [];
+  for (let ronda = 0; ronda < 2 && cj.v !== "si"; ronda++) {
+    const orden = Object.keys(cj.culpa).sort((a, b) => cj.culpa[b] - cj.culpa[a]);
+    let best = null, bs = cj.raw + 0.5;
+    orden.slice(0, 3).forEach((pid) => {
+      const p = byId(pid); if (!p) return;
+      activas().forEach((q) => {
+        if (q.cat !== p.cat || cur.includes(q.id)) return;
+        const nids = cur.map((id) => (id === pid ? q.id : id)), r = juzga(nids, c);
+        if (r && r.raw > bs) { bs = r.raw; best = { de: p, a: q, ids: nids, j: r }; }
+      });
+    });
+    if (!best) break;
+    cambios.push({ de: best.de, a: best.a }); cur = best.ids; cj = best.j;
+  }
+  const ps = cur.map(byId).filter(Boolean), has = (cat) => ps.some((p) => p.cat === cat);
+  [["calzado", ocaDe(c.oca).id !== "casa"], ["capa", capaHace(c)]].forEach(([cat, hace]) => {
+    if (!hace || has(cat)) return;
+    let best = null, bs = cj.raw;
+    activas().forEach((q) => { if (q.cat !== cat) return; const nids = cur.concat(q.id), r = juzga(nids, c); if (r && r.raw >= bs) { bs = r.raw; best = { a: q, ids: nids, j: r }; } });
+    if (best) { cambios.push({ de: null, a: best.a }); cur = best.ids; cj = best.j; }
+  });
+  return cambios.length ? { cambios, ids: cur, v: cj.v } : null;
+}
