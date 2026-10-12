@@ -135,7 +135,7 @@ export function pintaAnalisis() {
   k.appendChild(f1); k.appendChild(f2); const res = el("div", "a-row"); k.appendChild(res); si.appendChild(k); w.appendChild(si);
   radios(o1, "i-est", [["autumn", "Otoño"], ["winter", "Invierno"], ["spring", "Primavera"], ["summer", "Verano"]], ["winter", "winter", "spring", "spring", "spring", "summer", "summer", "summer", "autumn", "autumn", "autumn", "winter"][new Date().getMonth()]);
   radios(o2, "i-oca", OCAS.map((o) => [o.id, o.n]), "diario");
-  const EN = { diario: "casual everyday", finde: "weekend afternoon", oficina: "work office", casa: "cozy at home", cita: "date night", noche: "night out", evento: "wedding guest", viaje: "travel", concierto: "concert" };
+  const EN = { diario: "casual everyday", finde: "weekend afternoon", oficina: "casual office", "oficina-formal": "business formal office", casa: "cozy at home", cita: "date night", noche: "night out", evento: "wedding guest", viaje: "travel", concierto: "concert" };
   const pinta = () => {
     res.textContent = "";
     const est = val("i-est"), oca = EN[val("i-oca")] || "", nombre = (e.claves || []).slice(0, 2).join(" ") || e.nombre || "";

@@ -126,7 +126,7 @@ export function monta(ocaId, bandaId, lluvia, seed, evitar) {
     for (const p of ps) { const o = SO[estiloDe(p)]; if (o === null) return null; if (/evento/.test(oca.id) && estiloDe(p) === "casual") return null; so += o; }
     s += (so / ps.length) * 2.2;
     if (oca.id === "casa") ps.forEach((p) => { const t = tejidoDe(p); s += t === "vaquero" ? -0.6 : t === "felpa" || t === "algodon" ? 0.3 : 0; });
-    if (/cita|noche|evento|finde/.test(oca.id) && !ps.some((p) => /arreglado|fiesta/.test(estiloDe(p)))) s -= oca.id === "finde" ? 1.2 : 1.5;
+    if (/cita|noche|evento|finde|oficina-formal/.test(oca.id) && !ps.some((p) => /arreglado|fiesta/.test(estiloDe(p)))) s -= oca.id === "finde" ? 1.2 : /oficina-formal/.test(oca.id) ? 2.5 : 1.5;
     s += ps.reduce((t, p) => t + wfit(p), 0) / ps.length;
     ps.forEach((p) => { if (corto(p)) s += (bc.id === "frio" ? -2 : bc.id === "fresco" ? -0.8 : bc.id === "calor" ? 0.4 : 0) + (/evento/.test(oca.id) ? -1.2 : /oficina/.test(oca.id) ? -0.6 : 0); });
     if (ps.length === 2) {
@@ -310,7 +310,8 @@ export function juzga(ids, c) {
     else if (/evento/.test(oca.id) && estiloDe(p) === "casual" && p.cat !== "accesorio") fallo(2, Cap(nomP(p)) + " se queda demasiado informal para un evento.", [p]);
     else if (v <= -1.2) fallo(1, Cap(nomP(p)) + " no es lo más apropiado para " + oca.n.toLowerCase() + ".", [p]);
   });
-  if (/cita|noche|evento|finde/.test(oca.id) && !ps.some((p) => /arreglado|fiesta/.test(estiloDe(p)))) fallo(1.5, "Para " + oca.n.toLowerCase() + " le falta un punto arreglado: una prenda más cuidada o un accesorio con brillo.");
+  if (/oficina-formal/.test(oca.id) && !ps.some((p) => estiloDe(p) === "arreglado")) fallo(4, "Para la oficina formal le falta una prenda arreglada: camisa, blazer o pantalón de pinzas.", base);
+  else if (/cita|noche|evento|finde/.test(oca.id) && !ps.some((p) => /arreglado|fiesta/.test(estiloDe(p)))) fallo(1.5, "Para " + oca.n.toLowerCase() + " le falta un punto arreglado: una prenda más cuidada o un accesorio con brillo.");
   if (mal.length === nOca) bien.push(oca.multi ? "Te sirve para todo el día: " + oca.n.toLowerCase() + "." : "Encaja con «" + oca.n + "».");
   // Tiempo
   const nT = mal.length;

@@ -5,7 +5,7 @@ export const CATN = Object.fromEntries(CATS);
 export const CORTES = [["ajustada", "Ajustada"], ["fluida", "Fluida"], ["amplia", "Amplia"]];
 export const ABRIGOS = [["1", "Ligera"], ["2", "Media"], ["3", "Abrigada"]];
 
-export const EST = [["deportivo", "Deportiva"], ["casual", "Casual"], ["arreglado", "Arreglada"], ["fiesta", "De fiesta"]];
+export const EST = [["deportivo", "Deportiva (para hacer deporte)"], ["casual", "Casual"], ["arreglado", "Arreglada"], ["fiesta", "De fiesta"]];
 export const ESTN = { deportivo: "Deportivo", casual: "Casual", arreglado: "Arreglado", fiesta: "De fiesta" };
 export const TEJ = [["algodon", "Algodón"], ["vaquero", "Vaquero o pana"], ["punto", "Punto"], ["felpa", "Felpa"], ["saten", "Satén o brillo"], ["ligero", "Encaje, gasa o lino"], ["piel", "Piel o ante"]];
 export const TEJN = { algodon: "Algodón", vaquero: "Vaquero", punto: "Punto", felpa: "Felpa", saten: "Satén", ligero: "Tejido ligero", piel: "Piel" };
@@ -23,7 +23,8 @@ export const MESBANDA = ["frio", "frio", "fresco", "fresco", "templado", "calor"
 export const OCAS = [
   { id: "diario", n: "Diario", s: "lunes a jueves", d: "una tarde entre semana, casual", f: [1, 2] },
   { id: "finde", n: "Tarde de finde", s: "viernes a domingo", d: "una tarde de viernes, sábado o domingo: un punto más arreglada que a diario, sin llegar a cita", f: [1.5, 2.5] },
-  { id: "oficina", n: "Oficina", f: [1.8, 2.6] },
+  { id: "oficina", n: "Oficina", s: "casual: vaqueros y polos valen", d: "una oficina de ambiente casual (vaqueros, polos y camisetas valen; nada de chándal ni de fiesta)", f: [1.2, 2.3] },
+  { id: "oficina-formal", n: "Oficina formal", s: "reuniones y clientes", d: "una oficina formal o un día de reuniones con clientes", f: [2, 2.8] },
   { id: "casa", n: "En casa", f: [1, 1.5] },
   { id: "cita", n: "Cita", f: [2, 3] },
   { id: "noche", n: "Salir de noche", f: [2, 3] },
@@ -45,7 +46,8 @@ export const S_PAR = tabla([
 export const S_OCA = {
   diario: { deportivo: -0.4, casual: 0.6, arreglado: 0.1, fiesta: -1.5 },
   finde: { deportivo: -1.5, casual: 0.2, arreglado: 0.6, fiesta: -0.4 },
-  oficina: { deportivo: null, casual: 0.2, arreglado: 0.7, fiesta: null },
+  oficina: { deportivo: -1, casual: 0.5, arreglado: 0.5, fiesta: null },
+  "oficina-formal": { deportivo: null, casual: -0.6, arreglado: 0.8, fiesta: null },
   casa: { deportivo: 0.8, casual: 0.3, arreglado: -1.2, fiesta: null },
   cita: { deportivo: null, casual: -0.3, arreglado: 0.7, fiesta: 0.3 },
   noche: { deportivo: null, casual: -0.6, arreglado: 0.3, fiesta: 0.9 },

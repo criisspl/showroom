@@ -170,7 +170,7 @@ function transicion(oca) {
   if (!oca.multi) return null;
   const a = oca.multi[0], b = oca.multi[oca.multi.length - 1];
   let t = "De " + a.n.toLowerCase() + " a " + b.n.toLowerCase() + ": ";
-  if (a.id === "oficina" && /cita|noche|finde|concierto|diario/.test(b.id)) t += "suelta el pelo, desabrocha un botón o saca la blusa, y lleva en el bolso unos pendientes o un labial más vivo.";
+  if (/^oficina/.test(a.id) && /cita|noche|finde|concierto|diario/.test(b.id)) t += "suelta el pelo, desabrocha un botón o saca la blusa, y lleva en el bolso unos pendientes o un labial más vivo.";
   else if (/evento|cita|noche/.test(a.id)) t += "el look ya va arreglado; para la parte informal, cambia la joya grande por una más sencilla.";
   else t += "lleva en el bolso un accesorio para subir o bajar el registro según el plan.";
   return t;
@@ -362,7 +362,7 @@ async function pedirIA() {
     "\n\nOcasión: " + oca.n + (oca.d ? " (" + oca.d + ")" : "") + ". Tiempo: " + banda.n + " (" + banda.s + ")" + (c.lluvia ? ", llueve" : "") + "." +
     (oca.multi || banda.multi ? " Va a estar todo el día fuera sin pasar por casa: el outfit tiene que servir para todo, con una capa que se pueda quitar si cambia la temperatura." : "") +
     (noes.length ? "\nCombinaciones que NO se pondría (no las repitas): " + noes.join("; ") + "." : "") + (sies.length ? "\nCombinaciones que SÍ le gustan: " + sies.join("; ") + "." : "") +
-    '\n\nMonta hasta 3 outfits distintos usando SOLO prendas de esa lista, por su id. Cada outfit lleva arriba y abajo, o un vestido; añade capa si hace fresco o frío, calzado y como mucho un accesorio. Coherencia antes que color: nunca mezcles deportivo o felpa con arreglado, fiesta, satén o encaje; respeta la ocasión; una sola prenda amplia. Si le vendría muy bien una prenda que NO tiene, proponla en "falta"; si no, null. Español de España, frases cortas. Responde solo JSON: {"outfits":[{"prendas":["id1","id2"],"porque":"una frase","consejo":"un gesto","falta":{"nombre":"","cat":"arriba|abajo|vestido|capa|calzado|accesorio","tipo":"","color":"#RRGGBB","porque":""}}]}';
+    '\n\nMonta hasta 3 outfits distintos usando SOLO prendas de esa lista, por su id. Cada outfit lleva arriba y abajo, o un vestido; añade capa si hace fresco o frío, calzado y como mucho un accesorio. Coherencia antes que color: nunca mezcles deportivo o felpa con arreglado, fiesta, satén o encaje; respeta la ocasión (la oficina normal es casual: vaqueros, polos y camisetas valen; la oficina formal pide prendas arregladas; deportivo es solo ropa de hacer deporte); una sola prenda amplia. Si le vendría muy bien una prenda que NO tiene, proponla en "falta"; si no, null. Español de España, frases cortas. Responde solo JSON: {"outfits":[{"prendas":["id1","id2"],"porque":"una frase","consejo":"un gesto","falta":{"nombre":"","cat":"arriba|abajo|vestido|capa|calzado|accesorio","tipo":"","color":"#RRGGBB","porque":""}}]}';
   btn.disabled = true; out.appendChild(el("p", "a-note", "La IA está mirando tu armario…"));
   try {
     const d = await preguntaJSON(app.ajustes, { sistema: "Eres una estilista personal. Hablas español de España.", texto });

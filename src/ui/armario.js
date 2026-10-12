@@ -137,7 +137,7 @@ async function autoIA() {
   try {
     const url = await imagenParaIA(app.ui.photo.blob, 768);
     const d = await preguntaJSON(app.ajustes, {
-      texto: 'La imagen es una prenda de ropa o un accesorio. Descríbela para un armario digital. Responde solo con JSON: {"nombre":"nombre corto en español, sin marca","cat":"arriba|abajo|vestido|capa|calzado|accesorio","tipo":"una o dos palabras","color":"#RRGGBB del color principal de la prenda, no del fondo","corte":"ajustada|fluida|amplia","registro":"deportivo|casual|arreglado|fiesta","tejido":"algodon|vaquero|punto|felpa|saten|ligero|piel","abrigo":1}  (abrigo: 1 ligera, 2 media, 3 abrigada).',
+      texto: 'La imagen es una prenda de ropa o un accesorio. Descríbela para un armario digital. Responde solo con JSON: {"nombre":"nombre corto en español, sin marca","cat":"arriba|abajo|vestido|capa|calzado|accesorio","tipo":"una o dos palabras","color":"#RRGGBB del color principal de la prenda, no del fondo","corte":"ajustada|fluida|amplia","registro":"deportivo (solo ropa de hacer deporte: chándal, mallas, ropa técnica) | casual (camisetas, polos, sudaderas, vaqueros) | arreglado | fiesta","tejido":"algodon|vaquero|punto|felpa|saten|ligero|piel","abrigo":1}  (abrigo: 1 ligera, 2 media, 3 abrigada).',
       imagenes: [url]
     });
     if (d.nombre) $("a-nombre").value = String(d.nombre).slice(0, 60);

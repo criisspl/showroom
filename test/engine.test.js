@@ -95,3 +95,12 @@ test("juzga: avisa de sandalias con lluvia y de la capa que falta con frío", ()
   const j = juzga(["t3", "b3", "z1"], { oca: "diario", banda: "frio", lluvia: false });
   assert.ok(j.mal.some((t) => /capa|frío/.test(t)));
 });
+
+test("oficina casual acepta un look casual; la formal pide una prenda arreglada", () => {
+  const casual = juzga(["t2", "b2", "z2"], { oca: "diario+oficina", banda: "templado", lluvia: false });
+  assert.notEqual(casual.v, "no");
+  assert.ok(!casual.mal.some((t) => /no es para/.test(t)));
+  const formal = juzga(["t2", "b2", "z2"], { oca: "oficina-formal", banda: "templado", lluvia: false });
+  assert.equal(formal.v, "no");
+  assert.ok(formal.mal.some((t) => /oficina formal/.test(t)));
+});
