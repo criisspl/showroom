@@ -2,7 +2,7 @@
 // sugerido desde Deseos), valorarlos, y «Lo monto yo»: la persona elige prendas y la app dice si pega.
 import { $, el, boton, radios, val, vals, hoyISO, fechaLarga, pinA } from "../lib/dom.js";
 import { app, estado } from "../state.js";
-import { OCAS, BANDAS, MESBANDA, CATN, S_OCA, MOT, TEMPORADAS, TEMPN, estacionHoy } from "../data/constants.js";
+import { OCAS, BANDAS, MESBANDA, CATS, CATN, S_OCA, MOT, TEMPORADAS, TEMPN, estacionHoy } from "../data/constants.js";
 import { monta, byId, activas, estiloDe, tejidoDe, famDe, palDe, casan, clave2, ocaDe, bandaDe, capaHace, juzga, mejora, claveDe, fueraTemporada, txtTemporada, setEstado, esVirtual } from "../lib/engine.js";
 import { clasifica, familia, harm } from "../lib/color.js";
 import { hayIA, preguntaJSON } from "../lib/ai.js";
@@ -32,7 +32,9 @@ export function initHoy() {
   radios($("a-temp"), "a-temp", BANDAS, [b0], { sub: true, multi: true });
   radios($("a-est"), "a-est", TEMPORADAS, estacionHoy());
   document.querySelectorAll('input[name="a-est"]').forEach((i) => i.addEventListener("change", alCambiarCtx));
-  radios($("a-modo"), "a-modo", [["propon", "Propónme looks"], ["yo", "Lo monto yo"]], "propon");
+  radios($("a-modo"), "a-modo", [["propon", "Propónme looks"], ["ancla", "Con esta prenda"], ["yo", "Lo monto yo"]], "propon");
+  CATS.forEach(([id, n]) => { const o = el("option", null, n); o.value = id; $("a-ancla-cat").appendChild(o); });
+  $("a-ancla-go").addEventListener("click", anclaDescrita);
   app.ui.orden = { "a-oca": [oca0], "a-temp": [b0] };
   $("a-fecha").textContent = fechaLarga(hoyISO());
   // Varias ocasiones (hasta 3) y uno o dos tiempos; siempre al menos uno marcado; se recuerda el orden
@@ -55,11 +57,64 @@ export function initHoy() {
     if (app.ui.res) repintaHoy(); else if (!$("a-out").children.length || app.ui.vacio) montar(false);
   };
 }
-function alCambiarCtx() { if (val("a-modo") === "yo") { if (app.ui.yoSel.length) juzgaYo(); } else montar(false); }
+function alCambiarCtx() { const m = val("a-modo"); if (m === "yo") { if (app.ui.yoSel.length) juzgaYo(); } else if (m === "ancla") { if (app.ui.ancla) montarAncla(false); } else montar(false); }
 function modoHoy() {
-  const yo = val("a-modo") === "yo";
-  $("a-yo").hidden = !yo; $("a-yo-out").hidden = !yo; $("a-out").hidden = yo; $("a-prop-row").hidden = yo;
+  const m = val("a-modo"), yo = m === "yo", an = m === "ancla";
+  $("a-yo").hidden = !yo; $("a-yo-out").hidden = !yo; $("a-out").hidden = yo; $("a-prop-row").hidden = yo || an; $("a-ancla").hidden = !an;
   if (yo) { pintaYo(); if (app.ui.yoSel.length) juzgaYo(); }
+  else if (an) { pintaAncla(); if (app.ui.ancla) montarAncla(false); else { $("a-out").textContent = ""; app.ui.res = null; } }
+  else montar(false);
+}
+
+/* ---------- Con esta prenda: looks alrededor de una prenda (subida o no) ---------- */
+function pintaAncla() {
+  const box = $("a-ancla-pick"); if (!box) return; box.textContent = "";
+  const A = activas(), sel = app.ui.ancla && !app.ui.ancla.virtual ? app.ui.ancla.id : null;
+  ["arriba", "abajo", "vestido", "capa", "calzado", "accesorio"].forEach((cat) => {
+    const ps = A.filter((p) => p.cat === cat); if (!ps.length) return;
+    const sec = el("div", "yo-cat"), g = el("div", "yo-grid"); sec.appendChild(el("small", null, CATN[cat]));
+    ps.forEach((p) => {
+      const l = el("label", "yo-p"), i = el("input"); i.type = "radio"; i.name = "a-ancla-p"; i.value = p.id; i.checked = p.id === sel;
+      i.addEventListener("change", () => { app.ui.ancla = p; montarAncla(false); });
+      l.appendChild(i); l.appendChild(thumb(p)); l.appendChild(el("span", null, p.nombre)); g.appendChild(l);
+    });
+    sec.appendChild(g); box.appendChild(sec);
+  });
+}
+function anclaDescrita() {
+  const n = $("a-ancla-n").value.trim(); if (!n) { $("a-ancla-msg").textContent = "Escribe qué prenda es, por ejemplo «falda de cuadros»."; return; }
+  const cat = $("a-ancla-cat").value, col = $("a-ancla-col").value.toUpperCase(), tmp = { nombre: n, tipo: "", cat }, low = n.toLowerCase();
+  const v = { id: "ancla-" + Date.now().toString(36), nombre: n.charAt(0).toUpperCase() + n.slice(1), cat, tipo: low.split(" ")[0], color: col, colorN: clasifica(col, estado.PAL).n,
+    estilo: estiloDe(tmp), tejido: tejidoDe(tmp), abrigo: /abrigo|plumas|jersey|lana|punto gordo|borrego/.test(low) ? 3 : /tirantes|lino|short|sandalia/.test(low) ? 1 : 2, corte: "fluida", virtual: true, ancla: true };
+  v.formal = { deportivo: 1, casual: 1, arreglado: 2, fiesta: 3 }[v.estilo];
+  estado.virt[v.id] = v; app.ui.ancla = v; $("a-ancla-msg").textContent = "";
+  document.querySelectorAll('input[name="a-ancla-p"]').forEach((i) => { i.checked = false; });
+  montarAncla(false);
+}
+/** Monta con la prenda fija: quita las que ocuparían su sitio y se asegura de que esté en el look. */
+function montaAncla(c, seed, evitar) {
+  const a = app.ui.ancla; if (!a) return [];
+  const choca = (p) => p.id !== a.id && (a.cat === "vestido" ? ["vestido", "arriba", "abajo"].includes(p.cat) : a.cat === "arriba" || a.cat === "abajo" ? p.cat === a.cat || p.cat === "vestido" : p.cat === a.cat);
+  const real = estado.P; let res = [];
+  try { estado.P = real.filter((p) => !choca(p)).concat(a.virtual ? [a] : []); res = monta(c.oca, c.banda, c.lluvia, seed, evitar, c.est); }
+  finally { estado.P = real; }
+  res.forEach((o) => { if (!o.ids.includes(a.id)) { o.ids = o.ids.concat(a.id); o.forzada = true; } });
+  return res;
+}
+function montarAncla(otra) {
+  const out = $("a-out"); out.textContent = ""; app.ui.res = null; app.ui.ultNo = null;
+  const a = app.ui.ancla; if (!a) return;
+  const c = ctx(); app.ui.seed = otra ? app.ui.seed + 1 : 0;
+  const res = montaAncla(c, app.ui.seed, otra ? app.ui.last : null);
+  app.ui.last = res.map((r) => r.key);
+  if (!res.length) {
+    const j = juzga([a.id], c), d = el("div", "a-fit"), mal = j ? j.mal.filter((t) => !/Falta la (base|parte)/.test(t)) : [];
+    d.appendChild(el("h3", null, "Con esta prenda no me sale un look para hoy"));
+    d.appendChild(el("p", "a-msg", mal.length ? mal.join(" ") : "No encuentro en tu armario prendas que casen con ella en registro, tejido y abrigo para «" + ocaDe(c.oca).n + "». Prueba con otra ocasión o sube más ropa."));
+    out.appendChild(d); return;
+  }
+  app.ui.resCtx = c; app.ui.res = res.map((o) => ({ o, origen: "ancla" }));
+  repintaHoy();
 }
 
 /* ---------- Huecos: lo que falta para que el look esté completo ---------- */
@@ -131,7 +186,7 @@ function piezaHueco(h) {
   const it = el("li", "hueco");
   const pic = h.icono ? icono(h.icono, h.color) : el("div"); pic.className = "a-th a-th-w"; if (!h.icono) pic.style.background = h.color;
   it.appendChild(pic);
-  it.appendChild(el("small", null, h.estado === "quiero" ? "En tu lista" : h.estado === "no" ? "No la tienes" : h.estado === "tengo" ? "Dices que la tienes" : h.virtual ? "¿La tienes?" : "Te falta"));
+  it.appendChild(el("small", null, h.estado === "ancla" ? "La que quieres llevar" : h.estado === "quiero" ? "En tu lista" : h.estado === "no" ? "No la tienes" : h.estado === "tengo" ? "Dices que la tienes" : h.virtual ? "¿La tienes?" : "Te falta"));
   it.appendChild(el("span", null, h.nombre + (h.colorN && !h.generico ? ", en " + h.colorN.toLowerCase() : "")));
   return it;
 }
@@ -154,7 +209,7 @@ function pregunta(q, dest) {
   box.appendChild(pic); box.appendChild(tx); box.appendChild(row); return box;
 }
 function anadeAlLook(q, dest) {
-  app.ui.pendiente = { wid: q.id, dest };
+  app.ui.pendiente = { wid: q.ancla ? null : q.id, dest, ancla: !!q.ancla };
   ver("armario"); abreForm(null, q.pre);
   $("a-form-msg").textContent = "Revisa los datos (y hazle una foto si quieres). Al guardar, la pongo en tu look.";
 }
@@ -164,6 +219,7 @@ const repintaDest = (dest) => (dest === "yo" ? juzgaYo() : repintaHoy(dest));
 export async function vuelveConPrenda(pd, nid) {
   if (pd.wid) await ponDeseo(pd.wid, "tengo");
   const p = byId(nid); ver("hoy");
+  if (p && pd.ancla && app.ui.ancla && app.ui.ancla.virtual && app.ui.ancla.cat === p.cat) app.ui.ancla = p;
   const reemplaza = (ids) => (p && (PRINC[p.cat] || p.cat === "calzado") ? ids.filter((id) => { const q = byId(id); return !(q && q.cat === p.cat); }) : ids).concat(nid);
   if (pd.dest === "yo") { app.ui.yoSel = reemplaza(app.ui.yoSel); pintaYo(); juzgaYo(); }
   else if (app.ui.res && app.ui.res[pd.dest]) { const o = app.ui.res[pd.dest].o; o.ids = reemplaza(o.ids); repintaHoy(pd.dest); }
@@ -235,17 +291,18 @@ function transicion(oca) {
 }
 function tarjeta(o, n, c, origen, idx) {
   const li = el("article", "a-fit"), oca = ocaDe(c.oca), banda = bandaDe(c.banda);
-  li.appendChild(el("p", "who", (origen === "ia" ? "Propuesta de la IA · " : origen === "yo" ? "Tu look · " : "Opción " + n + " · ") + lugarDe(c)));
+  li.appendChild(el("p", "who", (origen === "ia" ? "Propuesta de la IA · " : origen === "yo" ? "Tu look · " : origen === "ancla" ? "Con tu prenda · opción " + n + " · " : "Opción " + n + " · ") + lugarDe(c)));
+  if (o.forzada && app.ui.ancla) li.appendChild(el("p", "a-note hueco-n", "Ojo: " + app.ui.ancla.nombre.charAt(0).toLowerCase() + app.ui.ancla.nombre.slice(1) + " no termina de casar con el resto; mira «¿Pega?» en «Lo monto yo» para ver por qué."));
   if (o.nuevo) li.appendChild(el("p", "a-note hueco-n", o.nuevo === true ? "Te enseño este en lugar del que no te convencía; ese no vuelve a salir." : o.nuevo));
   const hs = huecos(o, c), ul = el("ul", "a-pieces"), dots = el("div", "dots"), ps = o.ids.map(byId).filter(Boolean);
   // Prendas que quizá tienes: se pintan como sugerencia y se preguntan primero
   const vq = ps.filter((p) => p.virtual).map((p) => ({ id: p.id, nombre: p.nombre, cat: p.cat, color: p.color, colorN: p.colorN, icono: p.icono, virtual: true, estado: estadoDe(p.id),
-    porque: p.basico ? "Es un básico que va genial con este look. Si lo tienes, súbelo y lo uso más veces." : "Dijiste que la tienes: súbela y la uso en tus looks.",
+    ancla: !!p.ancla, porque: p.ancla ? "Es la prenda que quieres llevar. Súbela al armario para que la tenga en cuenta siempre." : p.basico ? "Es un básico que va genial con este look. Si lo tienes, súbelo y lo uso más veces." : "Dijiste que la tienes: súbela y la uso en tus looks.",
     pre: { nombre: p.nombre, cat: p.cat, tipo: p.tipo, color: p.color, corte: p.corte, abrigo: p.abrigo, estilo: p.estilo, tejido: p.tejido } }));
-  if (vq.length) li.appendChild(el("p", "a-note hueco-n", "Con algo que quizá tienes y no has subido."));
+  if (vq.some((h) => !h.ancla)) li.appendChild(el("p", "a-note hueco-n", "Con algo que quizá tienes y no has subido."));
   o.ids.slice().sort((a, b) => ((byId(a) ? ORDEN[byId(a).cat] : 9) - (byId(b) ? ORDEN[byId(b).cat] : 9))).forEach((id) => {
     const p = byId(id), it = el("li");
-    if (p && p.virtual) { const h = vq.find((x) => x.id === id); ul.appendChild(piezaHueco(h.estado === "tengo" ? h : { ...h, estado: null })); return; } it.appendChild(thumb(p)); it.appendChild(el("small", null, p ? CATN[p.cat] : "")); it.appendChild(el("span", null, p ? p.nombre : "Prenda eliminada")); ul.appendChild(it);
+    if (p && p.virtual) { const h = vq.find((x) => x.id === id); ul.appendChild(piezaHueco(h.ancla ? { ...h, estado: "ancla" } : h.estado === "tengo" ? h : { ...h, estado: null })); return; } it.appendChild(thumb(p)); it.appendChild(el("small", null, p ? CATN[p.cat] : "")); it.appendChild(el("span", null, p ? p.nombre : "Prenda eliminada")); ul.appendChild(it);
     if (p && p.cat !== "accesorio" && p.cat !== "calzado") { const i = el("i"); i.style.background = p.color; dots.appendChild(i); }
   });
   hs.forEach((h) => ul.appendChild(piezaHueco(h)));
@@ -274,7 +331,11 @@ function tarjeta(o, n, c, origen, idx) {
     const p = el("p", "a-note hueco-n"); p.appendChild(document.createTextNode("Dijiste que tienes " + h.nombre.toLowerCase() + ", pero no está en tu armario. "));
     p.appendChild(boton("Añadirla ahora", "a-link", () => anadeAlLook(h, idx))); li.appendChild(p);
   });
-  const pend = vq.find((h) => !h.estado) || hs.find((h) => !h.propia && !h.estado && !(h.generico && app.ui.noGen[h.nombre]));
+  vq.filter((h) => h.ancla).forEach((h) => {
+    const p = el("p", "a-note hueco-n"); p.appendChild(document.createTextNode(h.nombre + " no está en tu armario. "));
+    p.appendChild(boton("Subirla ahora", "a-link", () => anadeAlLook(h, idx))); li.appendChild(p);
+  });
+  const pend = vq.find((h) => !h.estado && !h.ancla) || hs.find((h) => !h.propia && !h.estado && !(h.generico && app.ui.noGen[h.nombre]));
   const q = pend || (hs.length ? null : o.falta || (origen === "ia" ? null : sugiere(o, c)));
   if (q) li.appendChild(pregunta(q, idx));
   const un = app.ui.ultNo;
@@ -315,16 +376,17 @@ function repintaHoy(scrollA) {
   const out = $("a-out"); if (!out || !app.ui.res) return;
   out.textContent = ""; app.ui.preg = {};
   app.ui.res.forEach((r, i) => out.appendChild(tarjeta(r.o, i + 1, app.ui.resCtx, r.origen, i)));
-  const row = el("div", "a-row"); row.appendChild(boton("Otra tanda", "a-btn ghost", () => montar(true))); out.appendChild(row);
+  const row = el("div", "a-row"); row.appendChild(boton("Otra tanda", "a-btn ghost", () => (val("a-modo") === "ancla" ? montarAncla(true) : montar(true)))); out.appendChild(row);
   if (scrollA != null) { const t = out.querySelector('[data-idx="' + scrollA + '"]'); if (t) t.scrollIntoView({ block: "start" }); }
 }
 /** Cambia el look rechazado por otro que no estuviera ya en pantalla. */
 function sustituye(idx, sinPrenda) {
   if (!app.ui.res || !app.ui.res[idx]) return;
   const c = app.ui.resCtx, vistos = app.ui.res.map((r) => r.o.key || claveDe(r.o.ids));
+  const anc = app.ui.res[idx].origen === "ancla";
   let nuevo = app.ui.res[idx].o.conVirtual ? montaConVirtual(c, vistos) : null;
-  for (let sd = 0; sd < 6 && !nuevo; sd++) nuevo = monta(c.oca, c.banda, c.lluvia, sd, vistos, c.est).find((r) => !vistos.includes(r.key)) || null;
-  if (nuevo) { nuevo.nuevo = sinPrenda ? "Como no tienes " + sinPrenda.charAt(0).toLowerCase() + sinPrenda.slice(1) + ", te propongo este otro." : true; app.ui.res[idx] = { o: nuevo, origen: "local" }; } else app.ui.res.splice(idx, 1);
+  for (let sd = 0; sd < 6 && !nuevo; sd++) nuevo = (anc ? montaAncla(c, sd, vistos) : monta(c.oca, c.banda, c.lluvia, sd, vistos, c.est)).find((r) => !vistos.includes(r.key)) || null;
+  if (nuevo) { nuevo.nuevo = sinPrenda ? "Como no tienes " + sinPrenda.charAt(0).toLowerCase() + sinPrenda.slice(1) + ", te propongo este otro." : true; app.ui.res[idx] = { o: nuevo, origen: anc ? "ancla" : "local" }; } else app.ui.res.splice(idx, 1);
   app.ui.ultNo = null; repintaHoy(nuevo ? idx : null);
 }
 export function montar(otra) {

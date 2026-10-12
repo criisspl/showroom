@@ -90,6 +90,16 @@
       <label class="a-check"><input type="checkbox" id="a-lluvia"><span>Llueve</span></label></fieldset>
     <div class="a-row" id="a-prop-row"><button type="button" class="a-btn" id="a-montar">Montar outfits</button><button type="button" class="a-btn ghost" id="a-ia" hidden>Pedir a la IA</button></div>
   </div>
+  <div class="card a-yo" id="a-ancla" hidden>
+    <h2>Con esta prenda</h2>
+    <p class="a-msg">¿Hoy te apetece llevar algo en concreto? Elígelo de tu armario y te monto el look alrededor.</p>
+    <div id="a-ancla-pick"></div>
+    <details class="a-ancla-otra"><summary><b>¿No está en tu armario? Descríbela</b></summary>
+      <label class="a-f"><span>Qué prenda es</span><input type="text" id="a-ancla-n" maxlength="60" placeholder="Por ejemplo: falda de cuadros, blazer de lino"></label>
+      <div class="a-row"><label class="a-f"><span>Tipo</span><select id="a-ancla-cat"></select></label><label class="a-f"><span>Color</span><input type="color" id="a-ancla-col" value="#c19a6b"></label></div>
+      <div class="a-row"><button type="button" class="a-btn" id="a-ancla-go">Monta looks con ella</button><span class="a-msg" id="a-ancla-msg"></span></div>
+    </details>
+  </div>
   <div class="card a-yo" id="a-yo" hidden>
     <h2>Lo monto yo</h2>
     <p class="a-msg">Elige las prendas de tu look y te digo si pega con la ocasión y el tiempo que has marcado arriba.</p>

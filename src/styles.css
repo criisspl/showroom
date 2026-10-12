@@ -348,3 +348,7 @@ body{margin:0}
 #a-yo-out{margin-top:12px}
 .a-pin{margin:0}
 .a-pin .pinbtn{font-size:.82rem}
+.a-ancla-otra{display:grid;gap:8px;border-top:1px dashed var(--card-line);padding-top:10px}
+.a-ancla-otra summary{cursor:pointer;font-size:.9rem}
+.a-ancla-otra .a-row{align-items:end}
+.a-ancla-otra input[type=color]{width:56px;height:40px;padding:2px;border-radius:10px}
