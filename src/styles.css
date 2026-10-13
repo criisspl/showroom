@@ -353,3 +353,6 @@ body{margin:0}
 .a-ancla-otra .a-row{align-items:end}
 .a-ancla-otra input[type=color]{width:56px;height:40px;padding:2px;border-radius:10px}
 .a-conds{display:flex;flex-wrap:wrap;gap:4px 16px}
+.a-fl-prev img{display:block;max-width:100%;max-height:50vh;border-radius:14px;margin:4px 0}
+.a-foto-add{grid-template-columns:minmax(0,1fr)}
+#a-fl-out{margin-top:12px}

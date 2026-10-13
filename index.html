@@ -91,6 +91,16 @@
     <fieldset class="pick"><legend>Dónde vas a estar</legend><div class="opts-r" id="a-entorno"></div></fieldset>
     <div class="a-row" id="a-prop-row"><button type="button" class="a-btn" id="a-montar">Montar outfits</button><button type="button" class="a-btn ghost" id="a-ia" hidden>Pedir a la IA</button></div>
   </div>
+  <div class="card a-yo" id="a-fotolook" hidden>
+    <h2>Foto de un look</h2>
+    <p class="a-msg">Sube una foto de un outfit (de cuerpo entero, con buena luz). Te digo qué funciona, qué mejorarías y te añado al armario las prendas que no tengas.</p>
+    <p class="aviso" id="a-fl-ia" hidden>Para analizar fotos hace falta la IA: actívala en Ajustes.</p>
+    <label class="a-btn ghost" style="position:relative;justify-self:start">Hacer o elegir foto<input type="file" id="a-fl-file" accept="image/*" style="position:absolute;inset:0;opacity:0"></label>
+    <div class="a-fl-prev" id="a-fl-prev"></div>
+    <label class="a-check"><input type="checkbox" id="a-fl-acepto"> <span>Acepto enviar esta foto a la IA para analizarla</span></label>
+    <div class="a-row"><button type="button" class="a-btn" id="a-fl-go" disabled>Analizar mi look</button><span class="a-msg" id="a-fl-msg"></span></div>
+  </div>
+  <div id="a-fl-out" class="a-out" aria-live="polite" hidden></div>
   <div class="card a-yo" id="a-ancla" hidden>
     <h2>Con esta prenda</h2>
     <p class="a-msg">¿Hoy te apetece llevar algo en concreto? Elígelo de tu armario y te monto el look alrededor.</p>
