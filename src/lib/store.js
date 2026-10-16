@@ -16,50 +16,77 @@ function abrir() {
     };
     r.onsuccess = () => res(r.result);
     r.onerror = () => rej(r.error);
+    r.onblocked = () => rej(new Error("La app está abierta en otra pestaña con una versión distinta. Ciérrala y vuelve a abrir esta."));
   });
 }
 
 function req(r) { return new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
 function nid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
 
-export async function creaStore() {
-  const db = await abrir();
+// Safari (sobre todo en iPhone, al volver de segundo plano) puede cortar la conexión con la base de datos:
+// a partir de ahí cada transacción falla con InvalidStateError o UnknownError hasta recargar la página.
+const perdida = (e) => !!e && (e.name === "InvalidStateError" || e.name === "UnknownError");
+
+export async function creaStore({ onError = (e) => console.error(e) } = {}) {
+  let db = null;
+  async function conexion(nueva) {
+    if (nueva || !db) {
+      if (db) try { db.close(); } catch (e) { /* ya cerrada */ }
+      db = await abrir();
+      db.onclose = () => { db = null; };
+      db.onversionchange = () => { db.close(); db = null; };
+    }
+    return db;
+  }
+  await conexion();
   const subs = Object.fromEntries(COLS.map((c) => [c, []]));
   const urls = new Map();
-  const tx = (store, modo = "readonly") => db.transaction(store, modo).objectStore(store);
+  /** Ejecuta fn con el almacén pedido; si la conexión se ha perdido, reconecta y lo repite una vez. */
+  async function usa(store, modo, fn) {
+    try { return await fn((await conexion()).transaction(store, modo).objectStore(store)); }
+    catch (e) { if (!perdida(e)) throw e; return fn((await conexion(true)).transaction(store, modo).objectStore(store)); }
+  }
+  const lee = (store, k) => usa(store, "readonly", (s) => req(s.get(k)));
+  const pon = (store, v, k) => usa(store, "readwrite", (s) => req(k === undefined ? s.put(v) : s.put(v, k)));
+  const quita = (store, k) => usa(store, "readwrite", (s) => req(s.delete(k)));
 
-  async function todos(c) { return req(tx(c).getAll()); }
-  async function emit(c) { const a = await todos(c); subs[c].forEach((f) => f(a)); }
+  async function todos(c) { return usa(c, "readonly", (s) => req(s.getAll())); }
+  async function emit(c) {
+    try { const a = await todos(c); subs[c].forEach((f) => { try { f(a); } catch (e) { onError(e); } }); }
+    catch (e) { onError(e); }
+  }
 
   const api = {
     /** Se suscribe a una colección: recibe el array completo cada vez que cambia. */
-    on(c, cb) { subs[c].push(cb); todos(c).then(cb); },
-    async add(c, d) { const id = nid(); await req(tx(c, "readwrite").put({ ...d, id })); emit(c); return id; },
-    async set(c, id, d) { await req(tx(c, "readwrite").put({ ...d, id })); emit(c); },
+    on(c, cb) {
+      subs[c].push(cb);
+      return todos(c).then(cb).catch(onError);
+    },
+    async add(c, d) { const id = nid(); await pon(c, { ...d, id }); emit(c); return id; },
+    async set(c, id, d) { await pon(c, { ...d, id }); emit(c); },
     async update(c, id, patch) {
-      const s = tx(c, "readwrite"); const old = await req(s.get(id));
-      if (old) await req(s.put({ ...old, ...patch, id }));
+      await usa(c, "readwrite", async (s) => { const old = await req(s.get(id)); if (old) await req(s.put({ ...old, ...patch, id })); });
       emit(c);
     },
-    async del(c, id) { await req(tx(c, "readwrite").delete(id)); emit(c); },
-    async get(c, id) { return req(tx(c).get(id)); },
+    async del(c, id) { await quita(c, id); emit(c); },
+    async get(c, id) { return lee(c, id); },
     todos,
 
     // Fotos
-    async putFoto(blob) { const id = "f" + nid(); await req(tx("fotos", "readwrite").put(blob, id)); return id; },
-    async delFoto(id) { if (!id) return; await req(tx("fotos", "readwrite").delete(id)); const u = urls.get(id); if (u) { URL.revokeObjectURL(u); urls.delete(id); } },
+    async putFoto(blob) { const id = "f" + nid(); await pon("fotos", blob, id); return id; },
+    async delFoto(id) { if (!id) return; await quita("fotos", id); const u = urls.get(id); if (u) { URL.revokeObjectURL(u); urls.delete(id); } },
     async urlFoto(id) {
       if (!id) return null;
       if (urls.has(id)) return urls.get(id);
-      const b = await req(tx("fotos").get(id));
+      const b = await lee("fotos", id);
       if (!b) return null;
       const u = URL.createObjectURL(b); urls.set(id, u); return u;
     },
-    async blobFoto(id) { return id ? req(tx("fotos").get(id)) : null; },
+    async blobFoto(id) { return id ? lee("fotos", id) : null; },
 
     // Clave-valor (perfil, ajustes)
-    async kget(k) { return req(tx("kv").get(k)); },
-    async kset(k, v) { return req(tx("kv", "readwrite").put(v, k)); },
+    async kget(k) { return lee("kv", k); },
+    async kset(k, v) { return pon("kv", v, k); },
 
     /** Copia de seguridad completa en JSON (las fotos van en base64). */
     async exporta() {
@@ -74,11 +101,12 @@ export async function creaStore() {
     async importa(data, { reemplazar = true } = {}) {
       if (!data || data.app !== "armario") throw new Error("Este archivo no es una copia de la app.");
       for (const c of COLS) {
-        const s = tx(c, "readwrite");
-        if (reemplazar) await req(s.clear());
-        for (const d of data[c] || []) await req(s.put(d));
+        await usa(c, "readwrite", async (s) => {
+          if (reemplazar) await req(s.clear());
+          for (const d of data[c] || []) await req(s.put(d));
+        });
       }
-      for (const [id, url] of Object.entries(data.fotos || {})) await req(tx("fotos", "readwrite").put(await (await fetch(url)).blob(), id));
+      for (const [id, url] of Object.entries(data.fotos || {})) await pon("fotos", await (await fetch(url)).blob(), id);
       for (const [k, v] of Object.entries(data.kv || {})) {
         if (k === "ajustes") { const cur = (await api.kget("ajustes")) || {}; await api.kset(k, { ...v, clave: cur.clave || "" }); }
         else await api.kset(k, v);
@@ -86,7 +114,7 @@ export async function creaStore() {
       COLS.forEach(emit);
     },
     async borraTodo() {
-      for (const c of [...COLS, "fotos", "kv"]) await req(tx(c, "readwrite").clear());
+      for (const c of [...COLS, "fotos", "kv"]) await usa(c, "readwrite", (s) => req(s.clear()));
       COLS.forEach(emit);
     }
   };

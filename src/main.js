@@ -9,7 +9,7 @@ import { creaStore } from "./lib/store.js";
 import { app, setPerfil, repinta } from "./state.js";
 import { setEstado } from "./lib/engine.js";
 import { normaliza } from "./lib/analysis.js";
-import { ver } from "./ui/comun.js";
+import { ver, falla } from "./ui/comun.js";
 import { initHoy } from "./ui/hoy.js";
 import { initArmario } from "./ui/armario.js";
 import { initDeseos } from "./ui/deseos.js";
@@ -20,7 +20,7 @@ import { initAjustes } from "./ui/ajustes.js";
 import { initInstala, protegeDatos } from "./ui/instala.js";
 
 async function arranca() {
-  try { app.store = await creaStore(); }
+  try { app.store = await creaStore({ onError: falla }); }
   catch (e) {
     document.body.textContent = "Este navegador no permite guardar datos (IndexedDB). Prueba con otro navegador o sal del modo privado.";
     return;
@@ -29,7 +29,8 @@ async function arranca() {
   const p = await app.store.kget("perfil");
   if (p) { try { setPerfil(normaliza(p, p.respuestas || {}, p.origen || "ia")); } catch (e) { setPerfil(null); } }
 
-  initHoy(); initArmario(); initDeseos(); initHistorial(); initAnalisis(); initBienvenida(); initAjustes(); initInstala();
+  // Si una pantalla falla al arrancar, las demás (y la carga de tus prendas) siguen funcionando
+  [initHoy, initArmario, initDeseos, initHistorial, initAnalisis, initBienvenida, initAjustes, initInstala].forEach((f) => { try { f(); } catch (e) { falla(e); } });
   document.querySelectorAll(".a-tabs button").forEach((b) => b.addEventListener("click", () => ver(b.getAttribute("data-tab"))));
 
   app.store.on("prendas", (a) => { setEstado({ P: a }); repinta("armario", "historial", "deseos", "hoy"); });
