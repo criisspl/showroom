@@ -119,9 +119,9 @@ export function aprende() {
     }
     if (v.voto !== "no") return;
     l.no++;
-    let ctx = false, mezcla = false;
-    if (m.includes("ocasion")) { l.veto[v.key + "|o:" + v.ocasion] = 1; ctx = true; }
-    if (m.includes("tiempo")) { l.veto[v.key + "|b:" + v.banda] = 1; ctx = true; }
+    let mezcla = false;
+    if (m.includes("ocasion")) { l.veto[v.key + "|o:" + v.ocasion] = 1; }
+    if (m.includes("tiempo")) { l.veto[v.key + "|b:" + v.banda] = 1; }
     if (dos) {
       if (m.includes("estilos")) { mas(l.est, clave2(v.est[0], v.est[1]), -0.5, -2, 0.6); mezcla = true; }
       if (m.includes("tejidos")) { mas(l.tej, clave2(v.tej[0], v.tej[1]), -0.5, -2, 0.6); mezcla = true; }

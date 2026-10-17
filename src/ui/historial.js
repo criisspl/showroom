@@ -1,7 +1,7 @@
 // Pestaña Historial: lo que te has puesto, lo guardado, lo que la app ha aprendido y las altas.
 import { $, el, boton, hoyISO, fechaLarga } from "../lib/dom.js";
 import { app, estado } from "../state.js";
-import { OCAS, BANDAS, ESTN, TEJN, FAMN, CORN } from "../data/constants.js";
+import { ESTN, TEJN, FAMN, CORN } from "../data/constants.js";
 import { activas, byId, usos, aprende, ocaDe, bandaDe } from "../lib/engine.js";
 import { thumb, falla } from "./comun.js";
 
