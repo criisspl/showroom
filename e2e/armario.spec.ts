@@ -1,0 +1,54 @@
+import { test, expect } from "@playwright/test";
+import { abreConArmario, pestana } from "./ayuda.ts";
+
+test("añade, edita y elimina una prenda", async ({ page }) => {
+  await abreConArmario(page);
+  await pestana(page, "Armario");
+  const grid = page.locator("#a-grid");
+  await expect(grid.getByRole("button")).toHaveCount(11);
+
+  await page.getByRole("button", { name: "Añadir prenda" }).click();
+  const form = page.locator("#a-form");
+  await form.getByLabel("Nombre").fill("Falda plisada salvia");
+  await form.getByRole("group", { name: "Categoría" }).getByText("Abajo").click();
+  await form.getByLabel("Color principal").fill("#9caf88");
+  await form.getByRole("button", { name: "Guardar" }).click();
+
+  const nueva = grid.getByRole("button", { name: /Falda plisada salvia/ });
+  await expect(nueva).toContainText("sin estrenar");
+  await expect(grid.getByRole("button")).toHaveCount(12);
+
+  await nueva.click();
+  await form.getByLabel("Nombre").fill("Falda plisada verde");
+  await form.getByRole("button", { name: "Guardar" }).click();
+  await expect(grid.getByRole("button", { name: /Falda plisada verde/ })).toBeVisible();
+
+  await grid.getByRole("button", { name: /Falda plisada verde/ }).click();
+  await form.getByRole("button", { name: "Eliminar" }).click();
+  await form.getByRole("button", { name: "Pulsa otra vez para eliminar" }).click();
+  await expect(grid.getByRole("button", { name: /Falda plisada/ })).toHaveCount(0);
+  await expect(grid.getByRole("button")).toHaveCount(11);
+});
+
+test("no guarda una prenda sin nombre", async ({ page }) => {
+  await abreConArmario(page);
+  await pestana(page, "Armario");
+  await page.getByRole("button", { name: "Añadir prenda" }).click();
+  await page.locator("#a-form").getByRole("button", { name: "Guardar" }).click();
+  await expect(page.locator("#a-form-msg")).toHaveText("Ponle un nombre para reconocerla después.");
+});
+
+test("¿Lo compro? da un veredicto sin guardar la prenda", async ({ page }) => {
+  await abreConArmario(page);
+  await pestana(page, "Armario");
+  await page.getByRole("button", { name: "¿Lo compro?" }).click();
+  await expect(page.getByRole("heading", { name: "Deseos" })).toBeVisible();
+  const form = page.locator("#a-form");
+  await form.getByLabel("Tipo").fill("blusa");
+  await form.getByLabel("Color principal").fill("#7a8fa6");
+  await form.getByRole("button", { name: "Analizar" }).click();
+  await expect(page.locator("#a-verd")).toContainText(/Cómprala|Piénsatelo|Mejor no/);
+  await form.getByRole("button", { name: "Cancelar" }).click();
+  await pestana(page, "Armario");
+  await expect(page.locator("#a-grid").getByRole("button")).toHaveCount(11);
+});

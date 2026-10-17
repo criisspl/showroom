@@ -9,7 +9,7 @@ Instrucciones para Claude en este repo. Cada línea está aquí porque sin ella 
 - Imports con extensión `.ts` explícita (`allowImportingTsExtensions`). Tipos del dominio en `src/lib/tipos.ts`.
 - Backend: Cloudflare Worker (`worker/`) que solo hace de intermediario con la IA; config en `wrangler.jsonc`.
 - Datos: IndexedDB en el navegador (`src/lib/store.ts`). Sin cuentas ni base de datos en servidor.
-- Tests: Vitest + `node:assert/strict`, con `fake-indexeddb` para el store.
+- Tests: Vitest + `node:assert/strict`, con `fake-indexeddb` para el store. E2E: Playwright en `e2e/`, contra la app compilada; el armario de prueba (`e2e/datos/`) es inventado.
 
 | Qué            | Comando                           |
 | -------------- | --------------------------------- |
@@ -18,10 +18,11 @@ Instrucciones para Claude en este repo. Cada línea está aquí porque sin ella 
 | Dev con API    | `npm run dev:api`                 |
 | Tests          | `npm test`                        |
 | Tipos          | `npm run typecheck`               |
+| E2E            | `npm run e2e`                     |
 | Lint y formato | `npm run lint` · `npm run format` |
 | Build          | `npm run build`                   |
 
-CI (`.github/workflows/ci.yml`) ejecuta lint, formato, tipos, tests con cobertura mínima y build: todo tiene que pasar antes de dar algo por hecho. Los commits siguen Conventional Commits (commitlint).
+CI (`.github/workflows/ci.yml`) ejecuta lint, formato, tipos, tests con cobertura mínima, build y e2e: todo tiene que pasar antes de dar algo por hecho. Los commits siguen Conventional Commits (commitlint).
 
 ## Estructura
 

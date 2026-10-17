@@ -88,6 +88,7 @@ npm install
 npm run dev        # la web, con recarga en caliente
 npm run dev:api    # la web + el servidor de la IA en local (pon IA_CLAVE en .dev.vars)
 npm test           # pruebas unitarias con Vitest (motor, color, análisis local y servidor)
+npm run e2e        # pruebas de punta a punta con Playwright (la app compilada, en Chromium de móvil)
 npm run typecheck  # comprueba los tipos (TypeScript estricto)
 npm run lint       # ESLint
 npm run format     # Prettier
@@ -115,6 +116,7 @@ src/lib/              lógica sin interfaz, en TypeScript estricto
 src/data/             estaciones, tipos de cuerpo, estéticas, maquillaje e iconos
 src/ui/               una pantalla por archivo (JavaScript; se pasará a Svelte)
 test/                 pruebas con Vitest
+e2e/                  pruebas de punta a punta con Playwright y un armario de prueba inventado
 ```
 
 ## Aviso
