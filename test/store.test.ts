@@ -1,7 +1,8 @@
 import { test } from "vitest";
 import assert from "node:assert/strict";
 import "fake-indexeddb/auto";
-import { creaStore, type Coleccion, type Colecciones, type Store } from "../src/lib/store.ts";
+import { creaStore, type Coleccion, type Colecciones, type Copia, type Store } from "../src/lib/store.ts";
+import type { Voto } from "../src/lib/tipos.ts";
 
 // Guarda las conexiones que abre la app para poder cortarlas como hace Safari
 const conexiones: IDBDatabase[] = [];
@@ -37,4 +38,62 @@ test("un fallo al pintar se avisa y no rompe la carga", async () => {
     throw new Error("pantalla rota");
   });
   assert.equal(errores[0].message, "pantalla rota");
+});
+
+test("añade, cambia y borra avisando a quien escucha", async () => {
+  const store = await creaStore();
+  await store.borraTodo();
+  const vistas: string[][] = [];
+  await store.on("prendas", (ps) => vistas.push(ps.map((p) => p.nombre)));
+  const id = await store.add("prendas", { nombre: "Blusa salvia", cat: "arriba", color: "#9CAF88" });
+  await store.update("prendas", id, { nombre: "Blusa musgo" });
+  assert.equal((await store.get("prendas", id))?.color, "#9CAF88"); // update mezcla, no pisa
+  await store.update("prendas", "no-existe", { nombre: "fantasma" });
+  assert.equal(await store.get("prendas", "no-existe"), undefined);
+  await store.set("prendas", id, { nombre: "Solo nombre", cat: "arriba" });
+  assert.equal((await store.get("prendas", id))?.color, undefined); // set reemplaza entera
+  await store.del("prendas", id);
+  await recibe(store, "prendas"); // deja que lleguen los avisos pendientes
+  assert.deepEqual(vistas[0], []);
+  assert.deepEqual(vistas.at(-1), []);
+  assert.ok(vistas.some((v) => v[0] === "Blusa musgo"));
+});
+
+test("guarda fotos y reutiliza su URL", async () => {
+  const store = await creaStore();
+  const id = await store.putFoto(new Blob(["foto"], { type: "image/jpeg" }));
+  assert.equal(await (await store.blobFoto(id))?.text(), "foto");
+  const url = await store.urlFoto(id);
+  assert.match(url ?? "", /^blob:/);
+  assert.equal(await store.urlFoto(id), url);
+  await store.delFoto(id);
+  assert.equal(await store.urlFoto(id), null);
+  assert.equal(await store.urlFoto(null), null);
+  assert.equal(await store.blobFoto(undefined), null);
+  await store.delFoto(null);
+});
+
+test("la copia no se lleva la clave de la IA y al importar se conserva la tuya", async () => {
+  const store = await creaStore();
+  await store.borraTodo();
+  await store.add("votos", { key: "a+b" } as Voto);
+  await store.kset("perfil", { resumen: "Otoño suave" });
+  await store.kset("ajustes", { proveedor: "groq", clave: "secreta" });
+  const copia = await store.exporta();
+  assert.equal(copia.app, "armario");
+  assert.deepEqual(copia.kv.ajustes, { proveedor: "groq", clave: "" });
+  assert.equal(copia.votos.length, 1);
+
+  await store.borraTodo();
+  await store.kset("ajustes", { proveedor: "mistral", clave: "mia" });
+  copia.fotos = { f1: "data:image/png;base64,aG9sYQ==" };
+  await store.importa(copia);
+  assert.deepEqual(await store.kget("ajustes"), { proveedor: "groq", clave: "mia" });
+  assert.deepEqual(await store.kget("perfil"), { resumen: "Otoño suave" });
+  assert.equal((await store.todos("votos")).length, 1);
+  assert.equal(await (await store.blobFoto("f1"))?.text(), "hola");
+
+  await store.importa(copia, { reemplazar: false });
+  assert.equal((await store.todos("votos")).length, 1); // mismo id: no se duplica
+  await assert.rejects(store.importa({ app: "otra" } as unknown as Copia), /no es una copia/);
 });

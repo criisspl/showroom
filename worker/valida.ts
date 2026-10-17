@@ -18,6 +18,7 @@ export interface Entrada {
 }
 
 /** Devuelve el motivo del rechazo o null si la entrada es válida (y entonces es una Entrada). */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- es justo lo que valida esta función
 export function valida(e: any): string | null {
   if (!e || typeof e !== "object" || !Array.isArray(e.messages)) return "Faltan los mensajes.";
   if (e.messages.length < 1 || e.messages.length > 3) return "Demasiados mensajes.";

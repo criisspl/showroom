@@ -25,6 +25,7 @@ export type TipoColor = "ok" | "neutro" | "evita";
 export type Veredicto = "si" | "quiza" | "no";
 
 /** JSON que viene de fuera (IA, copia importada) antes de validarlo. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- se valida campo a campo al normalizar
 export type Crudo = any;
 
 export interface Prenda {
