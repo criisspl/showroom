@@ -1,14 +1,15 @@
 // Color: conversión a CIELAB, familias de color y clasificación según la paleta de cada persona.
-import { H_PAR, par } from "../data/constants.js";
+import { H_PAR, par } from "../data/constants.ts";
+import type { ColorPaleta, Familia, Lab, Perfil, Rgb, TipoColor } from "./tipos.ts";
 
-export function rgb(hex) {
+export function rgb(hex: string | undefined): Rgb {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex || "");
   if (!m) return [200, 190, 170];
   const n = parseInt(m[1], 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-export function lab(hex) {
+export function lab(hex: string | undefined): Lab {
   const c = rgb(hex).map((v) => {
     v /= 255;
     return v > 0.04045 ? Math.pow((v + 0.055) / 1.055, 2.4) : v / 12.92;
@@ -16,18 +17,18 @@ export function lab(hex) {
   const x = (c[0] * 0.4124 + c[1] * 0.3576 + c[2] * 0.1805) / 0.95047;
   const y = c[0] * 0.2126 + c[1] * 0.7152 + c[2] * 0.0722;
   const z = (c[0] * 0.0193 + c[1] * 0.1192 + c[2] * 0.9505) / 1.08883;
-  const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  const f = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
   return [116 * f(y) - 16, 500 * (f(x) - f(y)), 200 * (f(y) - f(z))];
 }
 
-export function dist(a, b) {
+export function dist(a: string, b: string): number {
   const p = lab(a),
     q = lab(b);
   return Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
 }
 
 /** Familia de un color a partir de su luminosidad, croma y tono. */
-export function familia(hex) {
+export function familia(hex: string | undefined): Familia {
   const [L, A, B] = lab(hex),
     C = Math.hypot(A, B);
   let h = (Math.atan2(B, A) * 180) / Math.PI;
@@ -44,13 +45,13 @@ export function familia(hex) {
   return L > 65 ? "rosa" : L < 40 ? "vino" : "morado";
 }
 
-export function harm(a, b) {
+export function harm(a: Familia, b: Familia): number {
   const v = par(H_PAR, a, b);
-  return v === 0 ? 1 : v;
+  return v === 0 || v === null ? 1 : v;
 }
 
 // Colores genéricos para clasificar lo que no está en la paleta personal.
-const GENERICOS = [
+const GENERICOS: [string, string][] = [
   ["Negro", "#141110"],
   ["Blanco óptico", "#FFFFFF"],
   ["Gris claro", "#C8CDD3"],
@@ -84,9 +85,9 @@ const GENERICOS = [
  * Construye la paleta de trabajo de una persona: sus colores (ok), sus neutros (neutro),
  * los que evita (evita) y los genéricos, que heredan la etiqueta del color suyo más cercano.
  */
-export function construyePaleta(perfil) {
-  const c = (perfil && perfil.color) || {};
-  const pal = [];
+export function construyePaleta(perfil: Pick<Perfil, "color"> | null): ColorPaleta[] {
+  const c: Partial<Perfil["color"]> = (perfil && perfil.color) || {};
+  const pal: Omit<ColorPaleta, "lab" | "fam">[] = [];
   (c.paleta || []).forEach((x) => pal.push({ n: x.n, hex: x.hex, tipo: "ok" }));
   (c.neutros || []).forEach((x) => pal.push({ n: x.n, hex: x.hex, tipo: "neutro" }));
   (c.evitar || []).forEach((x) => pal.push({ n: x.n, hex: x.hex, tipo: "evita" }));
@@ -96,30 +97,29 @@ export function construyePaleta(perfil) {
     const cerca = propios.filter((p) => dist(p.hex, hex) < 14)[0];
     pal.push({ n, hex, tipo: propios.length ? (cerca ? cerca.tipo : "evita") : "neutro" });
   });
-  pal.forEach((p) => {
-    p.lab = lab(p.hex);
-    p.fam = familia(p.hex);
-  });
-  return pal;
+  return pal.map((p) => ({ ...p, lab: lab(p.hex), fam: familia(p.hex) }));
 }
 
-export function clasifica(hex, paleta) {
+export function clasifica(
+  hex: string | undefined,
+  paleta: ColorPaleta[]
+): { n: string; fam: Familia; tipo: TipoColor } {
   const l = lab(hex);
-  let best = null,
+  let best: ColorPaleta | null = null,
     bd = 1e9;
-  paleta.forEach((p) => {
+  for (const p of paleta) {
     const d = Math.hypot(l[0] - p.lab[0], l[1] - p.lab[1], l[2] - p.lab[2]);
     if (d < bd) {
       bd = d;
       best = p;
     }
-  });
+  }
   return best
     ? { n: best.n, fam: familia(hex), tipo: best.tipo }
-    : { n: hex, fam: familia(hex), tipo: "neutro" };
+    : { n: hex ?? "", fam: familia(hex), tipo: "neutro" };
 }
 
-export function consejoColor(c) {
+export function consejoColor(c: { tipo: TipoColor }): string {
   if (c.tipo === "ok") return "En tu paleta";
   if (c.tipo === "neutro") return "Neutro de tu paleta";
   return "Fuera de tu paleta: llévalo lejos de la cara";

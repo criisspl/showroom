@@ -2,18 +2,53 @@
 // y la app combina las dos estéticas más votadas. Cada estética trae su fórmula, búsquedas de
 // Pinterest (en inglés, dan mejores resultados) y las prendas clave que se proponen en «Deseos».
 
-const P = (n, cat, icono, estilo, tejido, extra = {}) => ({
+import type { Cat, Corte, Estilo, Tejido } from "../lib/tipos.ts";
+
+/** Prenda clave de una estética, para «Deseos». */
+const P = (
+  n: string,
+  cat: Cat,
+  icono: string,
+  estilo: Estilo,
+  tejido: Tejido,
+  extra: { corte?: Corte; abrigo?: number; formal?: number; top?: boolean } = {}
+) => ({
   n,
   cat,
   icono,
   estilo,
   tejido,
-  corte: "fluida",
+  corte: "fluida" as Corte,
   abrigo: 2,
   ...extra
 });
 
-export const ESTETICAS = {
+export type PrendaClave = ReturnType<typeof P>;
+export interface Estetica {
+  palabra: string;
+  nombre: string;
+  subtitulo: string;
+  palabras: string[];
+  formula: string[];
+  claves: string[];
+  porque: string[];
+  pinterest: string[];
+  /** [ocasión, prendas] */
+  looks: [string, string[]][];
+  prendas: PrendaClave[];
+}
+export interface Belleza {
+  piel: string;
+  /** [nombre, pasos] */
+  looks: [string, string[]][];
+  gestos: string[];
+  evita: string[];
+  /** [nombre, hex] */
+  pelo: [string, string][];
+  peloEvita: string[];
+}
+
+export const ESTETICAS: Record<string, Estetica> = {
   romantica: {
     palabra: "Romántica",
     nombre: "Romántica",
@@ -233,7 +268,7 @@ export const ESTETICAS = {
 };
 
 /** Maquillaje y pelo según la familia de la estación (primavera, verano, otoño, invierno). */
-export const BELLEZA = {
+export const BELLEZA: Record<string, Belleza> = {
   primavera: {
     piel: "Acabado luminoso y fresco: base ligera, iluminador dorado suave.",
     looks: [

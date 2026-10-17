@@ -1,4 +1,4 @@
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import {
   rgbALab,
@@ -8,9 +8,11 @@ import {
   analizaEstetica,
   perfilLocal,
   siluetaDe
-} from "../src/lib/local.js";
-import { normaliza } from "../src/lib/analysis.js";
-import { ESTACIONES, CUERPOS } from "../src/data/presets.js";
+} from "../src/lib/local.ts";
+import { normaliza } from "../src/lib/analysis.ts";
+import { ESTACIONES, CUERPOS } from "../src/data/presets.ts";
+import type { Muestras } from "../src/lib/local.ts";
+import type { Rgb } from "../src/lib/tipos.ts";
 
 test("rgbALab: blanco y negro", () => {
   const b = rgbALab([255, 255, 255]),
@@ -20,11 +22,11 @@ test("rgbALab: blanco y negro", () => {
 });
 
 test("corrigeLuz neutraliza una luz amarillenta", () => {
-  const blanco = [250, 235, 190];
+  const blanco: Rgb = [250, 235, 190];
   assert.deepEqual(corrigeLuz(blanco, blanco).map(Math.round), [250, 250, 250]);
 });
 
-const casos = [
+const casos: [string, Muestras, Record<string, string>, RegExp][] = [
   [
     "rubia de ojos azules y piel rosada",
     { piel: [238, 212, 205], pelo: [205, 190, 165], ojos: [100, 135, 170] },
@@ -100,8 +102,8 @@ test("cuerpo: curvas y estatura baja → romántico; anguloso y alta → dramát
 });
 
 test("silueta por medidas", () => {
-  assert.match(siluetaDe({ pecho: 90, cintura: 64, cadera: 92 }), /Reloj de arena/);
-  assert.match(siluetaDe({ pecho: 86, cintura: 70, cadera: 100 }), /pera/);
+  assert.match(siluetaDe({ pecho: 90, cintura: 64, cadera: 92 }) ?? "", /Reloj de arena/);
+  assert.match(siluetaDe({ pecho: 86, cintura: 70, cadera: 100 }) ?? "", /pera/);
   assert.equal(siluetaDe({}), null);
 });
 
@@ -120,6 +122,6 @@ test("perfilLocal completo pasa la normalización (como al guardarlo y volver a 
   const p = normaliza(perfilLocal({ piel: [235, 205, 180] }, r), r, "local");
   assert.ok(p.color.paleta.length >= 10);
   assert.ok(p.deseos.length >= 7);
-  assert.ok(p.maquillaje.looks.length >= 2);
-  assert.equal(p.color.alternativas.length, 2);
+  assert.ok((p.maquillaje?.looks.length ?? 0) >= 2);
+  assert.equal(p.color.alternativas?.length, 2);
 });

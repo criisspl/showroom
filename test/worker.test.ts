@@ -1,10 +1,10 @@
-import { test, afterEach } from "node:test";
+import { test, afterEach } from "vitest";
 import assert from "node:assert/strict";
-import worker from "../worker/index.js";
-import { valida, cuerpoPara } from "../worker/valida.js";
+import worker, { type Env } from "../worker/index.ts";
+import { valida, cuerpoPara, type Entrada } from "../worker/valida.ts";
 
 const IMG = "data:image/jpeg;base64,AAAA";
-const msg = (extra = {}) => ({
+const msg = (extra: object = {}): Entrada => ({
   messages: [
     {
       role: "user",
@@ -16,8 +16,8 @@ const msg = (extra = {}) => ({
   ],
   ...extra
 });
-const env = (o = {}) => ({
-  ASSETS: { fetch: () => new Response("web") },
+const env = (o: Partial<Env> = {}): Env => ({
+  ASSETS: { fetch: async () => new Response("web") },
   IA_URL: "https://uno.test/v1",
   IA_MODELO: "m1",
   IA_CLAVE: "k1",
@@ -27,7 +27,7 @@ const env = (o = {}) => ({
   LIMITE: { limit: async () => ({ success: true }) },
   ...o
 });
-const pide = (body, headers = {}) =>
+const pide = (body: unknown, headers = {}) =>
   new Request("https://armario.test/api/ia", {
     method: "POST",
     headers: { "content-type": "application/json", origin: "https://armario.test", ...headers },
@@ -63,7 +63,8 @@ test("cuerpoPara pone el modelo del servidor y no deja pasar otros parámetros",
   assert.equal(b.model, "m1");
   assert.equal(b.max_tokens, 4096);
   assert.deepEqual(b.response_format, { type: "json_object" });
-  assert.equal(cuerpoPara(msg(), "m2", true).messages[0].content[1].image_url, IMG);
+  const contenido = cuerpoPara(msg(), "m2", true).messages[0].content as { image_url?: unknown }[];
+  assert.equal(contenido[1].image_url, IMG);
 });
 
 test("sirve la web fuera de /api", async () => {
@@ -72,26 +73,30 @@ test("sirve la web fuera de /api", async () => {
 });
 
 test("añade la clave del servidor y devuelve la respuesta", async () => {
-  let visto;
-  globalThis.fetch = async (url, init) => {
+  let visto:
+    { url: string; init: RequestInit & { headers: Record<string, string>; body: string } } | undefined;
+  globalThis.fetch = (async (
+    url: string,
+    init: RequestInit & { headers: Record<string, string>; body: string }
+  ) => {
     visto = { url, init };
     return new Response('{"choices":[]}', { status: 200 });
-  };
+  }) as typeof fetch;
   const r = await worker.fetch(pide(msg()), env());
   assert.equal(r.status, 200);
-  assert.equal(visto.url, "https://uno.test/v1");
-  assert.equal(visto.init.headers.authorization, "Bearer k1");
-  assert.equal(JSON.parse(visto.init.body).model, "m1");
+  assert.equal(visto?.url, "https://uno.test/v1");
+  assert.equal(visto?.init.headers.authorization, "Bearer k1");
+  assert.equal(JSON.parse(visto?.init.body ?? "{}").model, "m1");
 });
 
 test("si el principal está saturado, usa el de reserva", async () => {
-  const urls = [];
-  globalThis.fetch = async (url) => {
+  const urls: string[] = [];
+  globalThis.fetch = (async (url: string) => {
     urls.push(url);
     return url.includes("uno")
       ? new Response("{}", { status: 429 })
       : new Response('{"ok":1}', { status: 200 });
-  };
+  }) as typeof fetch;
   const r = await worker.fetch(pide(msg()), env());
   assert.equal(r.status, 200);
   assert.equal(urls.length, 2);
@@ -101,7 +106,7 @@ test("cupo lleno en todos → 429 con mensaje en español", async () => {
   globalThis.fetch = async () => new Response("{}", { status: 429 });
   const r = await worker.fetch(pide(msg()), env());
   assert.equal(r.status, 429);
-  assert.match((await r.json()).mensaje, /cupo/);
+  assert.match(((await r.json()) as { mensaje: string }).mensaje, /cupo/);
 });
 
 test("rechaza otros orígenes, métodos, exceso de peticiones y cuerpos no válidos", async () => {

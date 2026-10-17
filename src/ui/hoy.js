@@ -15,7 +15,7 @@ import {
   estacionHoy,
   ENTORNOS,
   ENTN
-} from "../data/constants.js";
+} from "../data/constants.ts";
 import {
   monta,
   byId,
@@ -36,10 +36,10 @@ import {
   txtTemporada,
   setEstado,
   esVirtual
-} from "../lib/engine.js";
-import { clasifica, familia, harm } from "../lib/color.js";
-import { hayIA, preguntaJSON, abreImagen, imagenParaIA } from "../lib/ai.js";
-import { textoPerfil } from "../lib/analysis.js";
+} from "../lib/engine.ts";
+import { clasifica, familia, harm } from "../lib/color.ts";
+import { hayIA, preguntaJSON, abreImagen, imagenParaIA } from "../lib/ai.ts";
+import { textoPerfil } from "../lib/analysis.ts";
 import { thumb, icono, ver, falla } from "./comun.js";
 import { abreForm } from "./armario.js";
 import { ponDeseo } from "./deseos.js";

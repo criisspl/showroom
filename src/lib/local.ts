@@ -1,38 +1,58 @@
 // Análisis sin IA, hecho entero en el dispositivo: colorimetría a partir de los colores que la
 // persona marca en su selfie (piel, ojos, pelo y, si hay, algo blanco para corregir la luz) más
 // sus respuestas; tipo de cuerpo (Kibbe) por puntos; y estética según las palabras que elige.
-import { ESTACIONES, CUERPOS } from "../data/presets.js";
-import { ESTETICAS, BELLEZA } from "../data/esteticas.js";
+import { ESTACIONES, CUERPOS } from "../data/presets.ts";
+import { ESTETICAS, BELLEZA, type PrendaClave } from "../data/esteticas.ts";
+import { FORMAL_DE } from "../data/constants.ts";
+import type { Deseo, Lab, Perfil, Rgb } from "./tipos.ts";
+import type { Estacion } from "../data/presets.ts";
+
+/** Colores marcados en el selfie, en RGB 0-255 (todos opcionales). */
+export interface Muestras {
+  piel?: Rgb;
+  ojos?: Rgb;
+  pelo?: Rgb;
+  blanco?: Rgb;
+}
+/** T: temperatura (+ cálido), V: valor (+ claro), C: croma/contraste (+ brillante). */
+interface Puntos {
+  T: number;
+  V: number;
+  C: number;
+}
+type Respuestas = Record<string, unknown>;
+/** Perfil sin IA: además del perfil, guarda las muestras del selfie. */
+export type PerfilLocal = Perfil & { muestras: Muestras };
 
 /* ---------- Color: de RGB a CIELAB ---------- */
-const lin = (c) => {
+const lin = (c: number) => {
   c /= 255;
   return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
 };
-export function rgbALab([r, g, b]) {
+export function rgbALab([r, g, b]: Rgb): Lab {
   const R = lin(r),
     G = lin(g),
     B = lin(b);
   const x = (R * 0.4124 + G * 0.3576 + B * 0.1805) / 0.95047,
     y = R * 0.2126 + G * 0.7152 + B * 0.0722,
     z = (R * 0.0193 + G * 0.1192 + B * 0.9505) / 1.08883;
-  const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  const f = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
   return [116 * f(y) - 16, 500 * (f(x) - f(y)), 200 * (f(y) - f(z))];
 }
 /** Corrige el color de la luz con una referencia blanca (balance de blancos sencillo, von Kries en RGB). */
-export function corrigeLuz(rgb, blanco) {
+export function corrigeLuz(rgb: Rgb, blanco?: Rgb): Rgb {
   if (!blanco) return rgb;
   const ref = Math.max(...blanco);
   if (ref < 60) return rgb; // la referencia está demasiado oscura: mejor no tocar
-  return rgb.map((c, i) => Math.max(0, Math.min(255, (c * ref) / Math.max(1, blanco[i]))));
+  return rgb.map((c, i) => Math.max(0, Math.min(255, (c * ref) / Math.max(1, blanco[i])))) as Rgb;
 }
-const croma = (l) => Math.hypot(l[1], l[2]);
-const tono = (l) => (Math.atan2(l[2], l[1]) * 180) / Math.PI;
-const lim = (x, a = -2, b = 2) => Math.max(a, Math.min(b, x));
+const croma = (l: Lab) => Math.hypot(l[1], l[2]);
+const tono = (l: Lab) => (Math.atan2(l[2], l[1]) * 180) / Math.PI;
+const lim = (x: number, a = -2, b = 2) => Math.max(a, Math.min(b, x));
 
 /* ---------- Respuestas de las preguntas → puntos ---------- */
 // T: temperatura (+ cálido), V: valor (+ claro), C: croma/contraste (+ brillante)
-const R = {
+const R: Record<string, Record<string, Partial<Puntos>>> = {
   venas: { "Azules o moradas": { T: -1 }, Verdes: { T: 1 } },
   joyas: { Doradas: { T: 1 }, Plateadas: { T: -1 } },
   sol: {
@@ -59,17 +79,19 @@ const R = {
 };
 
 /** Puntuación de color. `muestras` = { piel, ojos, pelo, blanco } en RGB [0-255] (todas opcionales). */
-export function puntosColor(muestras = {}, respuestas = {}) {
-  const p = { T: 0, V: 0, C: 0 },
-    motivos = [];
+export function puntosColor(muestras: Muestras = {}, respuestas: Respuestas = {}) {
+  const p: Puntos = { T: 0, V: 0, C: 0 },
+    motivos: string[] = [];
   for (const [q, tabla] of Object.entries(R)) {
-    const d = tabla[respuestas[q]];
+    const d = tabla[String(respuestas[q])];
     if (!d) continue;
-    for (const k of Object.keys(d)) p[k] += d[k];
+    for (const k of Object.keys(d) as (keyof Puntos)[]) p[k] += d[k] ?? 0;
   }
-  const lab = {};
-  for (const k of ["piel", "ojos", "pelo"])
-    if (muestras[k]) lab[k] = rgbALab(corrigeLuz(muestras[k], muestras.blanco));
+  const lab: { piel?: Lab; ojos?: Lab; pelo?: Lab } = {};
+  for (const k of ["piel", "ojos", "pelo"] as const) {
+    const m = muestras[k];
+    if (m) lab[k] = rgbALab(corrigeLuz(m, muestras.blanco));
+  }
   if (lab.piel) {
     // La piel cálida tira a amarillo (ángulo de tono alto); la fría, a rosa.
     const h = tono(lab.piel);
@@ -103,9 +125,9 @@ export function puntosColor(muestras = {}, respuestas = {}) {
   return { ...p, motivos, lab };
 }
 
-const FAM = (id) => id.split("-")[0];
+const FAM = (id: string) => id.split("-")[0];
 // Estaciones vecinas en la rueda de las 12: las dudas típicas de cada una.
-const VECINAS = {
+const VECINAS: Record<string, [string, string]> = {
   "primavera-clara": ["verano-claro", "primavera-calida"],
   "primavera-calida": ["otono-calido", "primavera-brillante"],
   "primavera-brillante": ["invierno-brillante", "primavera-calida"],
@@ -120,20 +142,22 @@ const VECINAS = {
   "invierno-brillante": ["primavera-brillante", "invierno-frio"]
 };
 /** De los puntos a una de las 12 estaciones: manda la característica más fuerte; la segunda decide. */
-export function estacionDe({ T, V, C }) {
-  const dims = [
-    ["claro", V, T >= 0 ? "primavera-clara" : "verano-claro"],
-    ["profundo", -V, T >= 0 ? "otono-profundo" : "invierno-profundo"],
-    ["calido", T, C >= 0 ? "primavera-calida" : "otono-calido"],
-    ["frio", -T, C >= 0 ? "invierno-frio" : "verano-frio"],
-    ["brillante", C, T >= 0 ? "primavera-brillante" : "invierno-brillante"],
-    ["suave", -C, T >= 0 ? "otono-suave" : "verano-suave"]
-  ].sort((a, b) => b[1] - a[1]);
+export function estacionDe({ T, V, C }: Puntos) {
+  const dims = (
+    [
+      ["claro", V, T >= 0 ? "primavera-clara" : "verano-claro"],
+      ["profundo", -V, T >= 0 ? "otono-profundo" : "invierno-profundo"],
+      ["calido", T, C >= 0 ? "primavera-calida" : "otono-calido"],
+      ["frio", -T, C >= 0 ? "invierno-frio" : "verano-frio"],
+      ["brillante", C, T >= 0 ? "primavera-brillante" : "invierno-brillante"],
+      ["suave", -C, T >= 0 ? "otono-suave" : "verano-suave"]
+    ] as [string, number, string][]
+  ).sort((a, b) => b[1] - a[1]);
   const id = dims[0][2];
   return { id, dominante: dims[0][0], alternativas: VECINAS[id] };
 }
 
-const TXT_DOM = {
+const TXT_DOM: Record<string, string> = {
   claro: "Lo que más te define es la claridad",
   profundo: "Lo que más te define es la profundidad",
   calido: "Lo que más te define es la calidez",
@@ -142,7 +166,7 @@ const TXT_DOM = {
   suave: "Lo que más te define es la suavidad"
 };
 
-export function analizaColor(muestras, respuestas) {
+export function analizaColor(muestras: Muestras, respuestas: Respuestas) {
   const p = puntosColor(muestras, respuestas),
     e = estacionDe(p),
     est = ESTACIONES[e.id];
@@ -166,7 +190,7 @@ export function analizaColor(muestras, respuestas) {
 }
 
 /* ---------- Cuerpo (Kibbe) ---------- */
-const K = {
+const K: Record<string, Record<string, Record<string, number>>> = {
   estructura: {
     "Huesuda y angulosa, de líneas rectas": { dramatico: 3, "clasico-dramatico": 1, "gamine-flamboyant": 1 },
     "Ancha y recta, de aspecto atlético": { natural: 3, "natural-suave": 1, "dramatico-suave": 0.5 },
@@ -209,10 +233,10 @@ const K = {
     "Más estrechos que la cadera": { romantico: 1, "romantico-teatral": 0.5, "gamine-suave": 0.5 }
   }
 };
-export function siluetaDe(r) {
-  const b = +r.pecho,
-    w = +r.cintura,
-    h = +r.cadera;
+export function siluetaDe(r: Respuestas) {
+  const b = Number(r.pecho),
+    w = Number(r.cintura),
+    h = Number(r.cadera);
   if (!(b > 40 && w > 40 && h > 40)) return null;
   if (Math.abs(b - h) <= 5 && w <= Math.min(b, h) * 0.75)
     return "Reloj de arena: pecho y cadera parecidos y cintura marcada.";
@@ -221,13 +245,13 @@ export function siluetaDe(r) {
   if (w > Math.min(b, h) * 0.85) return "Rectángulo: pecho, cintura y cadera bastante alineados.";
   return "Equilibrada: pecho y cadera parecidos, cintura suave.";
 }
-export function analizaCuerpo(r = {}) {
-  const s = Object.fromEntries(Object.keys(CUERPOS).map((k) => [k, 0]));
+export function analizaCuerpo(r: Respuestas = {}) {
+  const s: Record<string, number> = Object.fromEntries(Object.keys(CUERPOS).map((k) => [k, 0]));
   for (const [q, tabla] of Object.entries(K)) {
-    const d = tabla[r[q]];
+    const d = tabla[String(r[q])];
     if (d) for (const [k, v] of Object.entries(d)) s[k] += v;
   }
-  const alt = +r.altura;
+  const alt = Number(r.altura);
   if (alt >= 170) {
     s.dramatico += 1.5;
     s["dramatico-suave"] += 1.5;
@@ -247,7 +271,7 @@ export function analizaCuerpo(r = {}) {
 }
 
 /* ---------- Estética ---------- */
-export function analizaEstetica(palabras = []) {
+export function analizaEstetica(palabras: string[] = []) {
   const ids = palabras.filter((p) => ESTETICAS[p]).slice(0, 3);
   if (!ids.length) ids.push("clasica");
   const [a, b] = ids,
@@ -269,26 +293,25 @@ export function analizaEstetica(palabras = []) {
 }
 
 /* ---------- Perfil completo ---------- */
-export function perfilLocal(muestras, respuestas) {
+export function perfilLocal(muestras: Muestras, respuestas: Respuestas): PerfilLocal {
   const col = analizaColor(muestras, respuestas),
     cu = analizaCuerpo(respuestas),
-    et = analizaEstetica(respuestas.estetica || []);
+    et = analizaEstetica((respuestas.estetica as string[]) || []);
   const e = ESTACIONES[col.estacionId],
     b = CUERPOS[cu.cuerpoId],
     bel = BELLEZA[FAM(col.estacionId)];
   const pal = e.paleta,
-    cols = (i) =>
-      [pal[i % pal.length], pal[(i + 5) % pal.length], e.neutros[i % e.neutros.length]].map((c) => [
-        c.n,
-        c.hex
-      ]);
-  const prendas = [];
+    cols = (i: number) =>
+      [pal[i % pal.length], pal[(i + 5) % pal.length], e.neutros[i % e.neutros.length]].map(
+        (c): [string, string] => [c.n, c.hex]
+      );
+  const prendas: PrendaClave[] = [];
   et.ids.slice(0, 2).forEach((id, j) =>
     ESTETICAS[id].prendas.forEach((w) => {
       if (!prendas.some((x) => x.n === w.n)) prendas.push({ ...w, top: j === 0 && !!w.top });
     })
   );
-  const deseos = prendas.map((w, i) => ({
+  const deseos = prendas.map((w, i): Deseo => ({
     id:
       "w-" +
       i +
@@ -302,7 +325,7 @@ export function perfilLocal(muestras, respuestas) {
     tipo: w.icono,
     cols: cols(i),
     nota: "En tu paleta y con tu estética.",
-    formal: { deportivo: 1, casual: 1, arreglado: 2, fiesta: 3 }[w.estilo],
+    formal: FORMAL_DE[w.estilo],
     q1: w.n,
     q2: w.n + " outfit"
   }));
@@ -377,10 +400,10 @@ export function perfilLocal(muestras, respuestas) {
   };
 }
 
-function combinaciones(e) {
+function combinaciones(e: Estacion) {
   const p = e.paleta,
     n = e.neutros,
-    out = [];
+    out: Perfil["color"]["combinaciones"] = [];
   const usos = ["Diario", "Oficina", "Cita", "Finde", "Noche", "Viaje"];
   for (let i = 0; i < 6; i++) {
     const a = n[i % n.length],

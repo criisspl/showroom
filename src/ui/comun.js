@@ -1,8 +1,8 @@
 // Piezas de interfaz compartidas: miniaturas, navegación por pestañas e iconos.
 import { el, $ } from "../lib/dom.js";
 import { app } from "../state.js";
-import { CATN } from "../data/constants.js";
-import { ICONOS } from "../data/icons.js";
+import { CATN } from "../data/constants.ts";
+import { ICONOS } from "../data/icons.ts";
 
 /** Miniatura de una prenda: foto si la hay (se carga de IndexedDB), si no, su color con la categoría. */
 export function thumb(p) {

@@ -2,7 +2,36 @@
 // necesita clave. Opcionalmente, cada persona puede usar su propia clave de cualquier proveedor
 // compatible con la API de OpenAI (chat/completions); esa clave se guarda solo en su navegador.
 
-export const PROVEEDORES = {
+import type { Crudo } from "./tipos.ts";
+
+/** Ajustes de IA de la persona (se guardan solo en su navegador). */
+export interface Ajustes {
+  proveedor?: string;
+  modelo?: string;
+  url?: string;
+  clave?: string;
+}
+interface Proveedor {
+  n: string;
+  url: string;
+  modelo: string;
+  /** Dónde sacar la clave (vacío si no hace falta). */
+  clave: string;
+  nota: string;
+  /** Cómo quiere el proveedor las imágenes: como texto o como objeto { url }. */
+  imagen: "texto" | "objeto";
+  sinClave?: boolean;
+}
+export interface Pregunta {
+  sistema?: string;
+  texto: string;
+  imagenes?: string[];
+  json?: boolean;
+  signal?: AbortSignal;
+}
+type Contenido = { type: "text"; text: string } | { type: "image_url"; image_url: string | { url: string } };
+
+export const PROVEEDORES: Record<string, Proveedor> = {
   integrada: {
     n: "IA de la app (sin clave)",
     url: "api/ia",
@@ -54,7 +83,7 @@ export const PROVEEDORES = {
   }
 };
 
-export function config(ajustes) {
+export function config(ajustes: Ajustes | null | undefined) {
   let id = (ajustes && ajustes.proveedor) || "integrada";
   // Sin clave propia, siempre la integrada
   if (!PROVEEDORES[id] || (!PROVEEDORES[id].sinClave && !(ajustes && ajustes.clave))) id = "integrada";
@@ -68,24 +97,24 @@ export function config(ajustes) {
     imagen: p.imagen
   };
 }
-export const hayIA = (ajustes) => !!config(ajustes).url;
+export const hayIA = (ajustes: Ajustes | null | undefined) => !!config(ajustes).url;
 
 /** Reduce una imagen (Blob o File) a JPEG de como mucho `max` px y la devuelve como data URL. */
-export async function imagenParaIA(blob, max = 1024) {
+export async function imagenParaIA(blob: Blob, max = 1024): Promise<string> {
   const img = await abreImagen(blob);
-  const w = img.naturalWidth || img.width,
-    h = img.naturalHeight || img.height;
+  const w = ("naturalWidth" in img && img.naturalWidth) || img.width,
+    h = ("naturalHeight" in img && img.naturalHeight) || img.height;
   const r = Math.min(1, max / Math.max(w, h));
   const c = document.createElement("canvas");
   c.width = Math.max(1, Math.round(w * r));
   c.height = Math.max(1, Math.round(h * r));
-  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-  if (img.close) img.close();
+  c.getContext("2d")?.drawImage(img, 0, 0, c.width, c.height);
+  if ("close" in img) img.close();
   return c.toDataURL("image/jpeg", 0.85);
 }
 
 /** Abre una foto respetando la orientación EXIF. Usa <img> como respaldo (Safari antiguo). */
-export async function abreImagen(blob) {
+export async function abreImagen(blob: Blob): Promise<ImageBitmap | HTMLImageElement> {
   if (typeof createImageBitmap === "function") {
     try {
       return await createImageBitmap(blob, { imageOrientation: "from-image" });
@@ -118,9 +147,12 @@ export async function abreImagen(blob) {
  * Llama al modelo. `imagenes` son data URLs. Devuelve el texto de la respuesta.
  * Lanza Error con un mensaje en español si algo falla.
  */
-export async function pregunta(ajustes, { sistema, texto, imagenes = [], json = true, signal }) {
+export async function pregunta(
+  ajustes: Ajustes | null | undefined,
+  { sistema, texto, imagenes = [], json = true, signal }: Pregunta
+): Promise<string> {
   const cfg = config(ajustes);
-  const contenido = [{ type: "text", text: texto }];
+  const contenido: Contenido[] = [{ type: "text", text: texto }];
   imagenes.forEach((u) =>
     contenido.push(
       cfg.imagen === "texto"
@@ -128,7 +160,7 @@ export async function pregunta(ajustes, { sistema, texto, imagenes = [], json = 
         : { type: "image_url", image_url: { url: u } }
     )
   );
-  const body = {
+  const body: Record<string, unknown> = {
     ...(cfg.sinClave ? {} : { model: cfg.modelo }),
     messages: [
       ...(sistema ? [{ role: "system", content: sistema }] : []),
@@ -187,14 +219,14 @@ export async function pregunta(ajustes, { sistema, texto, imagenes = [], json = 
     (typeof m.content === "string"
       ? m.content
       : Array.isArray(m.content)
-        ? m.content.map((x) => x.text || "").join("")
+        ? m.content.map((x: { text?: string }) => x.text || "").join("")
         : "");
   if (!out) throw new Error("La IA no ha devuelto respuesta.");
   return out;
 }
 
 /** Extrae el primer objeto JSON de un texto (quita ``` y texto alrededor). */
-export function sacaJSON(t) {
+export function sacaJSON(t: unknown): Crudo {
   const s = String(t).replace(/```(?:json)?/gi, "");
   const a = s.indexOf("{"),
     b = s.lastIndexOf("}");
@@ -202,7 +234,7 @@ export function sacaJSON(t) {
   return JSON.parse(s.slice(a, b + 1));
 }
 
-export async function preguntaJSON(ajustes, opts) {
+export async function preguntaJSON(ajustes: Ajustes | null | undefined, opts: Pregunta): Promise<Crudo> {
   const t = await pregunta(ajustes, opts);
   try {
     return sacaJSON(t);
