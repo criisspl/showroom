@@ -1,6 +1,7 @@
 ---
 name: preparar-pr
 description: Use when the user asks to prepare, validate or write up a branch or pull request before opening or pushing it.
+model: sonnet
 disable-model-invocation: true
 ---
 

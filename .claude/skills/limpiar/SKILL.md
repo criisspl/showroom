@@ -1,6 +1,7 @@
 ---
 name: limpiar
 description: Use after a feature works and tests pass, when the user asks to clean up, simplify or de-duplicate recently changed code without changing behavior.
+model: sonnet
 argument-hint: "[foco opcional, p. ej. duplicación]"
 ---
 
