@@ -13,7 +13,9 @@ import { ver, falla } from "./ui/comun.js";
 import { initHoy } from "./ui/hoy.js";
 import { initArmario } from "./ui/armario.js";
 import { initDeseos } from "./ui/deseos.js";
-import { initHistorial } from "./ui/historial.js";
+import { mount } from "svelte";
+import Historial from "./ui/Historial.svelte";
+import { avisa } from "./ui/puente.svelte.ts";
 import { initAnalisis } from "./ui/analisis.js";
 import { initBienvenida } from "./ui/bienvenida.js";
 import { initAjustes } from "./ui/ajustes.js";
@@ -38,22 +40,20 @@ async function arranca() {
   }
 
   // Si una pantalla falla al arrancar, las demás (y la carga de tus prendas) siguen funcionando
-  [
-    initHoy,
-    initArmario,
-    initDeseos,
-    initHistorial,
-    initAnalisis,
-    initBienvenida,
-    initAjustes,
-    initInstala
-  ].forEach((f) => {
+  [initHoy, initArmario, initDeseos, initAnalisis, initBienvenida, initAjustes, initInstala].forEach((f) => {
     try {
       f();
     } catch (e) {
       falla(e);
     }
   });
+  // Pantallas ya pasadas a Svelte: se montan una vez y se repintan con el aviso del puente
+  try {
+    mount(Historial, { target: document.querySelector("#tab-historial .wrap") });
+    app.pinta.historial = avisa;
+  } catch (e) {
+    falla(e);
+  }
   document
     .querySelectorAll(".a-tabs button")
     .forEach((b) => b.addEventListener("click", () => ver(b.getAttribute("data-tab"))));
