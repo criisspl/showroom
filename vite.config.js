@@ -1,7 +1,9 @@
 import { defineConfig } from "vitest/config";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 export default defineConfig({
   base: "./",
+  plugins: [svelte()],
   build: {
     // Navegadores de los últimos ~4 años: iPhone con iOS 15+, Android con Chrome 90+, Firefox 90+, Edge 90+
     target: ["es2020", "safari15", "chrome90", "firefox94", "edge90"]

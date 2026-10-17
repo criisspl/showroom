@@ -114,7 +114,7 @@ src/lib/              lógica sin interfaz, en TypeScript estricto
                       «¿Lo compro?» y «Lo monto yo»
   store.ts            IndexedDB: colecciones, fotos y copias de seguridad
 src/data/             estaciones, tipos de cuerpo, estéticas, maquillaje e iconos
-src/ui/               una pantalla por archivo (JavaScript; se pasará a Svelte)
+src/ui/               una pantalla por archivo; pasando de JavaScript a Svelte 5 (Historial ya está)
 test/                 pruebas con Vitest
 e2e/                  pruebas de punta a punta con Playwright y un armario de prueba inventado
 ```

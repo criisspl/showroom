@@ -3,7 +3,7 @@ import { estado, setEstado } from "./lib/engine.ts";
 import { construyePaleta } from "./lib/color.ts";
 
 export const app = {
-  store: null,
+  store: /** @type {import("./lib/store.ts").Store} */ (null), // lo abre main.js al arrancar
   ajustes: { proveedor: "integrada", modelo: "", url: "", clave: "" },
   perfil: null,
   D: {}, // deseos guardados por id (estado de cada prenda deseada)

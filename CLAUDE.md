@@ -4,23 +4,24 @@ Instrucciones para Claude en este repo. Cada línea está aquí porque sin ella 
 
 ## Stack y comandos
 
-- TypeScript estricto en `src/lib/`, `src/data/` y `worker/`; la interfaz (`src/ui/`) sigue en JavaScript hasta pasarla a Svelte 5. Vite, Node 22.
+- TypeScript estricto en `src/lib/`, `src/data/` y `worker/`. Vite, Node 22.
+- Interfaz pasando de JS a Svelte 5 pantalla a pantalla: las nuevas son `src/ui/<Pantalla>.svelte` (solo runas, `lang="ts"`) y su lógica va a `src/lib/<pantalla>.ts` con tests. Mientras convivan, el estado del motor no es reactivo: main.js avisa con `repinta()` y `src/ui/puente.svelte.ts` hace que las pantallas Svelte se recalculen.
 - TypeScript fijado en 6.0: typescript-eslint todavía no admite la 7. ESLint revisa también los `.ts`.
 - Imports con extensión `.ts` explícita (`allowImportingTsExtensions`). Tipos del dominio en `src/lib/tipos.ts`.
 - Backend: Cloudflare Worker (`worker/`) que solo hace de intermediario con la IA; config en `wrangler.jsonc`.
 - Datos: IndexedDB en el navegador (`src/lib/store.ts`). Sin cuentas ni base de datos en servidor.
 - Tests: Vitest + `node:assert/strict`, con `fake-indexeddb` para el store. E2E: Playwright en `e2e/`, contra la app compilada; el armario de prueba (`e2e/datos/`) es inventado.
 
-| Qué            | Comando                           |
-| -------------- | --------------------------------- |
-| Instalar       | `npm ci`                          |
-| Dev (solo web) | `npm run dev`                     |
-| Dev con API    | `npm run dev:api`                 |
-| Tests          | `npm test`                        |
-| Tipos          | `npm run typecheck`               |
-| E2E            | `npm run e2e`                     |
-| Lint y formato | `npm run lint` · `npm run format` |
-| Build          | `npm run build`                   |
+| Qué            | Comando                                  |
+| -------------- | ---------------------------------------- |
+| Instalar       | `npm ci`                                 |
+| Dev (solo web) | `npm run dev`                            |
+| Dev con API    | `npm run dev:api`                        |
+| Tests          | `npm test`                               |
+| Tipos          | `npm run typecheck` (tsc + svelte-check) |
+| E2E            | `npm run e2e`                            |
+| Lint y formato | `npm run lint` · `npm run format`        |
+| Build          | `npm run build`                          |
 
 CI (`.github/workflows/ci.yml`) ejecuta lint, formato, tipos, tests con cobertura mínima, build y e2e: todo tiene que pasar antes de dar algo por hecho. Los commits siguen Conventional Commits (commitlint).
 
