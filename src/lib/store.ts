@@ -206,8 +206,8 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
     },
 
     // Clave-valor (perfil, ajustes)
-    async kget(k: string): Promise<any> {
-      return lee("kv", k);
+    async kget<T = unknown>(k: string): Promise<T | undefined> {
+      return lee("kv", k) as Promise<T | undefined>;
     },
     async kset(k: string, v: unknown) {
       return pon("kv", v, k);
@@ -227,7 +227,7 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
         votos: await todos("votos")
       };
       for (const k of ["perfil", "ajustes"]) {
-        const v = await api.kget(k);
+        const v = await api.kget<Record<string, unknown>>(k);
         if (v !== undefined) out.kv[k] = k === "ajustes" ? { ...v, clave: "" } : v;
       }
       const ids = new Set<string>();
@@ -252,7 +252,7 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
         await pon("fotos", await (await fetch(url)).blob(), id);
       for (const [k, v] of Object.entries(data.kv || {})) {
         if (k === "ajustes") {
-          const cur = (await api.kget("ajustes")) || {};
+          const cur = (await api.kget<{ clave?: string }>("ajustes")) || {};
           await api.kset(k, { ...(v as object), clave: cur.clave || "" });
         } else await api.kset(k, v);
       }

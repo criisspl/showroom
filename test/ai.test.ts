@@ -1,13 +1,14 @@
 import { test, afterEach } from "vitest";
 import assert from "node:assert/strict";
 import { config, hayIA, pregunta, preguntaJSON } from "../src/lib/ai.ts";
+import type { Crudo } from "../src/lib/tipos.ts";
 
 const IMG = "data:image/jpeg;base64,AAAA";
 const CLAVE = { proveedor: "groq", clave: "gsk_x" };
 const ok = (content: unknown) => new Response(JSON.stringify({ choices: [{ message: { content } }] }));
 
 // Guarda cada llamada a fetch y responde con lo que toque en cada turno
-let llamadas: { url: string; init: RequestInit; body: any }[] = [];
+let llamadas: { url: string; init: RequestInit; body: Crudo }[] = [];
 function responde(...rs: (Response | Error)[]) {
   llamadas = [];
   globalThis.fetch = (async (url: string, init: RequestInit) => {

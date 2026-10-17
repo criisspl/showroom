@@ -5,6 +5,7 @@ Instrucciones para Claude en este repo. Cada línea está aquí porque sin ella 
 ## Stack y comandos
 
 - TypeScript estricto en `src/lib/`, `src/data/` y `worker/`; la interfaz (`src/ui/`) sigue en JavaScript hasta pasarla a Svelte 5. Vite, Node 22.
+- TypeScript fijado en 6.0: typescript-eslint todavía no admite la 7. ESLint revisa también los `.ts`.
 - Imports con extensión `.ts` explícita (`allowImportingTsExtensions`). Tipos del dominio en `src/lib/tipos.ts`.
 - Backend: Cloudflare Worker (`worker/`) que solo hace de intermediario con la IA; config en `wrangler.jsonc`.
 - Datos: IndexedDB en el navegador (`src/lib/store.ts`). Sin cuentas ni base de datos en servidor.
