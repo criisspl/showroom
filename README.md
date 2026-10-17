@@ -108,7 +108,9 @@ src/lib/              lógica sin interfaz, en TypeScript estricto
   analysis.ts         preguntas, análisis con IA y normalización del perfil
   ai.ts               cliente de IA (integrada o con clave propia) y lectura de fotos
   color.ts            color en CIELAB, familias, paleta y clasificación
-  engine.ts           motor de outfits, aprendizaje de valoraciones y «¿Lo compro?»
+  engine.ts           punto de entrada del motor de outfits (reexporta motor/)
+  motor/              estado, rasgos de prenda, aprendizaje, contexto, montar looks,
+                      «¿Lo compro?» y «Lo monto yo»
   store.ts            IndexedDB: colecciones, fotos y copias de seguridad
 src/data/             estaciones, tipos de cuerpo, estéticas, maquillaje e iconos
 src/ui/               una pantalla por archivo (JavaScript; se pasará a Svelte)
