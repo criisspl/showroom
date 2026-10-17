@@ -38,18 +38,33 @@ export interface Copia {
 
 const DB_NAME = "armario";
 const COLS: Coleccion[] = ["prendas", "outfits", "deseos", "votos"];
-const VERSION = 1;
+/**
+ * Migraciones del esquema, en orden: la de índice i lleva de la versión i a la i+1.
+ * Solo se añaden al final; nunca se cambia una que ya esté publicada.
+ */
+const migraciones: ((db: IDBDatabase, tx: IDBTransaction) => void)[] = [
+  // 0 → 1: esquema inicial. Crea solo lo que falte, por si la base ya existía.
+  (db) => {
+    COLS.forEach((c) => {
+      if (!db.objectStoreNames.contains(c)) db.createObjectStore(c, { keyPath: "id" });
+    });
+    if (!db.objectStoreNames.contains("fotos")) db.createObjectStore("fotos");
+    if (!db.objectStoreNames.contains("kv")) db.createObjectStore("kv");
+  }
+];
+/** Versión del esquema: la de la base de datos y la que lleva la copia de seguridad. */
+export const VERSION = migraciones.length;
+
+/** Pone al día una copia antigua (version < VERSION). De momento no hay pasos. */
+function migraCopia(data: Copia): Copia {
+  return data;
+}
 
 function abrir(): Promise<IDBDatabase> {
   return new Promise((res, rej) => {
     const r = indexedDB.open(DB_NAME, VERSION);
-    r.onupgradeneeded = () => {
-      const db = r.result;
-      COLS.forEach((c) => {
-        if (!db.objectStoreNames.contains(c)) db.createObjectStore(c, { keyPath: "id" });
-      });
-      if (!db.objectStoreNames.contains("fotos")) db.createObjectStore("fotos");
-      if (!db.objectStoreNames.contains("kv")) db.createObjectStore("kv");
+    r.onupgradeneeded = (ev) => {
+      for (let v = ev.oldVersion; v < VERSION; v++) migraciones[v](r.result, r.transaction!);
     };
     r.onsuccess = () => res(r.result);
     r.onerror = () => rej(r.error);
@@ -217,7 +232,7 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
     async exporta(): Promise<Copia> {
       const out: Copia = {
         app: "armario",
-        version: 1,
+        version: VERSION,
         fecha: new Date().toISOString(),
         kv: {},
         fotos: {},
@@ -242,6 +257,9 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
     },
     async importa(data: Copia, { reemplazar = true } = {}) {
       if (!data || data.app !== "armario") throw new Error("Este archivo no es una copia de la app.");
+      if (data.version > VERSION)
+        throw new Error("Esta copia es de una versión más nueva de la app: actualízala y vuelve a probar.");
+      if (data.version < VERSION) data = migraCopia(data);
       for (const c of COLS) {
         await usa(c, "readwrite", async (s) => {
           if (reemplazar) await req(s.clear());

@@ -1,7 +1,14 @@
 import { test } from "vitest";
 import assert from "node:assert/strict";
 import "fake-indexeddb/auto";
-import { creaStore, type Coleccion, type Colecciones, type Copia, type Store } from "../src/lib/store.ts";
+import {
+  creaStore,
+  VERSION,
+  type Coleccion,
+  type Colecciones,
+  type Copia,
+  type Store
+} from "../src/lib/store.ts";
 import type { Voto } from "../src/lib/tipos.ts";
 
 // Guarda las conexiones que abre la app para poder cortarlas como hace Safari
@@ -96,4 +103,51 @@ test("la copia no se lleva la clave de la IA y al importar se conserva la tuya",
   await store.importa(copia, { reemplazar: false });
   assert.equal((await store.todos("votos")).length, 1); // mismo id: no se duplica
   await assert.rejects(store.importa({ app: "otra" } as unknown as Copia), /no es una copia/);
+});
+
+const espera = <T>(r: IDBRequest<T>) =>
+  new Promise<T>((res, rej) => {
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+
+test("una base de datos v1 de antes de las migraciones se abre sin perder nada", async () => {
+  // Las conexiones de los otros tests se cierran solas con el aviso de versionchange
+  await espera(indexedDB.deleteDatabase("armario"));
+  const r = indexedDB.open("armario", 1);
+  r.onupgradeneeded = () => {
+    const db = r.result;
+    for (const c of ["prendas", "outfits", "deseos", "votos"]) db.createObjectStore(c, { keyPath: "id" });
+    db.createObjectStore("fotos");
+    db.createObjectStore("kv");
+    r.transaction!.objectStore("prendas").put({ id: "p1", nombre: "Blusa salvia", cat: "arriba" });
+    r.transaction!.objectStore("kv").put({ resumen: "Otoño suave" }, "perfil");
+  };
+  (await espera(r)).close();
+
+  const store = await creaStore();
+  assert.equal((await store.get("prendas", "p1"))?.nombre, "Blusa salvia");
+  assert.deepEqual(await store.kget("perfil"), { resumen: "Otoño suave" });
+  await store.kset("ajustes", { proveedor: "groq" });
+  assert.deepEqual(await store.kget("ajustes"), { proveedor: "groq" });
+});
+
+test("rechaza una copia de una versión más nueva de la app", async () => {
+  const store = await creaStore();
+  const copia = await store.exporta();
+  await assert.rejects(store.importa({ ...copia, version: copia.version + 1 }), /versión más nueva/);
+});
+
+test("una copia de la versión actual se sigue restaurando", async () => {
+  const store = await creaStore();
+  await store.borraTodo();
+  await store.add("prendas", { nombre: "Falda camel", cat: "abajo" });
+  const copia = await store.exporta();
+  assert.equal(copia.version, VERSION);
+  await store.borraTodo();
+  await store.importa(copia);
+  assert.deepEqual(
+    (await store.todos("prendas")).map((p) => p.nombre),
+    ["Falda camel"]
+  );
 });
