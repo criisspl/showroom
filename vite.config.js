@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   base: "./",
@@ -7,5 +7,13 @@ export default defineConfig({
     target: ["es2020", "safari15", "chrome90", "firefox94", "edge90"]
   },
   // En desarrollo, /api va al servidor local de Cloudflare (npm run dev:api)
-  server: { proxy: { "/api": "http://localhost:8787" } }
+  server: { proxy: { "/api": "http://localhost:8787" } },
+  test: {
+    include: ["test/**/*.test.ts"],
+    coverage: {
+      provider: "v8",
+      include: ["src/lib/**/*.ts", "worker/**/*.ts"],
+      thresholds: { lines: 75 }
+    }
+  }
 });

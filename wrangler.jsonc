@@ -3,7 +3,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "armario",
-  "main": "worker/index.js",
+  "main": "worker/index.ts",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "./dist",

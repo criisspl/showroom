@@ -9,3 +9,4 @@ mis-datos/
 # Secretos locales de Cloudflare
 .dev.vars
 .wrangler/
+coverage/

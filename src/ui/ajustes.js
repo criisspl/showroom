@@ -1,8 +1,8 @@
 // Ajustes: proveedor de IA, copia de seguridad y borrado de datos.
 import { $, el } from "../lib/dom.js";
 import { app, setPerfil, repinta } from "../state.js";
-import { PROVEEDORES, pregunta, config } from "../lib/ai.js";
-import { normaliza } from "../lib/analysis.js";
+import { PROVEEDORES, pregunta, config } from "../lib/ai.ts";
+import { normaliza } from "../lib/analysis.ts";
 import { ver, falla } from "./comun.js";
 
 export function initAjustes() {

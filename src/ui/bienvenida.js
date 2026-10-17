@@ -2,10 +2,10 @@
 // Opcional: análisis más completo con IA (con consentimiento expreso) o perfil a mano.
 import { $, el, radios, vals, aviso } from "../lib/dom.js";
 import { app, setPerfil, repinta } from "../state.js";
-import { imagenParaIA, abreImagen, hayIA } from "../lib/ai.js";
-import { PREGUNTAS, analizaConIA, perfilManual, normaliza } from "../lib/analysis.js";
-import { perfilLocal } from "../lib/local.js";
-import { ESTACIONES, CUERPOS } from "../data/presets.js";
+import { imagenParaIA, abreImagen, hayIA } from "../lib/ai.ts";
+import { PREGUNTAS, analizaConIA, perfilManual, normaliza } from "../lib/analysis.ts";
+import { perfilLocal } from "../lib/local.ts";
+import { ESTACIONES, CUERPOS } from "../data/presets.ts";
 import { ver, falla } from "./comun.js";
 import { importaArchivo } from "./ajustes.js";
 import { protegeDatos, consejoIOS } from "./instala.js";

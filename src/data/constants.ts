@@ -1,6 +1,24 @@
 // Listas fijas y tablas de compatibilidad que usa el motor de outfits.
+import type { Cat, Corte, Entorno, Estilo, Familia, Tejido, Temporada } from "../lib/tipos.ts";
 
-export const CATS = [
+export interface Ocasion {
+  id: string;
+  n: string;
+  s?: string;
+  d?: string;
+  /** Margen de formalidad [mín, máx] entre 1 y 3. */
+  f: [number, number];
+}
+export interface Banda {
+  id: string;
+  n: string;
+  s: string;
+  /** Abrigo ideal (1 ligero – 3 abrigado). */
+  t: number;
+}
+type Tabla = Record<string, number | null>;
+
+export const CATS: [Cat, string][] = [
   ["arriba", "Arriba"],
   ["abajo", "Abajo"],
   ["vestido", "Vestido"],
@@ -8,8 +26,8 @@ export const CATS = [
   ["calzado", "Calzado"],
   ["accesorio", "Accesorio"]
 ];
-export const CATN = Object.fromEntries(CATS);
-export const CORTES = [
+export const CATN = Object.fromEntries(CATS) as Record<Cat, string>;
+export const CORTES: [Corte, string][] = [
   ["ajustada", "Ajustada"],
   ["fluida", "Fluida"],
   ["amplia", "Amplia"]
@@ -20,14 +38,19 @@ export const ABRIGOS = [
   ["3", "Abrigada"]
 ];
 
-export const EST = [
+export const EST: [Estilo, string][] = [
   ["deportivo", "Deportiva (para hacer deporte)"],
   ["casual", "Casual"],
   ["arreglado", "Arreglada"],
   ["fiesta", "De fiesta"]
 ];
-export const ESTN = { deportivo: "Deportivo", casual: "Casual", arreglado: "Arreglado", fiesta: "De fiesta" };
-export const TEJ = [
+export const ESTN: Record<Estilo, string> = {
+  deportivo: "Deportivo",
+  casual: "Casual",
+  arreglado: "Arreglado",
+  fiesta: "De fiesta"
+};
+export const TEJ: [Tejido, string][] = [
   ["algodon", "Algodón"],
   ["vaquero", "Vaquero o pana"],
   ["punto", "Punto"],
@@ -36,7 +59,7 @@ export const TEJ = [
   ["ligero", "Encaje, gasa o lino"],
   ["piel", "Piel o ante"]
 ];
-export const TEJN = {
+export const TEJN: Record<Tejido, string> = {
   algodon: "Algodón",
   vaquero: "Vaquero",
   punto: "Punto",
@@ -45,9 +68,9 @@ export const TEJN = {
   ligero: "Tejido ligero",
   piel: "Piel"
 };
-export const FORMAL_DE = { deportivo: 1, casual: 1, arreglado: 2, fiesta: 3 };
+export const FORMAL_DE: Record<Estilo, number> = { deportivo: 1, casual: 1, arreglado: 2, fiesta: 3 };
 
-export const BANDAS = [
+export const BANDAS: Banda[] = [
   { id: "frio", n: "Frío", s: "menos de 10°", t: 3 },
   { id: "fresco", n: "Fresco", s: "10 a 17°", t: 2.5 },
   { id: "templado", n: "Templado", s: "18 a 24°", t: 2 },
@@ -70,39 +93,51 @@ export const MESBANDA = [
 ];
 
 // Estaciones del año (temporada de las prendas)
-export const TEMPORADAS = [
+export const TEMPORADAS: [Temporada, string][] = [
   ["primavera", "Primavera"],
   ["verano", "Verano"],
   ["otono", "Otoño"],
   ["invierno", "Invierno"]
 ];
-export const TEMPN = { primavera: "primavera", verano: "verano", otono: "otoño", invierno: "invierno" };
-export const estacionHoy = (d = new Date()) =>
-  [
-    "invierno",
-    "invierno",
-    "primavera",
-    "primavera",
-    "primavera",
-    "verano",
-    "verano",
-    "verano",
-    "otono",
-    "otono",
-    "otono",
-    "invierno"
-  ][d.getMonth()];
+export const TEMPN: Record<Temporada, string> = {
+  primavera: "primavera",
+  verano: "verano",
+  otono: "otoño",
+  invierno: "invierno"
+};
+export const estacionHoy = (d = new Date()): Temporada =>
+  (
+    [
+      "invierno",
+      "invierno",
+      "primavera",
+      "primavera",
+      "primavera",
+      "verano",
+      "verano",
+      "verano",
+      "otono",
+      "otono",
+      "otono",
+      "invierno"
+    ] as const
+  )[d.getMonth()];
 
 // Dónde vas a estar
-export const ENTORNOS = [
+export const ENTORNOS: [Entorno, string][] = [
   ["ciudad", "Ciudad"],
   ["pueblo", "Pueblo"],
   ["montana", "Montaña"],
   ["playa", "Playa"]
 ];
-export const ENTN = { ciudad: "ciudad", pueblo: "pueblo", montana: "montaña", playa: "playa" };
+export const ENTN: Record<Entorno, string> = {
+  ciudad: "ciudad",
+  pueblo: "pueblo",
+  montana: "montaña",
+  playa: "playa"
+};
 
-export const OCAS = [
+export const OCAS: Ocasion[] = [
   { id: "diario", n: "Diario", s: "lunes a jueves", d: "una tarde entre semana, casual", f: [1, 2] },
   {
     id: "finde",
@@ -133,14 +168,14 @@ export const OCAS = [
   { id: "concierto", n: "Concierto", f: [1, 2] }
 ];
 
-function tabla(rows) {
-  const o = {};
+function tabla(rows: [string, string, number | null][]): Tabla {
+  const o: Tabla = {};
   rows.forEach(([a, b, v]) => {
     o[[a, b].sort().join("|")] = v;
   });
   return o;
 }
-export function par(tab, x, y) {
+export function par(tab: Tabla, x: string, y: string): number | null {
   const v = tab[[x, y].sort().join("|")];
   return v === undefined ? 0 : v;
 }
@@ -159,7 +194,7 @@ export const S_PAR = tabla([
   ["fiesta", "fiesta", 0.2]
 ]);
 // Registro de cada prenda según la ocasión. null = fuera.
-export const S_OCA = {
+export const S_OCA: Record<string, Record<Estilo, number | null>> = {
   diario: { deportivo: -0.4, casual: 0.6, arreglado: 0.1, fiesta: -1.5 },
   finde: { deportivo: -1.5, casual: 0.2, arreglado: 0.6, fiesta: -0.4 },
   oficina: { deportivo: -1, casual: 0.5, arreglado: 0.5, fiesta: null },
@@ -258,7 +293,7 @@ export const H_PAR = tabla([
   ["gris", "azul", 1.3]
 ]);
 
-export const MOT = [
+export const MOT: [string, string][] = [
   ["estilos", "La mezcla de estilos"],
   ["tejidos", "Los tejidos"],
   ["colores", "Los colores"],
@@ -266,7 +301,7 @@ export const MOT = [
   ["ocasion", "No es para esta ocasión"],
   ["tiempo", "No es para este tiempo"]
 ];
-export const FAMN = {
+export const FAMN: Record<Familia, string> = {
   verde: "verdes",
   rojizo: "rojizos",
   amarillo: "amarillos",
@@ -280,4 +315,4 @@ export const FAMN = {
   rosa: "rosas",
   morado: "morados"
 };
-export const CORN = { ajustada: "ajustado", fluida: "fluido", amplia: "amplio" };
+export const CORN: Record<Corte, string> = { ajustada: "ajustado", fluida: "fluido", amplia: "amplio" };

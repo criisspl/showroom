@@ -1,9 +1,9 @@
 // Pestaña Deseos: las prendas que le faltan a tu armario según tu análisis, y las que añades tú.
 import { $, el, boton, radios, setVal, pinA } from "../lib/dom.js";
 import { app, estado } from "../state.js";
-import { CATN } from "../data/constants.js";
-import { activas, casan, famDe } from "../lib/engine.js";
-import { clasifica, familia, harm } from "../lib/color.js";
+import { CATN } from "../data/constants.ts";
+import { activas, casan, famDe } from "../lib/engine.ts";
+import { clasifica, familia, harm } from "../lib/color.ts";
 import { icono, ver, falla } from "./comun.js";
 import { abreForm } from "./armario.js";
 

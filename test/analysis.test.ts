@@ -1,9 +1,9 @@
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
-import { normaliza, perfilManual, textoPerfil } from "../src/lib/analysis.js";
-import { sacaJSON } from "../src/lib/ai.js";
-import { ESTACIONES, CUERPOS, CATALOGO } from "../src/data/presets.js";
-import { TIPOS_ICONO } from "../src/data/icons.js";
+import { normaliza, perfilManual, textoPerfil } from "../src/lib/analysis.ts";
+import { sacaJSON } from "../src/lib/ai.ts";
+import { ESTACIONES, CUERPOS, CATALOGO } from "../src/data/presets.ts";
+import { TIPOS_ICONO } from "../src/data/icons.ts";
 
 test("sacaJSON extrae el objeto aunque venga envuelto en texto o ```json", () => {
   assert.deepEqual(sacaJSON('Aquí tienes:\n```json\n{"a":1}\n```'), { a: 1 });

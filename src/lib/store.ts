@@ -1,11 +1,46 @@
 // Almacenamiento local en IndexedDB. Todo se queda en el navegador de cada persona.
 // Colecciones de documentos con suscripción (on), fotos como Blob y un pequeño almacén clave-valor.
 
+import type { Outfit, Prenda, Voto } from "./tipos.ts";
+
+/** Estado de una prenda de «Deseos» (las del perfil y las que añade la persona). */
+export interface DeseoGuardado {
+  id: string;
+  estado?: string;
+  cuando?: string;
+  propio?: boolean;
+  nombre?: string;
+  foto?: string | null;
+  mini?: string | null;
+  [k: string]: unknown;
+}
+/** Lo que guarda cada colección. */
+export interface Colecciones {
+  prendas: Prenda;
+  outfits: Outfit;
+  deseos: DeseoGuardado;
+  votos: Voto;
+}
+export type Coleccion = keyof Colecciones;
+type Almacen = Coleccion | "fotos" | "kv";
+/** Copia de seguridad (.armario.json). */
+export interface Copia {
+  app: "armario";
+  version: number;
+  fecha: string;
+  kv: Record<string, unknown>;
+  fotos: Record<string, string>;
+  prendas: Prenda[];
+  outfits: Outfit[];
+  deseos: DeseoGuardado[];
+  votos: Voto[];
+}
+
 const DB_NAME = "armario";
-const COLS = ["prendas", "outfits", "deseos", "votos"];
+const COLS: Coleccion[] = ["prendas", "outfits", "deseos", "votos"];
 const VERSION = 1;
 
-function abrir() {
+function abrir(): Promise<IDBDatabase> {
   return new Promise((res, rej) => {
     const r = indexedDB.open(DB_NAME, VERSION);
     r.onupgradeneeded = () => {
@@ -27,7 +62,7 @@ function abrir() {
   });
 }
 
-function req(r) {
+function req<T>(r: IDBRequest<T>): Promise<T> {
   return new Promise((res, rej) => {
     r.onsuccess = () => res(r.result);
     r.onerror = () => rej(r.error);
@@ -39,11 +74,17 @@ function nid() {
 
 // Safari (sobre todo en iPhone, al volver de segundo plano) puede cortar la conexión con la base de datos:
 // a partir de ahí cada transacción falla con InvalidStateError o UnknownError hasta recargar la página.
-const perdida = (e) => !!e && (e.name === "InvalidStateError" || e.name === "UnknownError");
+const perdida = (e: unknown) =>
+  !!e &&
+  typeof e === "object" &&
+  "name" in e &&
+  (e.name === "InvalidStateError" || e.name === "UnknownError");
 
-export async function creaStore({ onError = (e) => console.error(e) } = {}) {
-  let db = null;
-  async function conexion(nueva) {
+export type Store = Awaited<ReturnType<typeof creaStore>>;
+
+export async function creaStore({ onError = (e: unknown) => console.error(e) } = {}) {
+  let db: IDBDatabase | null = null;
+  async function conexion(nueva = false): Promise<IDBDatabase> {
     if (nueva || !db) {
       if (db)
         try {
@@ -51,22 +92,28 @@ export async function creaStore({ onError = (e) => console.error(e) } = {}) {
         } catch (e) {
           /* ya cerrada */
         }
-      db = await abrir();
-      db.onclose = () => {
+      const d = await abrir();
+      d.onclose = () => {
         db = null;
       };
-      db.onversionchange = () => {
-        db.close();
+      d.onversionchange = () => {
+        d.close();
         db = null;
       };
+      db = d;
     }
     return db;
   }
   await conexion();
-  const subs = Object.fromEntries(COLS.map((c) => [c, []]));
-  const urls = new Map();
+  type Sub<C extends Coleccion> = (a: Colecciones[C][]) => void;
+  const subs = Object.fromEntries(COLS.map((c) => [c, []])) as unknown as { [C in Coleccion]: Sub<C>[] };
+  const urls = new Map<string, string>();
   /** Ejecuta fn con el almacén pedido; si la conexión se ha perdido, reconecta y lo repite una vez. */
-  async function usa(store, modo, fn) {
+  async function usa<T>(
+    store: Almacen,
+    modo: IDBTransactionMode,
+    fn: (s: IDBObjectStore) => Promise<T>
+  ): Promise<T> {
     try {
       return await fn((await conexion()).transaction(store, modo).objectStore(store));
     } catch (e) {
@@ -74,17 +121,18 @@ export async function creaStore({ onError = (e) => console.error(e) } = {}) {
       return fn((await conexion(true)).transaction(store, modo).objectStore(store));
     }
   }
-  const lee = (store, k) => usa(store, "readonly", (s) => req(s.get(k)));
-  const pon = (store, v, k) => usa(store, "readwrite", (s) => req(k === undefined ? s.put(v) : s.put(v, k)));
-  const quita = (store, k) => usa(store, "readwrite", (s) => req(s.delete(k)));
+  const lee = (store: Almacen, k: string) => usa(store, "readonly", (s) => req(s.get(k)));
+  const pon = (store: Almacen, v: unknown, k?: string) =>
+    usa(store, "readwrite", (s) => req(k === undefined ? s.put(v) : s.put(v, k)));
+  const quita = (store: Almacen, k: string) => usa(store, "readwrite", (s) => req(s.delete(k)));
 
-  async function todos(c) {
+  async function todos<C extends Coleccion>(c: C): Promise<Colecciones[C][]> {
     return usa(c, "readonly", (s) => req(s.getAll()));
   }
-  async function emit(c) {
+  async function emit<C extends Coleccion>(c: C) {
     try {
       const a = await todos(c);
-      subs[c].forEach((f) => {
+      (subs[c] as Sub<C>[]).forEach((f) => {
         try {
           f(a);
         } catch (e) {
@@ -98,43 +146,43 @@ export async function creaStore({ onError = (e) => console.error(e) } = {}) {
 
   const api = {
     /** Se suscribe a una colección: recibe el array completo cada vez que cambia. */
-    on(c, cb) {
-      subs[c].push(cb);
+    on<C extends Coleccion>(c: C, cb: Sub<C>) {
+      (subs[c] as Sub<C>[]).push(cb);
       return todos(c).then(cb).catch(onError);
     },
-    async add(c, d) {
+    async add<C extends Coleccion>(c: C, d: Omit<Colecciones[C], "id">): Promise<string> {
       const id = nid();
       await pon(c, { ...d, id });
       emit(c);
       return id;
     },
-    async set(c, id, d) {
+    async set<C extends Coleccion>(c: C, id: string, d: Partial<Colecciones[C]>) {
       await pon(c, { ...d, id });
       emit(c);
     },
-    async update(c, id, patch) {
+    async update<C extends Coleccion>(c: C, id: string, patch: Partial<Colecciones[C]>) {
       await usa(c, "readwrite", async (s) => {
         const old = await req(s.get(id));
         if (old) await req(s.put({ ...old, ...patch, id }));
       });
       emit(c);
     },
-    async del(c, id) {
+    async del(c: Coleccion, id: string) {
       await quita(c, id);
       emit(c);
     },
-    async get(c, id) {
+    async get<C extends Coleccion>(c: C, id: string): Promise<Colecciones[C] | undefined> {
       return lee(c, id);
     },
     todos,
 
     // Fotos
-    async putFoto(blob) {
+    async putFoto(blob: Blob): Promise<string> {
       const id = "f" + nid();
       await pon("fotos", blob, id);
       return id;
     },
-    async delFoto(id) {
+    async delFoto(id: string | null | undefined) {
       if (!id) return;
       await quita("fotos", id);
       const u = urls.get(id);
@@ -143,36 +191,46 @@ export async function creaStore({ onError = (e) => console.error(e) } = {}) {
         urls.delete(id);
       }
     },
-    async urlFoto(id) {
+    async urlFoto(id: string | null | undefined): Promise<string | null> {
       if (!id) return null;
-      if (urls.has(id)) return urls.get(id);
-      const b = await lee("fotos", id);
+      const ya = urls.get(id);
+      if (ya) return ya;
+      const b: Blob | undefined = await lee("fotos", id);
       if (!b) return null;
       const u = URL.createObjectURL(b);
       urls.set(id, u);
       return u;
     },
-    async blobFoto(id) {
+    async blobFoto(id: string | null | undefined): Promise<Blob | null> {
       return id ? lee("fotos", id) : null;
     },
 
     // Clave-valor (perfil, ajustes)
-    async kget(k) {
+    async kget(k: string): Promise<any> {
       return lee("kv", k);
     },
-    async kset(k, v) {
+    async kset(k: string, v: unknown) {
       return pon("kv", v, k);
     },
 
     /** Copia de seguridad completa en JSON (las fotos van en base64). */
-    async exporta() {
-      const out = { app: "armario", version: 1, fecha: new Date().toISOString(), kv: {}, fotos: {} };
-      for (const c of COLS) out[c] = await todos(c);
+    async exporta(): Promise<Copia> {
+      const out: Copia = {
+        app: "armario",
+        version: 1,
+        fecha: new Date().toISOString(),
+        kv: {},
+        fotos: {},
+        prendas: await todos("prendas"),
+        outfits: await todos("outfits"),
+        deseos: await todos("deseos"),
+        votos: await todos("votos")
+      };
       for (const k of ["perfil", "ajustes"]) {
         const v = await api.kget(k);
         if (v !== undefined) out.kv[k] = k === "ajustes" ? { ...v, clave: "" } : v;
       }
-      const ids = new Set();
+      const ids = new Set<string>();
       [...out.prendas, ...out.deseos].forEach((p) => {
         if (p.foto) ids.add(p.foto);
       });
@@ -182,7 +240,7 @@ export async function creaStore({ onError = (e) => console.error(e) } = {}) {
       }
       return out;
     },
-    async importa(data, { reemplazar = true } = {}) {
+    async importa(data: Copia, { reemplazar = true } = {}) {
       if (!data || data.app !== "armario") throw new Error("Este archivo no es una copia de la app.");
       for (const c of COLS) {
         await usa(c, "readwrite", async (s) => {
@@ -195,23 +253,23 @@ export async function creaStore({ onError = (e) => console.error(e) } = {}) {
       for (const [k, v] of Object.entries(data.kv || {})) {
         if (k === "ajustes") {
           const cur = (await api.kget("ajustes")) || {};
-          await api.kset(k, { ...v, clave: cur.clave || "" });
+          await api.kset(k, { ...(v as object), clave: cur.clave || "" });
         } else await api.kset(k, v);
       }
-      COLS.forEach(emit);
+      COLS.forEach((c) => emit(c));
     },
     async borraTodo() {
-      for (const c of [...COLS, "fotos", "kv"]) await usa(c, "readwrite", (s) => req(s.clear()));
-      COLS.forEach(emit);
+      for (const c of [...COLS, "fotos", "kv"] as Almacen[]) await usa(c, "readwrite", (s) => req(s.clear()));
+      COLS.forEach((c) => emit(c));
     }
   };
   return api;
 }
 
-export function aDataURL(blob) {
+export function aDataURL(blob: Blob): Promise<string> {
   return new Promise((res, rej) => {
     const r = new FileReader();
-    r.onload = () => res(r.result);
+    r.onload = () => res(r.result as string);
     r.onerror = () => rej(r.error);
     r.readAsDataURL(blob);
   });

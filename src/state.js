@@ -1,6 +1,6 @@
 // Estado compartido de la interfaz.
-import { estado, setEstado } from "./lib/engine.js";
-import { construyePaleta } from "./lib/color.js";
+import { estado, setEstado } from "./lib/engine.ts";
+import { construyePaleta } from "./lib/color.ts";
 
 export const app = {
   store: null,

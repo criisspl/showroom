@@ -4,27 +4,30 @@ Instrucciones para Claude en este repo. Cada línea está aquí porque sin ella 
 
 ## Stack y comandos
 
-- JavaScript vanilla (módulos ES, sin framework) + Vite. Node 22.
+- TypeScript estricto en `src/lib/`, `src/data/` y `worker/`; la interfaz (`src/ui/`) sigue en JavaScript hasta pasarla a Svelte 5. Vite, Node 22.
+- Imports con extensión `.ts` explícita (`allowImportingTsExtensions`). Tipos del dominio en `src/lib/tipos.ts`.
 - Backend: Cloudflare Worker (`worker/`) que solo hace de intermediario con la IA; config en `wrangler.jsonc`.
-- Datos: IndexedDB en el navegador (`src/lib/store.js`). Sin cuentas ni base de datos en servidor.
-- Tests: `node:test` + `node:assert/strict`, con `fake-indexeddb` para el store.
+- Datos: IndexedDB en el navegador (`src/lib/store.ts`). Sin cuentas ni base de datos en servidor.
+- Tests: Vitest + `node:assert/strict`, con `fake-indexeddb` para el store.
 
-| Qué | Comando |
-| --- | --- |
-| Instalar | `npm ci` |
-| Dev (solo web) | `npm run dev` |
-| Dev con API | `npm run dev:api` |
-| Tests | `npm test` |
-| Build | `npm run build` |
+| Qué            | Comando                           |
+| -------------- | --------------------------------- |
+| Instalar       | `npm ci`                          |
+| Dev (solo web) | `npm run dev`                     |
+| Dev con API    | `npm run dev:api`                 |
+| Tests          | `npm test`                        |
+| Tipos          | `npm run typecheck`               |
+| Lint y formato | `npm run lint` · `npm run format` |
+| Build          | `npm run build`                   |
 
-CI (`.github/workflows/ci.yml`) ejecuta `npm test` y `npm run build`: los dos tienen que pasar antes de dar algo por hecho.
+CI (`.github/workflows/ci.yml`) ejecuta lint, formato, tipos, tests con cobertura mínima y build: todo tiene que pasar antes de dar algo por hecho. Los commits siguen Conventional Commits (commitlint).
 
 ## Estructura
 
 - `src/lib/`: lógica sin DOM (análisis, color, motor de outfits, store, IA). Aquí va lo testeable.
 - `src/ui/`: una pantalla por fichero. `src/data/`: constantes y catálogos.
-- `worker/`: `index.js` (rutas `/api/*`) y `valida.js` (validación de entrada).
-- `test/`: un `*.test.js` por módulo de `src/lib` o `worker`.
+- `worker/`: `index.ts` (rutas `/api/*`) y `valida.ts` (validación de entrada).
+- `test/`: un `*.test.ts` por módulo de `src/lib` o `worker`.
 
 ## Reglas del proyecto
 
@@ -46,7 +49,7 @@ CI (`.github/workflows/ci.yml`) ejecuta `npm test` y `npm run build`: los dos ti
 1. **Piensa antes de programar.** Di qué vas a hacer y qué supuestos asumes. Si hay dos interpretaciones razonables, pregunta.
 2. **Lo más simple que funcione.** Nada de abstracciones u opciones que nadie ha pedido.
 3. **Cambios quirúrgicos.** Toca solo lo necesario. No reformatees ni "mejores" código ajeno de paso; si ves algo, avísalo.
-4. **Verifica.** `npm test` y `npm run build` en verde antes de decir que funciona; si es UI, compruébalo en `npm run dev`.
+4. **Verifica.** `npm test`, `npm run typecheck` y `npm run build` en verde antes de decir que funciona; si es UI, compruébalo en `npm run dev`.
 
 ## Flujo
 

@@ -9,7 +9,7 @@ Prepara la rama actual para un PR a `main`. No hagas push ni abras el PR sin que
 
 1. Mira `git status` y `git diff main...HEAD --stat`.
 2. Detecta cambios que no pintan nada en este PR: ficheros sin relación con el objetivo, `console.log` de depuración, código comentado, secretos o `.env`. Señálalos; no los borres sin preguntar.
-3. Ejecuta lo mismo que la CI: `npm test` y `npm run build`.
+3. Ejecuta lo mismo que la CI: `npm test`, `npm run typecheck` y `npm run build`.
 4. Si la rama va por detrás de `main`, dilo.
 
 Formato de salida:

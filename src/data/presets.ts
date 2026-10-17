@@ -1,7 +1,37 @@
 // Presets para usar la app sin IA: las 12 estaciones de color, los tipos de cuerpo de Kibbe
 // y un catálogo base de prendas que se colorean con la paleta de cada persona.
+import type { Cat, ColorNombrado, Corte } from "../lib/tipos.ts";
 
-export const ESTACIONES = {
+export interface Estacion {
+  n: string;
+  subtono: string;
+  contraste: string;
+  intensidad: string;
+  paleta: ColorNombrado[];
+  neutros: ColorNombrado[];
+  evitar: ColorNombrado[];
+}
+export interface Cuerpo {
+  n: string;
+  sistema: string;
+  si: string[];
+  evita: string[];
+  tips: string[];
+}
+/** Prenda del catálogo base, sin colores (se ponen con la paleta de cada persona). */
+export interface PrendaCatalogo {
+  id: string;
+  n: string;
+  cat: Cat;
+  tipo: string;
+  icono: string;
+  corte: Corte;
+  abrigo: number;
+  formal: number;
+  top?: boolean;
+}
+
+export const ESTACIONES: Record<string, Estacion> = {
   "primavera-clara": {
     n: "Primavera Clara",
     subtono: "cálido-neutro",
@@ -1281,7 +1311,7 @@ export const ESTACIONES = {
   }
 };
 
-export const CUERPOS = {
+export const CUERPOS: Record<string, Cuerpo> = {
   dramatico: {
     n: "Dramático",
     sistema: "Kibbe",
@@ -1411,7 +1441,7 @@ export const CUERPOS = {
   }
 };
 
-export const CATALOGO = [
+export const CATALOGO: PrendaCatalogo[] = [
   {
     id: "w-blusa",
     n: "Blusa romántica con lazada",

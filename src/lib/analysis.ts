@@ -1,11 +1,29 @@
 // Análisis personal: preguntas, prompt para la IA y normalización del perfil resultante.
 // También construye un perfil sin IA a partir de los presets (estación + tipo de cuerpo).
-import { ESTACIONES, CUERPOS, CATALOGO } from "../data/presets.js";
-import { TIPOS_ICONO } from "../data/icons.js";
-import { preguntaJSON } from "./ai.js";
+import { ESTACIONES, CUERPOS, CATALOGO } from "../data/presets.ts";
+import { TIPOS_ICONO } from "../data/icons.ts";
+import { preguntaJSON, type Ajustes } from "./ai.ts";
+import { FORMAL_DE } from "../data/constants.ts";
+import type { Cat, Crudo, Deseo, Estilo, Perfil } from "./tipos.ts";
+
+export interface PreguntaAnalisis {
+  id: string;
+  t: string;
+  tipo: "elige" | "num" | "varias" | "texto";
+  ops?: string[] | [string, string][];
+  opc?: boolean;
+  max?: number;
+  /** Solo para el análisis con IA (texto libre). */
+  ia?: boolean;
+}
+/** Foto para el análisis con IA: qué es y su data URL. */
+export interface FotoAnalisis {
+  que: string;
+  url: string;
+}
 
 // `ia: true` → solo se usan en el análisis con IA (texto libre); el resto sirve también para el análisis en el móvil.
-export const PREGUNTAS = [
+export const PREGUNTAS: PreguntaAnalisis[] = [
   {
     id: "ojos_color",
     t: "Color de tus ojos",
@@ -144,12 +162,16 @@ const ESQUEMA = `{
  "deseos": [{"n":"nombre de la prenda","cat":"arriba|abajo|vestido|capa|calzado|accesorio","tipo":"una palabra","icono":"uno de: ${TIPOS_ICONO.join(", ")}","cols":[["nombre color","#RRGGBB"]],"nota":"por qué le favorece, 1 frase","corte":"ajustada|fluida|amplia","abrigo":1,"estilo":"deportivo|casual|arreglado|fiesta","tejido":"algodon|vaquero|punto|felpa|saten|ligero|piel","top":true,"q1":"búsqueda Pinterest de la prenda, en inglés","q2":"búsqueda Pinterest de outfits con ella, en inglés"}] // 16-24 prendas, 6 con top=true
 }`;
 
-export async function analizaConIA(ajustes, respuestas, fotos) {
-  const valor = (p, v) =>
+export async function analizaConIA(
+  ajustes: Ajustes,
+  respuestas: Record<string, unknown>,
+  fotos: FotoAnalisis[]
+): Promise<Perfil> {
+  const valor = (p: PreguntaAnalisis, v: unknown) =>
     p.tipo === "varias"
-      ? []
+      ? ([] as unknown[])
           .concat(v)
-          .map((x) => (p.ops.find((o) => o[0] === x) || [x, x])[1])
+          .map((x) => ((p.ops as [string, string][]).find((o) => o[0] === x) || [x, x])[1])
           .join(", ")
       : String(v);
   const datos = PREGUNTAS.filter((p) => respuestas[p.id] && String(respuestas[p.id]).length)
@@ -171,9 +193,9 @@ export async function analizaConIA(ajustes, respuestas, fotos) {
 }
 
 const HEX = /^#[0-9a-f]{6}$/i;
-const arr = (x) => (Array.isArray(x) ? x : []);
-const str = (x, n = 300) => (typeof x === "string" ? x.slice(0, n) : "");
-const colores = (x) =>
+const arr = (x: Crudo): Crudo[] => (Array.isArray(x) ? x : []);
+const str = (x: unknown, n = 300) => (typeof x === "string" ? x.slice(0, n) : "");
+const colores = (x: Crudo) =>
   arr(x)
     .filter((c) => c && HEX.test(c.hex))
     .map((c) => ({
@@ -183,12 +205,12 @@ const colores = (x) =>
     }));
 
 /** Limpia y completa un perfil (venga de la IA o de un archivo importado). */
-export function normaliza(j, respuestas = {}, origen = "ia") {
+export function normaliza(j: Crudo, respuestas: Record<string, unknown> = {}, origen = "ia"): Perfil {
   j = j || {};
   const c = j.color || {},
     b = j.cuerpo || {},
     e = j.estetica || {};
-  const perfil = {
+  const perfil: Perfil = {
     origen,
     creado: new Date().toISOString(),
     respuestas,
@@ -213,7 +235,7 @@ export function normaliza(j, respuestas = {}, origen = "ia") {
         .filter((x) => x && arr(x.hex).filter((h) => HEX.test(h)).length >= 2)
         .map((x) => ({
           nombre: str(x.nombre, 60),
-          hex: x.hex.filter((h) => HEX.test(h)).slice(0, 3),
+          hex: x.hex.filter((h: string) => HEX.test(h)).slice(0, 3),
           uso: str(x.uso, 60)
         }))
     },
@@ -298,7 +320,7 @@ export function normaliza(j, respuestas = {}, origen = "ia") {
       .slice(0, 8),
     deseos: arr(j.deseos)
       .map((d, i) => normalizaDeseo(d, i))
-      .filter(Boolean)
+      .filter((d): d is Deseo => !!d)
       .slice(0, 30)
   };
   if (!perfil.color.paleta.length)
@@ -307,13 +329,16 @@ export function normaliza(j, respuestas = {}, origen = "ia") {
 }
 
 const CATS = ["arriba", "abajo", "vestido", "capa", "calzado", "accesorio"];
-function normalizaDeseo(d, i) {
+function normalizaDeseo(d: Crudo, i: number): Deseo | null {
   if (!d || !d.n || !CATS.includes(d.cat)) return null;
   const cols = arr(d.cols)
     .filter((c) => Array.isArray(c) && HEX.test(c[1] || ""))
-    .map((c) => [str(c[0], 30), c[1].toUpperCase()])
+    .map((c): [string, string] => [str(c[0], 30), c[1].toUpperCase()])
     .slice(0, 3);
-  const out = {
+  const estilo: Estilo = ["deportivo", "casual", "arreglado", "fiesta"].includes(d.estilo)
+    ? d.estilo
+    : "casual";
+  const out: Deseo = {
     id:
       "w-" +
       i +
@@ -330,36 +355,40 @@ function normalizaDeseo(d, i) {
     nota: str(d.nota, 160),
     corte: ["ajustada", "fluida", "amplia"].includes(d.corte) ? d.corte : "fluida",
     abrigo: [1, 2, 3].includes(+d.abrigo) ? +d.abrigo : 2,
-    estilo: ["deportivo", "casual", "arreglado", "fiesta"].includes(d.estilo) ? d.estilo : "casual",
+    estilo,
     tejido: ["algodon", "vaquero", "punto", "felpa", "saten", "ligero", "piel"].includes(d.tejido)
       ? d.tejido
       : "algodon",
     top: !!d.top,
     q1: str(d.q1, 120) || str(d.n, 60),
-    q2: str(d.q2, 120) || str(d.n, 60) + " outfit"
+    q2: str(d.q2, 120) || str(d.n, 60) + " outfit",
+    formal: FORMAL_DE[estilo]
   };
-  out.formal = { deportivo: 1, casual: 1, arreglado: 2, fiesta: 3 }[out.estilo];
   return out;
 }
-const iconoPorCat = (c) =>
-  ({
-    arriba: "camiseta",
-    abajo: "pantalon-ancho",
-    vestido: "vestido",
-    capa: "chaqueta",
-    calzado: "botines",
-    accesorio: "bolso"
-  })[c];
+const ICONO_POR_CAT: Record<Cat, string> = {
+  arriba: "camiseta",
+  abajo: "pantalon-ancho",
+  vestido: "vestido",
+  capa: "chaqueta",
+  calzado: "botines",
+  accesorio: "bolso"
+};
+const iconoPorCat = (c: Cat) => ICONO_POR_CAT[c];
 
 /** Perfil sin IA: a partir de una estación de color y un tipo de cuerpo elegidos a mano. */
-export function perfilManual(estacionId, cuerpoId, estetica = {}) {
+export function perfilManual(
+  estacionId: string,
+  cuerpoId: string,
+  estetica: { nombre?: string; claves?: string[] } = {}
+): Perfil {
   const e = ESTACIONES[estacionId],
     b = CUERPOS[cuerpoId];
   if (!e || !b) throw new Error("Elige una estación y un tipo de cuerpo.");
   const pal = e.paleta;
-  const deseos = CATALOGO.map((w, i) => {
+  const deseos = CATALOGO.map((w, i): Deseo => {
     const cols = [pal[i % pal.length], pal[(i + 4) % pal.length], e.neutros[i % e.neutros.length]].map(
-      (c) => [c.n, c.hex]
+      (c): [string, string] => [c.n, c.hex]
     );
     return {
       ...w,
@@ -407,11 +436,11 @@ export function perfilManual(estacionId, cuerpoId, estetica = {}) {
 }
 
 /** Texto corto del perfil para usarlo en otros prompts. */
-export function textoPerfil(p) {
+export function textoPerfil(p: Perfil | null): string {
   if (!p) return "";
-  const c = p.color || {},
-    b = p.cuerpo || {},
-    e = p.estetica || {};
+  const c: Partial<Perfil["color"]> = p.color || {},
+    b: Partial<Perfil["cuerpo"]> = p.cuerpo || {},
+    e: Partial<Perfil["estetica"]> = p.estetica || {};
   return [
     p.resumen,
     "Colorimetría: " +

@@ -5,7 +5,20 @@ export const MAX_BYTES = 6 * 1024 * 1024; // 5 fotos de 1024 px en JPEG caben de
 const MAX_IMAGENES = 5;
 const MAX_TEXTO = 24000;
 
-export function valida(e) {
+type ImagenUrl = string | { url: string };
+export type Contenido = { type: "text"; text: string } | { type: "image_url"; image_url: ImagenUrl };
+export interface Mensaje {
+  role: "system" | "user";
+  content: string | Contenido[];
+}
+/** Lo que manda el navegador, ya validado por valida(). */
+export interface Entrada {
+  messages: Mensaje[];
+  response_format?: { type: string };
+}
+
+/** Devuelve el motivo del rechazo o null si la entrada es válida (y entonces es una Entrada). */
+export function valida(e: any): string | null {
   if (!e || typeof e !== "object" || !Array.isArray(e.messages)) return "Faltan los mensajes.";
   if (e.messages.length < 1 || e.messages.length > 3) return "Demasiados mensajes.";
   let texto = 0,
@@ -33,22 +46,35 @@ export function valida(e) {
 }
 
 // Mistral quiere la imagen como texto; el resto, como objeto { url }.
-const imagen = (u, comoTexto) => ({ type: "image_url", image_url: comoTexto ? u : { url: u } });
+const imagen = (u: string, comoTexto: boolean): Contenido => ({
+  type: "image_url",
+  image_url: comoTexto ? u : { url: u }
+});
 
 /** Cuerpo para el proveedor: el modelo y los límites los pone el servidor. */
-export function cuerpoPara(e, modelo, imagenComoTexto = false) {
-  const messages = e.messages.map((m) => ({
+const urlDe = (u: ImagenUrl) => (typeof u === "string" ? u : u.url);
+
+export interface CuerpoProveedor {
+  model: string;
+  messages: { role: Mensaje["role"]; content: string | Contenido[] }[];
+  temperature: number;
+  max_tokens: number;
+  response_format?: { type: "json_object" };
+}
+
+export function cuerpoPara(e: Entrada, modelo: string, imagenComoTexto = false): CuerpoProveedor {
+  const messages = e.messages.map((m): CuerpoProveedor["messages"][number] => ({
     role: m.role,
     content:
       typeof m.content === "string"
         ? m.content
         : m.content.map((c) =>
             c.type === "text"
-              ? { type: "text", text: c.text }
-              : imagen(typeof c.image_url === "string" ? c.image_url : c.image_url.url, imagenComoTexto)
+              ? ({ type: "text", text: c.text } as const)
+              : imagen(urlDe(c.image_url), imagenComoTexto)
           )
   }));
-  const b = { model: modelo, messages, temperature: 0.4, max_tokens: 4096 };
+  const b: CuerpoProveedor = { model: modelo, messages, temperature: 0.4, max_tokens: 4096 };
   if (e.response_format && e.response_format.type === "json_object")
     b.response_format = { type: "json_object" };
   return b;

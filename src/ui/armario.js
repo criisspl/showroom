@@ -1,11 +1,11 @@
 // Pestaña Armario: rejilla de prendas, ficha de prenda (con foto) y el modo «¿Lo compro?».
 import { $, el, boton, radios, val, vals, setVal } from "../lib/dom.js";
 import { app, estado } from "../state.js";
-import { CATS, CATN, CORTES, ABRIGOS, EST, TEJ, FORMAL_DE, TEMPORADAS } from "../data/constants.js";
-import { activas, byId, usos, estiloDe, tejidoDe, palDe, evalua, temporadaDe } from "../lib/engine.js";
-import { clasifica, consejoColor, familia, lab } from "../lib/color.js";
-import { hayIA, imagenParaIA, preguntaJSON, abreImagen } from "../lib/ai.js";
-import { textoPerfil } from "../lib/analysis.js";
+import { CATS, CATN, CORTES, ABRIGOS, EST, TEJ, FORMAL_DE, TEMPORADAS } from "../data/constants.ts";
+import { activas, byId, usos, estiloDe, tejidoDe, palDe, evalua, temporadaDe } from "../lib/engine.ts";
+import { clasifica, consejoColor, familia, lab } from "../lib/color.ts";
+import { hayIA, imagenParaIA, preguntaJSON, abreImagen } from "../lib/ai.ts";
+import { textoPerfil } from "../lib/analysis.ts";
 import { thumb, ver, falla } from "./comun.js";
 import { pintaDeseos } from "./deseos.js";
 import { vuelveConPrenda } from "./hoy.js";

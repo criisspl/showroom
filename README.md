@@ -87,7 +87,10 @@ Necesitas Node 20 o posterior.
 npm install
 npm run dev        # la web, con recarga en caliente
 npm run dev:api    # la web + el servidor de la IA en local (pon IA_CLAVE en .dev.vars)
-npm test           # pruebas unitarias (motor, color, análisis local y servidor)
+npm test           # pruebas unitarias con Vitest (motor, color, análisis local y servidor)
+npm run typecheck  # comprueba los tipos (TypeScript estricto)
+npm run lint       # ESLint
+npm run format     # Prettier
 npm run build      # genera dist/
 npm run deploy     # publica en Cloudflare desde tu ordenador
 ```
@@ -99,16 +102,17 @@ index.html            pantallas de la app
 public/               icono, manifest y service worker (app instalable y sin conexión)
 worker/               servidor de Cloudflare: sirve la web y hace de intermediario con la IA
 src/main.js           arranque
-src/lib/
-  local.js            análisis en el móvil: color desde el selfie, cuerpo y estética
-  analysis.js         preguntas, análisis con IA y normalización del perfil
-  ai.js               cliente de IA (integrada o con clave propia) y lectura de fotos
-  color.js            color en CIELAB, familias, paleta y clasificación
-  engine.js           motor de outfits, aprendizaje de valoraciones y «¿Lo compro?»
-  store.js            IndexedDB: colecciones, fotos y copias de seguridad
+src/lib/              lógica sin interfaz, en TypeScript estricto
+  tipos.ts            tipos del dominio: prenda, outfit, voto, perfil…
+  local.ts            análisis en el móvil: color desde el selfie, cuerpo y estética
+  analysis.ts         preguntas, análisis con IA y normalización del perfil
+  ai.ts               cliente de IA (integrada o con clave propia) y lectura de fotos
+  color.ts            color en CIELAB, familias, paleta y clasificación
+  engine.ts           motor de outfits, aprendizaje de valoraciones y «¿Lo compro?»
+  store.ts            IndexedDB: colecciones, fotos y copias de seguridad
 src/data/             estaciones, tipos de cuerpo, estéticas, maquillaje e iconos
-src/ui/               una pantalla por archivo
-test/                 pruebas con node:test
+src/ui/               una pantalla por archivo (JavaScript; se pasará a Svelte)
+test/                 pruebas con Vitest
 ```
 
 ## Aviso

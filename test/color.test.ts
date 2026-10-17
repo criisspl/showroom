@@ -1,8 +1,8 @@
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
-import { familia, dist, construyePaleta, clasifica } from "../src/lib/color.js";
-import { perfilManual } from "../src/lib/analysis.js";
-import { ESTACIONES } from "../src/data/presets.js";
+import { familia, dist, construyePaleta, clasifica } from "../src/lib/color.ts";
+import { perfilManual } from "../src/lib/analysis.ts";
+import { ESTACIONES } from "../src/data/presets.ts";
 
 test("dist es 0 para el mismo color y simétrica", () => {
   assert.equal(dist("#336699", "#336699"), 0);

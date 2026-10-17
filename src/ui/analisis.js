@@ -2,7 +2,7 @@
 // e «Inspo a la carta»: galerías de Pinterest según estación del año y ocasión.
 import { $, el, boton, radios, val, pinA } from "../lib/dom.js";
 import { app } from "../state.js";
-import { OCAS } from "../data/constants.js";
+import { OCAS } from "../data/constants.ts";
 import { ver } from "./comun.js";
 import { abreIA } from "./bienvenida.js";
 
