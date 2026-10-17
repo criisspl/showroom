@@ -25,6 +25,7 @@ CI (`.github/workflows/ci.yml`) ejecuta lint, formato, tipos, tests con cobertur
 ## Estructura
 
 - `src/lib/`: lógica sin DOM (análisis, color, motor de outfits, store, IA). Aquí va lo testeable.
+- `src/lib/motor/`: el motor de outfits por partes; la interfaz importa siempre de `engine.ts`, que lo reexporta.
 - `src/ui/`: una pantalla por fichero. `src/data/`: constantes y catálogos.
 - `worker/`: `index.ts` (rutas `/api/*`) y `valida.ts` (validación de entrada).
 - `test/`: un `*.test.ts` por módulo de `src/lib` o `worker`.
