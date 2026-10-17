@@ -10,7 +10,8 @@ test("dist es 0 para el mismo color y simétrica", () => {
 });
 
 test("familia devuelve una cadena para cualquier color", () => {
-  for (const h of ["#000000", "#ffffff", "#C19A6B", "#B22222", "#2E8B57", "#1E3A8A"]) assert.equal(typeof familia(h), "string");
+  for (const h of ["#000000", "#ffffff", "#C19A6B", "#B22222", "#2E8B57", "#1E3A8A"])
+    assert.equal(typeof familia(h), "string");
 });
 
 test("cada estación genera una paleta y clasifica sus propios colores como suyos", () => {

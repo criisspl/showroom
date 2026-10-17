@@ -18,13 +18,23 @@ test("normaliza exige una paleta válida", () => {
 test("normaliza limpia y recorta lo que devuelve la IA", () => {
   const p = normaliza({
     resumen: "x".repeat(2000),
-    color: { estacion: "Otoño suave", paleta: [{ n: "Oliva", hex: "#708238" }, { n: "mal", hex: "nope" }], combinaciones: [{ nombre: "A", hex: ["#111111"] }] },
+    color: {
+      estacion: "Otoño suave",
+      paleta: [
+        { n: "Oliva", hex: "#708238" },
+        { n: "mal", hex: "nope" }
+      ],
+      combinaciones: [{ nombre: "A", hex: ["#111111"] }]
+    },
     cuerpo: { tipo: "Soft Natural", si: ["Cintura marcada", 3] },
     estetica: { palabras: ["a", "b", "c", "d", "e"] },
     deseos: [{ n: "Falda midi", cat: "abajo", cols: [["Oliva", "#708238"]] }, null]
   });
   assert.equal(p.resumen.length <= 800, true);
-  assert.deepEqual(p.color.paleta.map((c) => c.hex), ["#708238"]);
+  assert.deepEqual(
+    p.color.paleta.map((c) => c.hex),
+    ["#708238"]
+  );
   assert.equal(p.color.combinaciones.length, 0);
   assert.ok(p.estetica.palabras.length <= 4);
   assert.ok(p.deseos.length >= 1);
@@ -32,14 +42,15 @@ test("normaliza limpia y recorta lo que devuelve la IA", () => {
 });
 
 test("perfilManual funciona con todas las estaciones y cuerpos", () => {
-  for (const e of Object.keys(ESTACIONES)) for (const b of Object.keys(CUERPOS)) {
-    const p = perfilManual(e, b);
-    assert.ok(p.color.paleta.length >= 6, e);
-    assert.equal(p.deseos.length, CATALOGO.length);
-    assert.ok(textoPerfil(p).includes(ESTACIONES[e].n));
-    // y vuelve a pasar por normaliza (como al importar una copia)
-    normaliza(p, {}, "manual");
-  }
+  for (const e of Object.keys(ESTACIONES))
+    for (const b of Object.keys(CUERPOS)) {
+      const p = perfilManual(e, b);
+      assert.ok(p.color.paleta.length >= 6, e);
+      assert.equal(p.deseos.length, CATALOGO.length);
+      assert.ok(textoPerfil(p).includes(ESTACIONES[e].n));
+      // y vuelve a pasar por normaliza (como al importar una copia)
+      normaliza(p, {}, "manual");
+    }
   assert.throws(() => perfilManual("nope", "nope"));
 });
 

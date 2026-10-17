@@ -9,7 +9,11 @@
 
 import { valida, cuerpoPara, MAX_BYTES } from "./valida.js";
 
-const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
+const json = (obj, status = 200) =>
+  new Response(JSON.stringify(obj), {
+    status,
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }
+  });
 
 export default {
   async fetch(request, env) {
@@ -31,14 +35,23 @@ async function ia(request, env, url) {
   if (env.LIMITE) {
     const ip = request.headers.get("cf-connecting-ip") || "anon";
     const { success } = await env.LIMITE.limit({ key: ip });
-    if (!success) return json({ error: "limite", mensaje: "Vas muy rápido: espera un minuto y vuelve a intentarlo." }, 429);
+    if (!success)
+      return json(
+        { error: "limite", mensaje: "Vas muy rápido: espera un minuto y vuelve a intentarlo." },
+        429
+      );
   }
 
   const largo = +(request.headers.get("content-length") || 0);
   if (largo > MAX_BYTES) return json({ error: "grande", mensaje: "Las fotos pesan demasiado." }, 413);
   let entrada;
-  try { const t = await request.text(); if (t.length > MAX_BYTES) throw 0; entrada = JSON.parse(t); }
-  catch (e) { return json({ error: "formato", mensaje: "Petición no válida." }, 400); }
+  try {
+    const t = await request.text();
+    if (t.length > MAX_BYTES) throw 0;
+    entrada = JSON.parse(t);
+  } catch (e) {
+    return json({ error: "formato", mensaje: "Petición no válida." }, 400);
+  }
   const fallo = valida(entrada);
   if (fallo) return json({ error: "formato", mensaje: fallo }, 400);
 
@@ -46,21 +59,47 @@ async function ia(request, env, url) {
     { url: env.IA_URL, modelo: env.IA_MODELO, clave: env.IA_CLAVE },
     { url: env.IA2_URL, modelo: env.IA2_MODELO, clave: env.IA2_CLAVE }
   ].filter((p) => p.url && p.modelo && p.clave);
-  if (!proveedores.length) return json({ error: "config", mensaje: "La IA de esta web no está configurada todavía." }, 503);
+  if (!proveedores.length)
+    return json({ error: "config", mensaje: "La IA de esta web no está configurada todavía." }, 503);
 
   let ultimo = null;
   for (const p of proveedores) {
     let r;
     try {
-      r = await fetch(p.url, { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + p.clave }, body: JSON.stringify(cuerpoPara(entrada, p.modelo, /mistral\.ai/.test(p.url))) });
-    } catch (e) { ultimo = { status: 502 }; continue; }
+      r = await fetch(p.url, {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: "Bearer " + p.clave },
+        body: JSON.stringify(cuerpoPara(entrada, p.modelo, /mistral\.ai/.test(p.url)))
+      });
+    } catch (e) {
+      ultimo = { status: 502 };
+      continue;
+    }
     // Saturado o caído: probamos con el de reserva.
-    if (r.status === 429 || r.status >= 500) { ultimo = { status: r.status }; continue; }
-    if (r.status === 401 || r.status === 403) { console.error("IA: clave rechazada por", p.url); ultimo = { status: 503 }; continue; }
+    if (r.status === 429 || r.status >= 500) {
+      ultimo = { status: r.status };
+      continue;
+    }
+    if (r.status === 401 || r.status === 403) {
+      console.error("IA: clave rechazada por", p.url);
+      ultimo = { status: 503 };
+      continue;
+    }
     // Si el modelo no acepta el modo JSON, se lo decimos al navegador tal cual para que reintente sin él.
     const cuerpo = await r.text();
-    return new Response(cuerpo, { status: r.status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
+    return new Response(cuerpo, {
+      status: r.status,
+      headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }
+    });
   }
-  if (ultimo && ultimo.status === 429) return json({ error: "cupo", mensaje: "Hoy hay mucha gente usando la IA y se ha llenado el cupo gratuito. Prueba más tarde o mañana." }, 429);
+  if (ultimo && ultimo.status === 429)
+    return json(
+      {
+        error: "cupo",
+        mensaje:
+          "Hoy hay mucha gente usando la IA y se ha llenado el cupo gratuito. Prueba más tarde o mañana."
+      },
+      429
+    );
   return json({ error: "caida", mensaje: "La IA no responde ahora mismo. Prueba en un rato." }, 502);
 }

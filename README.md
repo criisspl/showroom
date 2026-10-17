@@ -40,11 +40,11 @@ Está pensada para que la use cualquiera: no hay que registrarse, ni instalar na
 
 ## Dispositivos compatibles
 
-| | Mínimo |
-|---|---|
+|               | Mínimo                                                  |
+| ------------- | ------------------------------------------------------- |
 | iPhone y iPad | iOS / iPadOS 15 o posterior (Safari, o Chrome para iOS) |
-| Android | Chrome 90+, Samsung Internet 15+, Firefox 94+ |
-| Ordenador | Chrome o Edge 90+, Firefox 94+, Safari 15+ |
+| Android       | Chrome 90+, Samsung Internet 15+, Firefox 94+           |
+| Ordenador     | Chrome o Edge 90+, Firefox 94+, Safari 15+              |
 
 - **Se instala como una app:** se puede añadir a la pantalla de inicio desde el navegador, con su icono, a pantalla completa y sin pasar por ninguna tienda.
   - En **Android**, la app muestra un botón «Instalar» en Ajustes.
@@ -71,7 +71,7 @@ La app trae su propio servidor intermediario (`worker/`, en Cloudflare Workers).
 ## Publicarla (gratis) en Cloudflare
 
 1. Crea una cuenta gratuita en [Cloudflare](https://dash.cloudflare.com/sign-up).
-2. Ve a **Workers & Pages → Create → Import a repository**, conecta GitHub y elige este repo. Llama al proyecto `armario` (igual que `name` en `wrangler.jsonc`) y deja los valores por defecto: *Build command* `npm run build` y *Deploy command* `npx wrangler deploy`.
+2. Ve a **Workers & Pages → Create → Import a repository**, conecta GitHub y elige este repo. Llama al proyecto `armario` (igual que `name` en `wrangler.jsonc`) y deja los valores por defecto: _Build command_ `npm run build` y _Deploy command_ `npx wrangler deploy`.
 3. Crea una clave gratuita en [Groq](https://console.groq.com/keys).
 4. En el Worker, ve a **Settings → Variables and Secrets → Add**, elige el tipo **Secret**, ponle el nombre `IA_CLAVE` y pega la clave.
    - Opcional: añade también `IA2_CLAVE` con una clave de Mistral como reserva.
