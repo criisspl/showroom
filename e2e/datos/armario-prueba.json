@@ -1,0 +1,847 @@
+{
+  "app": "armario",
+  "version": 1,
+  "fecha": "2026-01-01T00:00:00.000Z",
+  "kv": {
+    "perfil": {
+      "origen": "manual",
+      "creado": "2026-10-17T17:18:09.615Z",
+      "respuestas": {},
+      "resumen": "Estación Verano Suave, cuerpo Clásico Suave.",
+      "color": {
+        "estacion": "Verano Suave",
+        "subtono": "neutro-frío",
+        "contraste": "bajo",
+        "intensidad": "suave y apagada",
+        "explicacion": "",
+        "paleta": [
+          {
+            "n": "Rosa palo",
+            "hex": "#D9A9B0"
+          },
+          {
+            "n": "Malva",
+            "hex": "#B48EA5"
+          },
+          {
+            "n": "Azul grisáceo",
+            "hex": "#8DA3B8"
+          },
+          {
+            "n": "Salvia fría",
+            "hex": "#A3B5A6"
+          },
+          {
+            "n": "Lavanda grisácea",
+            "hex": "#ADA4C4"
+          },
+          {
+            "n": "Azul denim suave",
+            "hex": "#6E86A3"
+          },
+          {
+            "n": "Rosa empolvado",
+            "hex": "#CE9AA6"
+          },
+          {
+            "n": "Verde eucalipto",
+            "hex": "#86A398"
+          },
+          {
+            "n": "Ciruela suave",
+            "hex": "#8A5C78"
+          },
+          {
+            "n": "Frambuesa apagada",
+            "hex": "#B0617A"
+          },
+          {
+            "n": "Azul petróleo suave",
+            "hex": "#5D7F86"
+          },
+          {
+            "n": "Rosa té",
+            "hex": "#D8B2B1"
+          }
+        ],
+        "neutros": [
+          {
+            "n": "Blanco roto frío",
+            "hex": "#EFECE6"
+          },
+          {
+            "n": "Gris topo",
+            "hex": "#A39A94"
+          },
+          {
+            "n": "Gris pizarra",
+            "hex": "#6B7079"
+          },
+          {
+            "n": "Taupe rosado",
+            "hex": "#B6A49F"
+          },
+          {
+            "n": "Azul marino grisáceo",
+            "hex": "#3E4A5E"
+          }
+        ],
+        "evitar": [
+          {
+            "n": "Negro",
+            "hex": "#141110",
+            "cambio": "Azul marino grisáceo"
+          },
+          {
+            "n": "Blanco óptico",
+            "hex": "#FFFFFF",
+            "cambio": "Blanco roto frío"
+          },
+          {
+            "n": "Naranja vivo",
+            "hex": "#F2702A",
+            "cambio": "Rosa empolvado"
+          },
+          {
+            "n": "Amarillo limón",
+            "hex": "#F4F03B",
+            "cambio": "Salvia fría"
+          },
+          {
+            "n": "Fucsia",
+            "hex": "#E5399B",
+            "cambio": "Frambuesa apagada"
+          }
+        ],
+        "metales": [],
+        "combinaciones": []
+      },
+      "cuerpo": {
+        "tipo": "Clásico Suave",
+        "explicacion": "",
+        "claves": [],
+        "si": [
+          "Cortes equilibrados con curvas suaves",
+          "Cintura definida",
+          "Tejidos fluidos",
+          "Escotes redondeados",
+          "Largo a la rodilla o midi"
+        ],
+        "evita": ["Prendas rígidas y angulosas", "Volúmenes extremos", "Estampados agresivos"],
+        "tips": ["Marca la cintura con suavidad.", "Prefiere líneas redondeadas a picos marcados."]
+      },
+      "rostro": null,
+      "maquillaje": null,
+      "pelo": null,
+      "estetica": {
+        "nombre": "",
+        "subtitulo": "",
+        "palabras": [],
+        "formula": [],
+        "claves": [],
+        "porque": [],
+        "pinterest": []
+      },
+      "looks": [],
+      "deseos": [
+        {
+          "id": "w-blusa",
+          "n": "Blusa romántica con lazada",
+          "cat": "arriba",
+          "tipo": "blusa",
+          "icono": "blusa",
+          "corte": "fluida",
+          "abrigo": 1,
+          "formal": 2,
+          "top": true,
+          "cols": [
+            ["Rosa palo", "#D9A9B0"],
+            ["Lavanda grisácea", "#ADA4C4"],
+            ["Blanco roto frío", "#EFECE6"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Blusa romántica con lazada",
+          "q2": "Blusa romántica con lazada outfit"
+        },
+        {
+          "id": "w-jersey",
+          "n": "Jersey de punto calado",
+          "cat": "arriba",
+          "tipo": "jersey",
+          "icono": "jersey",
+          "corte": "amplia",
+          "abrigo": 2,
+          "formal": 1,
+          "top": false,
+          "cols": [
+            ["Malva", "#B48EA5"],
+            ["Azul denim suave", "#6E86A3"],
+            ["Gris topo", "#A39A94"]
+          ],
+          "nota": "",
+          "estilo": "casual",
+          "tejido": "algodon",
+          "q1": "Jersey de punto calado",
+          "q2": "Jersey de punto calado outfit"
+        },
+        {
+          "id": "w-cami",
+          "n": "Top lencero con encaje",
+          "cat": "arriba",
+          "tipo": "top",
+          "icono": "top",
+          "corte": "fluida",
+          "abrigo": 1,
+          "formal": 2,
+          "top": false,
+          "cols": [
+            ["Azul grisáceo", "#8DA3B8"],
+            ["Rosa empolvado", "#CE9AA6"],
+            ["Gris pizarra", "#6B7079"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Top lencero con encaje",
+          "q2": "Top lencero con encaje outfit"
+        },
+        {
+          "id": "w-cruzado",
+          "n": "Top cruzado de manga larga",
+          "cat": "arriba",
+          "tipo": "top",
+          "icono": "top-cruzado",
+          "corte": "fluida",
+          "abrigo": 1,
+          "formal": 2,
+          "top": false,
+          "cols": [
+            ["Salvia fría", "#A3B5A6"],
+            ["Verde eucalipto", "#86A398"],
+            ["Taupe rosado", "#B6A49F"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Top cruzado de manga larga",
+          "q2": "Top cruzado de manga larga outfit"
+        },
+        {
+          "id": "w-saten",
+          "n": "Falda midi de satén",
+          "cat": "abajo",
+          "tipo": "falda",
+          "icono": "falda-midi",
+          "corte": "fluida",
+          "abrigo": 1,
+          "formal": 2,
+          "top": true,
+          "cols": [
+            ["Lavanda grisácea", "#ADA4C4"],
+            ["Ciruela suave", "#8A5C78"],
+            ["Azul marino grisáceo", "#3E4A5E"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Falda midi de satén",
+          "q2": "Falda midi de satén outfit"
+        },
+        {
+          "id": "w-maxi",
+          "n": "Falda larga de volantes",
+          "cat": "abajo",
+          "tipo": "falda",
+          "icono": "falda-larga",
+          "corte": "amplia",
+          "abrigo": 2,
+          "formal": 1,
+          "top": false,
+          "cols": [
+            ["Azul denim suave", "#6E86A3"],
+            ["Frambuesa apagada", "#B0617A"],
+            ["Blanco roto frío", "#EFECE6"]
+          ],
+          "nota": "",
+          "estilo": "casual",
+          "tejido": "algodon",
+          "q1": "Falda larga de volantes",
+          "q2": "Falda larga de volantes outfit"
+        },
+        {
+          "id": "w-pana",
+          "n": "Pantalón de pana acampanado",
+          "cat": "abajo",
+          "tipo": "pantalón",
+          "icono": "pantalon-campana",
+          "corte": "fluida",
+          "abrigo": 2,
+          "formal": 1,
+          "top": true,
+          "cols": [
+            ["Rosa empolvado", "#CE9AA6"],
+            ["Azul petróleo suave", "#5D7F86"],
+            ["Gris topo", "#A39A94"]
+          ],
+          "nota": "",
+          "estilo": "casual",
+          "tejido": "algodon",
+          "q1": "Pantalón de pana acampanado",
+          "q2": "Pantalón de pana acampanado outfit"
+        },
+        {
+          "id": "w-ancho",
+          "n": "Pantalón ancho con caída",
+          "cat": "abajo",
+          "tipo": "pantalón",
+          "icono": "pantalon-ancho",
+          "corte": "amplia",
+          "abrigo": 2,
+          "formal": 2,
+          "top": false,
+          "cols": [
+            ["Verde eucalipto", "#86A398"],
+            ["Rosa té", "#D8B2B1"],
+            ["Gris pizarra", "#6B7079"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Pantalón ancho con caída",
+          "q2": "Pantalón ancho con caída outfit"
+        },
+        {
+          "id": "w-vcruzado",
+          "n": "Vestido cruzado de flores",
+          "cat": "vestido",
+          "tipo": "vestido",
+          "icono": "vestido",
+          "corte": "fluida",
+          "abrigo": 2,
+          "formal": 2,
+          "top": false,
+          "cols": [
+            ["Ciruela suave", "#8A5C78"],
+            ["Rosa palo", "#D9A9B0"],
+            ["Taupe rosado", "#B6A49F"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Vestido cruzado de flores",
+          "q2": "Vestido cruzado de flores outfit"
+        },
+        {
+          "id": "w-slip",
+          "n": "Vestido lencero de satén",
+          "cat": "vestido",
+          "tipo": "vestido",
+          "icono": "vestido-lencero",
+          "corte": "fluida",
+          "abrigo": 1,
+          "formal": 2,
+          "top": false,
+          "cols": [
+            ["Frambuesa apagada", "#B0617A"],
+            ["Malva", "#B48EA5"],
+            ["Azul marino grisáceo", "#3E4A5E"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Vestido lencero de satén",
+          "q2": "Vestido lencero de satén outfit"
+        },
+        {
+          "id": "w-elfo",
+          "n": "Vestido de terciopelo, manga campana",
+          "cat": "vestido",
+          "tipo": "vestido",
+          "icono": "vestido-largo",
+          "corte": "fluida",
+          "abrigo": 3,
+          "formal": 3,
+          "top": false,
+          "cols": [
+            ["Azul petróleo suave", "#5D7F86"],
+            ["Azul grisáceo", "#8DA3B8"],
+            ["Blanco roto frío", "#EFECE6"]
+          ],
+          "nota": "",
+          "estilo": "fiesta",
+          "tejido": "algodon",
+          "q1": "Vestido de terciopelo, manga campana",
+          "q2": "Vestido de terciopelo, manga campana outfit"
+        },
+        {
+          "id": "w-cardigan",
+          "n": "Cárdigan largo de punto gordo",
+          "cat": "capa",
+          "tipo": "cárdigan",
+          "icono": "cardigan",
+          "corte": "amplia",
+          "abrigo": 2,
+          "formal": 1,
+          "top": true,
+          "cols": [
+            ["Rosa té", "#D8B2B1"],
+            ["Salvia fría", "#A3B5A6"],
+            ["Gris topo", "#A39A94"]
+          ],
+          "nota": "",
+          "estilo": "casual",
+          "tejido": "algodon",
+          "q1": "Cárdigan largo de punto gordo",
+          "q2": "Cárdigan largo de punto gordo outfit"
+        },
+        {
+          "id": "w-ante",
+          "n": "Chaqueta de ante con flecos",
+          "cat": "capa",
+          "tipo": "chaqueta",
+          "icono": "chaqueta",
+          "corte": "fluida",
+          "abrigo": 2,
+          "formal": 2,
+          "top": false,
+          "cols": [
+            ["Rosa palo", "#D9A9B0"],
+            ["Lavanda grisácea", "#ADA4C4"],
+            ["Gris pizarra", "#6B7079"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Chaqueta de ante con flecos",
+          "q2": "Chaqueta de ante con flecos outfit"
+        },
+        {
+          "id": "w-sobre",
+          "n": "Sobrecamisa de cuadros",
+          "cat": "capa",
+          "tipo": "sobrecamisa",
+          "icono": "camisa",
+          "corte": "amplia",
+          "abrigo": 2,
+          "formal": 1,
+          "top": false,
+          "cols": [
+            ["Malva", "#B48EA5"],
+            ["Azul denim suave", "#6E86A3"],
+            ["Taupe rosado", "#B6A49F"]
+          ],
+          "nota": "",
+          "estilo": "casual",
+          "tejido": "algodon",
+          "q1": "Sobrecamisa de cuadros",
+          "q2": "Sobrecamisa de cuadros outfit"
+        },
+        {
+          "id": "w-abrigo",
+          "n": "Abrigo largo con cinturón",
+          "cat": "capa",
+          "tipo": "abrigo",
+          "icono": "abrigo",
+          "corte": "fluida",
+          "abrigo": 3,
+          "formal": 2,
+          "top": false,
+          "cols": [
+            ["Azul grisáceo", "#8DA3B8"],
+            ["Rosa empolvado", "#CE9AA6"],
+            ["Azul marino grisáceo", "#3E4A5E"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Abrigo largo con cinturón",
+          "q2": "Abrigo largo con cinturón outfit"
+        },
+        {
+          "id": "w-capa",
+          "n": "Capa de lana con capucha",
+          "cat": "capa",
+          "tipo": "capa",
+          "icono": "capa",
+          "corte": "amplia",
+          "abrigo": 3,
+          "formal": 2,
+          "top": false,
+          "cols": [
+            ["Salvia fría", "#A3B5A6"],
+            ["Verde eucalipto", "#86A398"],
+            ["Blanco roto frío", "#EFECE6"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Capa de lana con capucha",
+          "q2": "Capa de lana con capucha outfit"
+        },
+        {
+          "id": "w-chaleco",
+          "n": "Chaleco de crochet",
+          "cat": "capa",
+          "tipo": "chaleco",
+          "icono": "chaleco",
+          "corte": "fluida",
+          "abrigo": 1,
+          "formal": 1,
+          "top": false,
+          "cols": [
+            ["Lavanda grisácea", "#ADA4C4"],
+            ["Ciruela suave", "#8A5C78"],
+            ["Gris topo", "#A39A94"]
+          ],
+          "nota": "",
+          "estilo": "casual",
+          "tejido": "algodon",
+          "q1": "Chaleco de crochet",
+          "q2": "Chaleco de crochet outfit"
+        },
+        {
+          "id": "w-botas",
+          "n": "Botas altas de tacón ancho",
+          "cat": "calzado",
+          "tipo": "botas",
+          "icono": "botas",
+          "corte": "ajustada",
+          "abrigo": 3,
+          "formal": 2,
+          "top": true,
+          "cols": [
+            ["Azul denim suave", "#6E86A3"],
+            ["Frambuesa apagada", "#B0617A"],
+            ["Gris pizarra", "#6B7079"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Botas altas de tacón ancho",
+          "q2": "Botas altas de tacón ancho outfit"
+        },
+        {
+          "id": "w-botines",
+          "n": "Botines de cordones",
+          "cat": "calzado",
+          "tipo": "botines",
+          "icono": "botines",
+          "corte": "ajustada",
+          "abrigo": 2,
+          "formal": 1,
+          "top": false,
+          "cols": [
+            ["Rosa empolvado", "#CE9AA6"],
+            ["Azul petróleo suave", "#5D7F86"],
+            ["Taupe rosado", "#B6A49F"]
+          ],
+          "nota": "",
+          "estilo": "casual",
+          "tejido": "algodon",
+          "q1": "Botines de cordones",
+          "q2": "Botines de cordones outfit"
+        },
+        {
+          "id": "w-merceditas",
+          "n": "Merceditas de suela gruesa",
+          "cat": "calzado",
+          "tipo": "merceditas",
+          "icono": "zapatos",
+          "corte": "ajustada",
+          "abrigo": 2,
+          "formal": 2,
+          "top": false,
+          "cols": [
+            ["Verde eucalipto", "#86A398"],
+            ["Rosa té", "#D8B2B1"],
+            ["Azul marino grisáceo", "#3E4A5E"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Merceditas de suela gruesa",
+          "q2": "Merceditas de suela gruesa outfit"
+        },
+        {
+          "id": "w-cinturon",
+          "n": "Cinturón blando de piel",
+          "cat": "accesorio",
+          "tipo": "cinturón",
+          "icono": "cinturon",
+          "corte": "ajustada",
+          "abrigo": 1,
+          "formal": 2,
+          "top": true,
+          "cols": [
+            ["Ciruela suave", "#8A5C78"],
+            ["Rosa palo", "#D9A9B0"],
+            ["Blanco roto frío", "#EFECE6"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Cinturón blando de piel",
+          "q2": "Cinturón blando de piel outfit"
+        },
+        {
+          "id": "w-joyas",
+          "n": "Joyas doradas de hojas y lunas",
+          "cat": "accesorio",
+          "tipo": "collar",
+          "icono": "joyas",
+          "corte": "ajustada",
+          "abrigo": 1,
+          "formal": 2,
+          "top": false,
+          "cols": [
+            ["Frambuesa apagada", "#B0617A"],
+            ["Malva", "#B48EA5"],
+            ["Gris topo", "#A39A94"]
+          ],
+          "nota": "",
+          "estilo": "arreglado",
+          "tejido": "algodon",
+          "q1": "Joyas doradas de hojas y lunas",
+          "q2": "Joyas doradas de hojas y lunas outfit"
+        },
+        {
+          "id": "w-bolso",
+          "n": "Bolso bandolera blando",
+          "cat": "accesorio",
+          "tipo": "bolso",
+          "icono": "bolso",
+          "corte": "fluida",
+          "abrigo": 1,
+          "formal": 1,
+          "top": false,
+          "cols": [
+            ["Azul petróleo suave", "#5D7F86"],
+            ["Azul grisáceo", "#8DA3B8"],
+            ["Gris pizarra", "#6B7079"]
+          ],
+          "nota": "",
+          "estilo": "casual",
+          "tejido": "algodon",
+          "q1": "Bolso bandolera blando",
+          "q2": "Bolso bandolera blando outfit"
+        },
+        {
+          "id": "w-medias",
+          "n": "Medias caladas",
+          "cat": "accesorio",
+          "tipo": "medias",
+          "icono": "medias",
+          "corte": "ajustada",
+          "abrigo": 2,
+          "formal": 1,
+          "top": false,
+          "cols": [
+            ["Rosa té", "#D8B2B1"],
+            ["Salvia fría", "#A3B5A6"],
+            ["Taupe rosado", "#B6A49F"]
+          ],
+          "nota": "",
+          "estilo": "casual",
+          "tejido": "algodon",
+          "q1": "Medias caladas",
+          "q2": "Medias caladas outfit"
+        }
+      ]
+    }
+  },
+  "fotos": {},
+  "prendas": [
+    {
+      "id": "p-blusa",
+      "nombre": "Blusa fluida azul grisáceo",
+      "cat": "arriba",
+      "tipo": "blusa",
+      "color": "#7A8FA6",
+      "estilo": "arreglado",
+      "tejido": "ligero",
+      "corte": "fluida",
+      "abrigo": 1,
+      "formal": 2,
+      "temporada": [],
+      "activa": true,
+      "foto": null,
+      "mini": null,
+      "creada": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "p-camiseta",
+      "nombre": "Camiseta básica crema",
+      "cat": "arriba",
+      "tipo": "camiseta",
+      "color": "#F3EBDD",
+      "estilo": "casual",
+      "tejido": "algodon",
+      "corte": "ajustada",
+      "abrigo": 1,
+      "formal": 1,
+      "temporada": [],
+      "activa": true,
+      "foto": null,
+      "mini": null,
+      "creada": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "p-jersey",
+      "nombre": "Jersey de punto malva",
+      "cat": "arriba",
+      "tipo": "jersey",
+      "color": "#A88AA0",
+      "estilo": "casual",
+      "tejido": "punto",
+      "corte": "fluida",
+      "abrigo": 2,
+      "formal": 1,
+      "temporada": [],
+      "activa": true,
+      "foto": null,
+      "mini": null,
+      "creada": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "p-vaquero",
+      "nombre": "Vaquero recto",
+      "cat": "abajo",
+      "tipo": "vaquero",
+      "color": "#4A5F7A",
+      "estilo": "casual",
+      "tejido": "vaquero",
+      "corte": "ajustada",
+      "abrigo": 2,
+      "formal": 1,
+      "temporada": [],
+      "activa": true,
+      "foto": null,
+      "mini": null,
+      "creada": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "p-falda",
+      "nombre": "Falda midi gris piedra",
+      "cat": "abajo",
+      "tipo": "falda",
+      "color": "#9A9590",
+      "estilo": "arreglado",
+      "tejido": "ligero",
+      "corte": "fluida",
+      "abrigo": 1,
+      "formal": 2,
+      "temporada": [],
+      "activa": true,
+      "foto": null,
+      "mini": null,
+      "creada": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "p-pantalon",
+      "nombre": "Pantalón de pinzas marino",
+      "cat": "abajo",
+      "tipo": "pantalón",
+      "color": "#2E3B55",
+      "estilo": "arreglado",
+      "tejido": "algodon",
+      "corte": "fluida",
+      "abrigo": 2,
+      "formal": 2,
+      "temporada": [],
+      "activa": true,
+      "foto": null,
+      "mini": null,
+      "creada": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "p-vestido",
+      "nombre": "Vestido camisero lavanda",
+      "cat": "vestido",
+      "tipo": "vestido",
+      "color": "#B9A8C9",
+      "estilo": "arreglado",
+      "tejido": "ligero",
+      "corte": "fluida",
+      "abrigo": 1,
+      "formal": 2,
+      "temporada": [],
+      "activa": true,
+      "foto": null,
+      "mini": null,
+      "creada": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "p-chaqueta",
+      "nombre": "Chaqueta de punto gris",
+      "cat": "capa",
+      "tipo": "cárdigan",
+      "color": "#8C8C94",
+      "estilo": "casual",
+      "tejido": "punto",
+      "corte": "fluida",
+      "abrigo": 2,
+      "formal": 1,
+      "temporada": [],
+      "activa": true,
+      "foto": null,
+      "mini": null,
+      "creada": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "p-gabardina",
+      "nombre": "Gabardina topo",
+      "cat": "capa",
+      "tipo": "gabardina",
+      "color": "#8B7D6B",
+      "estilo": "arreglado",
+      "tejido": "algodon",
+      "corte": "fluida",
+      "abrigo": 3,
+      "formal": 2,
+      "temporada": [],
+      "activa": true,
+      "foto": null,
+      "mini": null,
+      "creada": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "p-zapatillas",
+      "nombre": "Zapatillas blancas",
+      "cat": "calzado",
+      "tipo": "zapatillas",
+      "color": "#F5F5F0",
+      "estilo": "casual",
+      "tejido": "piel",
+      "corte": "ajustada",
+      "abrigo": 2,
+      "formal": 1,
+      "temporada": [],
+      "activa": true,
+      "foto": null,
+      "mini": null,
+      "creada": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "p-botines",
+      "nombre": "Botines de ante gris",
+      "cat": "calzado",
+      "tipo": "botines",
+      "color": "#7D7873",
+      "estilo": "arreglado",
+      "tejido": "piel",
+      "corte": "ajustada",
+      "abrigo": 2,
+      "formal": 2,
+      "temporada": [],
+      "activa": true,
+      "foto": null,
+      "mini": null,
+      "creada": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "outfits": [],
+  "deseos": [],
+  "votos": []
+}

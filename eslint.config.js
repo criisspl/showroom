@@ -3,7 +3,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default [
-  { ignores: ["dist/", ".wrangler/", "coverage/"] },
+  { ignores: ["dist/", ".wrangler/", "coverage/", "test-results/", "playwright-report/"] },
   js.configs.recommended,
   ...tseslint.configs.recommended.map((c) => ({ ...c, files: ["**/*.ts"] })),
   {
