@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Instrucciones para Claude en este repo. Cada línea está aquí porque sin ella Claude se equivocaría; si una deja de hacer falta, bórrala.
+Solo lo propio de este repo; las reglas generales y las skills (`/revisar`, `/limpiar`, `/preparar-pr`, `/grill-me`) vienen de [claude-config](https://github.com/criisspl/claude-config). Cada línea está aquí porque sin ella Claude se equivocaría; si una deja de hacer falta, bórrala.
 
 ## Stack y comandos
 
@@ -42,30 +42,6 @@ CI (`.github/workflows/ci.yml`) ejecuta lint, formato, tipos, tests con cobertur
 - La clave de la IA es un secreto de Cloudflare (`IA_CLAVE`); nunca en el código ni en `wrangler.jsonc`.
 - Textos de la interfaz y comentarios en español.
 - No añadas dependencias sin preguntar.
-
-## Comunicación
-
-- Español informal, corto y al grano. Sin introducciones ni resúmenes finales.
-- Al proponer código, solo el fragmento que cambia, salvo que pida el fichero entero.
-- Si algo es ambiguo, pregunta antes de escribir mucho.
-
-## Cómo trabajar
-
-1. **Piensa antes de programar.** Di qué vas a hacer y qué supuestos asumes. Si hay dos interpretaciones razonables, pregunta.
-2. **Lo más simple que funcione.** Nada de abstracciones u opciones que nadie ha pedido.
-3. **Cambios quirúrgicos.** Toca solo lo necesario. No reformatees ni "mejores" código ajeno de paso; si ves algo, avísalo.
-4. **Verifica.** `npm test`, `npm run typecheck` y `npm run build` en verde antes de decir que funciona; si es UI, compruébalo en `npm run dev`.
-
-## Flujo
-
-- Tarea compleja o de varios ficheros → `/plan` primero, o `/grill-me` si el diseño no está claro.
-- Bug → primero un test que falle en `test/`, luego el arreglo.
-- Después de cambios grandes: `/revisar` (bugs) y luego `/limpiar` (simplificar).
-- Antes de abrir un PR: `/preparar-pr`.
-- Una rama por cambio, PR a `main`, commits pequeños con mensaje en imperativo.
-
-## Prohibido
-
-- Commitear secretos o `.env`.
-- Push directo a `main`.
-- Borrar o debilitar tests para que pase la CI.
+- No cambies sin migración el formato de lo guardado en IndexedDB ni el de las copias `.armario.json`: rompería los datos de quien ya usa la app.
+- En revisiones, cualquier dato que salga del dispositivo sin cifrar o sin permiso es un bug de gravedad alta.
+- Bug → el test que falla va en `test/` (o en `e2e/` si solo se ve en la app compilada).
