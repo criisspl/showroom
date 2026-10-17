@@ -11,9 +11,7 @@
     "run_worker_first": ["/api/*"]
   },
   // Máximo 8 peticiones a la IA por minuto y por persona
-  "ratelimits": [
-    { "name": "LIMITE", "namespace_id": "1001", "simple": { "limit": 8, "period": 60 } }
-  ],
+  "ratelimits": [{ "name": "LIMITE", "namespace_id": "1001", "simple": { "limit": 8, "period": 60 } }],
   "vars": {
     // Proveedor principal: Groq (plan gratuito, modelo con visión)
     "IA_URL": "https://api.groq.com/openai/v1/chat/completions",

@@ -33,9 +33,11 @@ test("estilo y tejido se deducen del nombre", () => {
 
 test("nunca junta chándal con un top de fiesta", () => {
   assert.equal(casan(P[0], P[3]), null);
-  for (const o of OCAS) for (const b of ["frio", "fresco", "templado", "calor"]) {
-    for (const r of monta(o.id, b, false, 1)) assert.ok(!(r.ids.includes("t1") && r.ids.includes("b1")), o.id + "/" + b);
-  }
+  for (const o of OCAS)
+    for (const b of ["frio", "fresco", "templado", "calor"]) {
+      for (const r of monta(o.id, b, false, 1))
+        assert.ok(!(r.ids.includes("t1") && r.ids.includes("b1")), o.id + "/" + b);
+    }
 });
 
 test("monta devuelve hasta 3 outfits con prendas existentes", () => {
@@ -46,13 +48,18 @@ test("monta devuelve hasta 3 outfits con prendas existentes", () => {
 
 test("los votos «no» vetan esa combinación", () => {
   const r = monta("diario", "templado", false, 0)[0];
-  setEstado({ V: [{ id: "v", key: r.key, voto: "no", ocasion: "diario", banda: "templado", motivos: ["todo"] }] });
+  setEstado({
+    V: [{ id: "v", key: r.key, voto: "no", ocasion: "diario", banda: "templado", motivos: ["todo"] }]
+  });
   const r2 = monta("diario", "templado", false, 0);
   assert.ok(!r2.some((o) => o.key === r.key));
 });
 
 test("evalua da un veredicto para una prenda nueva", () => {
-  const v = evalua({ nombre: "Falda midi de punto", cat: "abajo", color: "#708238", formal: 2, abrigo: 2 }, []);
+  const v = evalua(
+    { nombre: "Falda midi de punto", cat: "abajo", color: "#708238", formal: 2, abrigo: 2 },
+    []
+  );
   assert.ok(v && typeof v === "object");
 });
 
@@ -63,16 +70,21 @@ test("varias ocasiones: solo vale lo que vale en todas", () => {
   assert.equal(o.n, "Oficina + Tarde de finde");
   assert.equal(o.multi.length, 2);
   assert.ok(o.f[0] <= o.f[1]);
-  for (const r of monta("oficina+finde", "fresco+templado", false, 0)) assert.ok(!r.ids.includes("b1"), "nada de chándal si hay oficina");
+  for (const r of monta("oficina+finde", "fresco+templado", false, 0))
+    assert.ok(!r.ids.includes("b1"), "nada de chándal si hay oficina");
 });
 
 test("dos tiempos: la capa se decide por la parte fría", () => {
   const b = bandaDe("templado+frio");
-  assert.equal(b.capa.id, "frio"); assert.equal(b.calido.id, "templado");
+  assert.equal(b.capa.id, "frio");
+  assert.equal(b.calido.id, "templado");
   assert.ok(capaHace({ banda: "templado+frio" }));
   assert.ok(!capaHace({ banda: "calor" }));
   const r = monta("diario", "calor+frio", false, 0);
-  assert.ok(r.some((o) => o.ids.includes("c1")), "con frío por la mañana añade la chaqueta");
+  assert.ok(
+    r.some((o) => o.ids.includes("c1")),
+    "con frío por la mañana añade la chaqueta"
+  );
 });
 
 test("juzga: chándal con lentejuelas no pega y propone cambios", () => {
@@ -108,33 +120,62 @@ test("oficina casual acepta un look casual; la formal pide una prenda arreglada"
 import { temporadaDe, fueraTemporada } from "../src/lib/engine.js";
 
 test("temporada deducida del nombre, sin falsos positivos", () => {
-  assert.deepEqual(temporadaDe({ nombre: "Sandalias planas", cat: "calzado", abrigo: 1 }).t, ["primavera", "verano"]);
+  assert.deepEqual(temporadaDe({ nombre: "Sandalias planas", cat: "calzado", abrigo: 1 }).t, [
+    "primavera",
+    "verano"
+  ]);
   assert.deepEqual(temporadaDe({ nombre: "Mallas acampanado marrón", cat: "abajo", abrigo: 2 }).t.length, 4);
-  assert.deepEqual(temporadaDe({ nombre: "Abrigo de lana", cat: "capa", abrigo: 3 }).t, ["otono", "invierno"]);
+  assert.deepEqual(temporadaDe({ nombre: "Abrigo de lana", cat: "capa", abrigo: 3 }).t, [
+    "otono",
+    "invierno"
+  ]);
   assert.equal(fueraTemporada({ nombre: "Short vaquero", cat: "abajo", abrigo: 1 }, "invierno"), null);
   assert.equal(fueraTemporada({ nombre: "Short vaquero", cat: "abajo", abrigo: 1 }, "otono"), 2.5);
   assert.equal(fueraTemporada({ nombre: "Camiseta", cat: "arriba", temporada: ["verano"] }, "otono"), null);
 });
 
 test("en invierno no propone prendas de verano", () => {
-  setEstado({ P: [...P.map((p) => ({ ...p })), { id: "s1", nombre: "Short vaquero", cat: "abajo", color: "#9DB7D5", abrigo: 1, estilo: "casual", tejido: "vaquero" }] });
-  for (let sd = 0; sd < 4; sd++) for (const r of monta("diario", "fresco", false, sd, null, "invierno")) assert.ok(!r.ids.includes("s1"));
+  setEstado({
+    P: [
+      ...P.map((p) => ({ ...p })),
+      {
+        id: "s1",
+        nombre: "Short vaquero",
+        cat: "abajo",
+        color: "#9DB7D5",
+        abrigo: 1,
+        estilo: "casual",
+        tejido: "vaquero"
+      }
+    ]
+  });
+  for (let sd = 0; sd < 4; sd++)
+    for (const r of monta("diario", "fresco", false, sd, null, "invierno")) assert.ok(!r.ids.includes("s1"));
   const j = juzga(["t2", "s1"], { oca: "diario", banda: "templado", est: "invierno" });
   assert.ok(j.mal.some((t) => /más de primavera y verano que de invierno/.test(t)));
 });
 
 test("un «no» descarta el look para siempre, también en otra ocasión", () => {
   const r = monta("diario", "templado", false, 0)[0];
-  setEstado({ V: [{ id: "v", key: r.key, voto: "no", ocasion: "diario", banda: "templado", motivos: ["ocasion"] }] });
-  for (const oca of ["diario", "finde", "viaje"]) assert.ok(!monta(oca, "templado", false, 0).some((o) => o.key === r.key), oca);
+  setEstado({
+    V: [{ id: "v", key: r.key, voto: "no", ocasion: "diario", banda: "templado", motivos: ["ocasion"] }]
+  });
+  for (const oca of ["diario", "finde", "viaje"])
+    assert.ok(!monta(oca, "templado", false, 0).some((o) => o.key === r.key), oca);
 });
 
 import { condiciones } from "../src/lib/engine.js";
 test("condiciones: montaña, playa, viento", () => {
-  const tacon = { nombre: "Salones de tacón", cat: "calzado", abrigo: 1 }, sand = { nombre: "Sandalias planas", cat: "calzado", abrigo: 1 };
+  const tacon = { nombre: "Salones de tacón", cat: "calzado", abrigo: 1 },
+    sand = { nombre: "Sandalias planas", cat: "calzado", abrigo: 1 };
   assert.ok(condiciones(tacon, { entorno: "montana" }).some(([p]) => p >= 4));
   assert.ok(condiciones(sand, { entorno: "playa" }).some(([p]) => p < 0));
-  assert.ok(condiciones({ nombre: "Falda plisada", cat: "abajo" }, { viento: true }).some(([, t]) => /levantar/.test(t || "")));
+  assert.ok(
+    condiciones({ nombre: "Falda plisada", cat: "abajo" }, { viento: true }).some(([, t]) =>
+      /levantar/.test(t || "")
+    )
+  );
   const r = monta("viaje", "fresco", false, 0, null, "otono", { entorno: "montana" });
-  for (const o of r) assert.ok(!o.ids.includes("b3") && !o.ids.includes("v1"), "nada de faldas ni vestidos en la montaña");
+  for (const o of r)
+    assert.ok(!o.ids.includes("b3") && !o.ids.includes("v1"), "nada de faldas ni vestidos en la montaña");
 });

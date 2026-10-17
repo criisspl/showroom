@@ -1,230 +1,480 @@
 <!doctype html>
 <html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Armario · tu asesora de imagen con IA</title>
-  <meta name="description" content="Análisis de color, cuerpo y estilo con IA, armario virtual y outfits con tu propia ropa. Gratis y sin registrarte.">
-  <meta name="theme-color" content="#E3E4CF">
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Armario">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-</head>
-<body>
-<p class="a-status" id="a-status" role="status" hidden></p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Armario · tu asesora de imagen con IA</title>
+    <meta
+      name="description"
+      content="Análisis de color, cuerpo y estilo con IA, armario virtual y outfits con tu propia ropa. Gratis y sin registrarte."
+    />
+    <meta name="theme-color" content="#E3E4CF" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Armario" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  </head>
+  <body>
+    <p class="a-status" id="a-status" role="status" hidden></p>
 
-<!-- ============ Bienvenida / análisis inicial ============ -->
-<section class="panel" id="tab-bienvenida" data-panel="bienvenida" hidden>
- <div class="wrap">
-  <header class="intro">
-    <p class="eyebrow">Tu asesora de imagen</p>
-    <h1>Armario</h1>
-    <p>Te hago tu análisis de imagen: tu paleta de color, tu tipo de cuerpo, tu estética y las prendas que te faltan. Después subes tu ropa y te monto outfits según la ocasión y el tiempo.</p>
-    <p class="aviso">Todo se hace y se guarda en este móvil: sin cuentas, y tus fotos no salen de aquí.</p>
-  </header>
+    <!-- ============ Bienvenida / análisis inicial ============ -->
+    <section class="panel" id="tab-bienvenida" data-panel="bienvenida" hidden>
+      <div class="wrap">
+        <header class="intro">
+          <p class="eyebrow">Tu asesora de imagen</p>
+          <h1>Armario</h1>
+          <p>
+            Te hago tu análisis de imagen: tu paleta de color, tu tipo de cuerpo, tu estética y las prendas
+            que te faltan. Después subes tu ropa y te monto outfits según la ocasión y el tiempo.
+          </p>
+          <p class="aviso">
+            Todo se hace y se guarda en este móvil: sin cuentas, y tus fotos no salen de aquí.
+          </p>
+        </header>
 
-  <div class="card paso">
-    <h2><span class="n">1</span>Tu selfie</h2>
-    <p class="a-msg">De frente, con luz natural de día (junto a una ventana), sin filtros y, si puedes, sin maquillaje.</p>
-    <label class="foto-in selfie-in" id="b-selfie-in"><b>Elegir o hacer selfie</b><input type="file" id="b-selfie" accept="image/*"></label>
-    <div class="marca" id="b-marca" hidden>
-      <p class="marca-t" id="b-marca-t"></p>
-      <div class="marca-img" id="b-marca-img"><img id="b-marca-foto" alt="Tu selfie"></div>
-      <ul class="marca-res" id="b-marca-res"></ul>
-      <div class="a-row"><button type="button" class="a-btn ghost" id="b-marca-salta" hidden>No hay nada blanco</button><button type="button" class="a-btn ghost" id="b-marca-otra">Volver a marcar</button><label class="a-btn ghost" style="position:relative">Cambiar foto<input type="file" id="b-selfie2" accept="image/*" style="position:absolute;inset:0;opacity:0"></label></div>
-    </div>
-  </div>
+        <div class="card paso">
+          <h2><span class="n">1</span>Tu selfie</h2>
+          <p class="a-msg">
+            De frente, con luz natural de día (junto a una ventana), sin filtros y, si puedes, sin maquillaje.
+          </p>
+          <label class="foto-in selfie-in" id="b-selfie-in"
+            ><b>Elegir o hacer selfie</b><input type="file" id="b-selfie" accept="image/*"
+          /></label>
+          <div class="marca" id="b-marca" hidden>
+            <p class="marca-t" id="b-marca-t"></p>
+            <div class="marca-img" id="b-marca-img"><img id="b-marca-foto" alt="Tu selfie" /></div>
+            <ul class="marca-res" id="b-marca-res"></ul>
+            <div class="a-row">
+              <button type="button" class="a-btn ghost" id="b-marca-salta" hidden>No hay nada blanco</button
+              ><button type="button" class="a-btn ghost" id="b-marca-otra">Volver a marcar</button
+              ><label class="a-btn ghost" style="position: relative"
+                >Cambiar foto<input
+                  type="file"
+                  id="b-selfie2"
+                  accept="image/*"
+                  style="position: absolute; inset: 0; opacity: 0"
+              /></label>
+            </div>
+          </div>
+        </div>
 
-  <div class="card paso">
-    <h2><span class="n">2</span>Sobre ti</h2>
-    <div id="b-preguntas" class="paso"></div>
-  </div>
+        <div class="card paso">
+          <h2><span class="n">2</span>Sobre ti</h2>
+          <div id="b-preguntas" class="paso"></div>
+        </div>
 
-  <div class="card paso">
-    <h2><span class="n">3</span>Tu análisis</h2>
-    <div class="a-row"><button type="button" class="a-btn" id="b-analiza">Hacer mi análisis</button></div>
-    <p class="a-msg" id="b-msg"></p>
-  </div>
+        <div class="card paso">
+          <h2><span class="n">3</span>Tu análisis</h2>
+          <div class="a-row">
+            <button type="button" class="a-btn" id="b-analiza">Hacer mi análisis</button>
+          </div>
+          <p class="a-msg" id="b-msg"></p>
+        </div>
 
-  <details class="card paso" id="b-ia">
-    <summary><b>Análisis más completo con IA</b> · opcional</summary>
-    <p class="a-msg">La IA mira tus fotos y te da un análisis más detallado: tu cara, tus cejas, gafas, cortes de pelo, maquillaje y una estética con nombre propio. No necesitas cuenta ni clave.</p>
-    <p class="aviso">Para hacerlo, tus fotos y respuestas se envían a un servicio de inteligencia artificial externo. Esta app no las guarda en ningún servidor. Para mayores de 18 años.</p>
-    <div class="fotos" id="b-fotos"></div>
-    <div id="b-preguntas-ia" class="paso"></div>
-    <label class="a-check"><input type="checkbox" id="b-acepto"> <span>Acepto enviar mis fotos y respuestas a la IA para hacer el análisis</span></label>
-    <div class="a-row"><button type="button" class="a-btn" id="b-analiza-ia">Hacer el análisis con IA</button></div>
-    <div class="progreso" id="b-prog" hidden><span class="a-msg" id="b-prog-t">Analizando…</span><span class="barra"><i></i></span></div>
-    <p class="a-msg" id="b-msg-ia"></p>
-  </details>
+        <details class="card paso" id="b-ia">
+          <summary><b>Análisis más completo con IA</b> · opcional</summary>
+          <p class="a-msg">
+            La IA mira tus fotos y te da un análisis más detallado: tu cara, tus cejas, gafas, cortes de pelo,
+            maquillaje y una estética con nombre propio. No necesitas cuenta ni clave.
+          </p>
+          <p class="aviso">
+            Para hacerlo, tus fotos y respuestas se envían a un servicio de inteligencia artificial externo.
+            Esta app no las guarda en ningún servidor. Para mayores de 18 años.
+          </p>
+          <div class="fotos" id="b-fotos"></div>
+          <div id="b-preguntas-ia" class="paso"></div>
+          <label class="a-check"
+            ><input type="checkbox" id="b-acepto" />
+            <span>Acepto enviar mis fotos y respuestas a la IA para hacer el análisis</span></label
+          >
+          <div class="a-row">
+            <button type="button" class="a-btn" id="b-analiza-ia">Hacer el análisis con IA</button>
+          </div>
+          <div class="progreso" id="b-prog" hidden>
+            <span class="a-msg" id="b-prog-t">Analizando…</span><span class="barra"><i></i></span>
+          </div>
+          <p class="a-msg" id="b-msg-ia"></p>
+        </details>
 
-  <details class="card paso" id="b-manual">
-    <summary><b>Ya sé mi estación y mi tipo de cuerpo</b></summary>
-    <p class="a-msg">Si ya te han hecho un análisis de color, elige tu estación y tu tipo de cuerpo y empiezo con eso.</p>
-    <label class="a-f"><span>Estación de color</span><select id="m-estacion"></select></label>
-    <label class="a-f"><span>Tipo de cuerpo (Kibbe)</span><select id="m-cuerpo"></select></label>
-    <label class="a-f"><span>Nombre de tu estética (opcional)</span><input type="text" id="m-estetica" maxlength="60" placeholder="Por ejemplo: romántica vintage"></label>
-    <div class="a-row"><button type="button" class="a-btn ghost" id="m-crear">Crear mi perfil</button></div>
-  </details>
+        <details class="card paso" id="b-manual">
+          <summary><b>Ya sé mi estación y mi tipo de cuerpo</b></summary>
+          <p class="a-msg">
+            Si ya te han hecho un análisis de color, elige tu estación y tu tipo de cuerpo y empiezo con eso.
+          </p>
+          <label class="a-f"
+            ><span>Estación de color</span
+            ><select id="m-estacion"></select
+          ></label>
+          <label class="a-f"
+            ><span>Tipo de cuerpo (Kibbe)</span
+            ><select id="m-cuerpo"></select
+          ></label>
+          <label class="a-f"
+            ><span>Nombre de tu estética (opcional)</span
+            ><input type="text" id="m-estetica" maxlength="60" placeholder="Por ejemplo: romántica vintage"
+          /></label>
+          <div class="a-row">
+            <button type="button" class="a-btn ghost" id="m-crear">Crear mi perfil</button>
+          </div>
+        </details>
 
-  <div class="card paso">
-    <p class="a-msg">¿Ya tienes una copia de seguridad?</p>
-    <label class="a-btn ghost" style="position:relative;justify-self:start">Importar copia<input type="file" id="b-importa" accept="application/json,.json" style="position:absolute;inset:0;opacity:0"></label>
-  </div>
- </div>
-</section>
+        <div class="card paso">
+          <p class="a-msg">¿Ya tienes una copia de seguridad?</p>
+          <label class="a-btn ghost" style="position: relative; justify-self: start"
+            >Importar copia<input
+              type="file"
+              id="b-importa"
+              accept="application/json,.json"
+              style="position: absolute; inset: 0; opacity: 0"
+          /></label>
+        </div>
+      </div>
+    </section>
 
-<!-- ============ Hoy ============ -->
-<section class="panel" id="tab-hoy" data-panel="hoy" hidden>
- <div class="wrap">
-  <header class="a-head"><p class="eyebrow" id="a-fecha">Hoy</p><h1 class="a-h1">¿Qué me pongo?</h1></header>
-  <div class="opts-r a-modo" id="a-modo" role="radiogroup" aria-label="Modo"></div>
-  <div class="card a-ctl">
-    <fieldset class="pick"><legend>Ocasión</legend><p class="pick-h">¿Todo el día fuera? Marca varias, en orden.</p><div class="opts-r" id="a-oca"></div></fieldset>
-    <fieldset class="pick"><legend>Estación del año</legend><div class="opts-r" id="a-est"></div></fieldset>
-    <fieldset class="pick"><legend>Tiempo en la calle</legend><p class="pick-h">Si va a cambiar, marca dos: el de la mañana y el de la tarde.</p><div class="opts-r" id="a-temp"></div>
-      <div class="a-conds"><label class="a-check"><input type="checkbox" id="a-lluvia"><span>Llueve</span></label><label class="a-check"><input type="checkbox" id="a-viento"><span>Viento</span></label><label class="a-check"><input type="checkbox" id="a-humedad"><span>Humedad</span></label></div></fieldset>
-    <fieldset class="pick"><legend>Dónde vas a estar</legend><div class="opts-r" id="a-entorno"></div></fieldset>
-    <div class="a-row" id="a-prop-row"><button type="button" class="a-btn" id="a-montar">Montar outfits</button><button type="button" class="a-btn ghost" id="a-ia" hidden>Pedir a la IA</button></div>
-  </div>
-  <div class="card a-yo" id="a-fotolook" hidden>
-    <h2>Foto de un look</h2>
-    <p class="a-msg">Sube una foto de un outfit (de cuerpo entero, con buena luz). Te digo qué funciona, qué mejorarías y te añado al armario las prendas que no tengas.</p>
-    <p class="aviso" id="a-fl-ia" hidden>Para analizar fotos hace falta la IA: actívala en Ajustes.</p>
-    <label class="a-btn ghost" style="position:relative;justify-self:start">Hacer o elegir foto<input type="file" id="a-fl-file" accept="image/*" style="position:absolute;inset:0;opacity:0"></label>
-    <div class="a-fl-prev" id="a-fl-prev"></div>
-    <label class="a-check"><input type="checkbox" id="a-fl-acepto"> <span>Acepto enviar esta foto a la IA para analizarla</span></label>
-    <div class="a-row"><button type="button" class="a-btn" id="a-fl-go" disabled>Analizar mi look</button><span class="a-msg" id="a-fl-msg"></span></div>
-  </div>
-  <div id="a-fl-out" class="a-out" aria-live="polite" hidden></div>
-  <div class="card a-yo" id="a-ancla" hidden>
-    <h2>Con esta prenda</h2>
-    <p class="a-msg">¿Hoy te apetece llevar algo en concreto? Elígelo de tu armario y te monto el look alrededor.</p>
-    <div id="a-ancla-pick"></div>
-    <details class="a-ancla-otra"><summary><b>¿No está en tu armario? Descríbela</b></summary>
-      <label class="a-f"><span>Qué prenda es</span><input type="text" id="a-ancla-n" maxlength="60" placeholder="Por ejemplo: falda de cuadros, blazer de lino"></label>
-      <div class="a-row"><label class="a-f"><span>Tipo</span><select id="a-ancla-cat"></select></label><label class="a-f"><span>Color</span><input type="color" id="a-ancla-col" value="#c19a6b"></label></div>
-      <div class="a-row"><button type="button" class="a-btn" id="a-ancla-go">Monta looks con ella</button><span class="a-msg" id="a-ancla-msg"></span></div>
-    </details>
-  </div>
-  <div class="card a-yo" id="a-yo" hidden>
-    <h2>Lo monto yo</h2>
-    <p class="a-msg">Elige las prendas de tu look y te digo si pega con la ocasión y el tiempo que has marcado arriba.</p>
-    <div id="a-yo-pick"></div>
-    <div class="a-row a-yo-bar"><button type="button" class="a-btn" id="a-yo-go" disabled>¿Pega?</button><button type="button" class="a-btn ghost" id="a-yo-clear">Empezar de nuevo</button></div>
-  </div>
-  <div id="a-yo-out" class="a-out" aria-live="polite" hidden></div>
-  <div id="a-out" class="a-out" aria-live="polite"></div>
- </div>
-</section>
+    <!-- ============ Hoy ============ -->
+    <section class="panel" id="tab-hoy" data-panel="hoy" hidden>
+      <div class="wrap">
+        <header class="a-head">
+          <p class="eyebrow" id="a-fecha">Hoy</p>
+          <h1 class="a-h1">¿Qué me pongo?</h1>
+        </header>
+        <div class="opts-r a-modo" id="a-modo" role="radiogroup" aria-label="Modo"></div>
+        <div class="card a-ctl">
+          <fieldset class="pick">
+            <legend>Ocasión</legend>
+            <p class="pick-h">¿Todo el día fuera? Marca varias, en orden.</p>
+            <div class="opts-r" id="a-oca"></div>
+          </fieldset>
+          <fieldset class="pick">
+            <legend>Estación del año</legend>
+            <div class="opts-r" id="a-est"></div>
+          </fieldset>
+          <fieldset class="pick">
+            <legend>Tiempo en la calle</legend>
+            <p class="pick-h">Si va a cambiar, marca dos: el de la mañana y el de la tarde.</p>
+            <div class="opts-r" id="a-temp"></div>
+            <div class="a-conds">
+              <label class="a-check"><input type="checkbox" id="a-lluvia" /><span>Llueve</span></label
+              ><label class="a-check"><input type="checkbox" id="a-viento" /><span>Viento</span></label
+              ><label class="a-check"><input type="checkbox" id="a-humedad" /><span>Humedad</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="pick">
+            <legend>Dónde vas a estar</legend>
+            <div class="opts-r" id="a-entorno"></div>
+          </fieldset>
+          <div class="a-row" id="a-prop-row">
+            <button type="button" class="a-btn" id="a-montar">Montar outfits</button
+            ><button type="button" class="a-btn ghost" id="a-ia" hidden>Pedir a la IA</button>
+          </div>
+        </div>
+        <div class="card a-yo" id="a-fotolook" hidden>
+          <h2>Foto de un look</h2>
+          <p class="a-msg">
+            Sube una foto de un outfit (de cuerpo entero, con buena luz). Te digo qué funciona, qué mejorarías
+            y te añado al armario las prendas que no tengas.
+          </p>
+          <p class="aviso" id="a-fl-ia" hidden>Para analizar fotos hace falta la IA: actívala en Ajustes.</p>
+          <label class="a-btn ghost" style="position: relative; justify-self: start"
+            >Hacer o elegir foto<input
+              type="file"
+              id="a-fl-file"
+              accept="image/*"
+              style="position: absolute; inset: 0; opacity: 0"
+          /></label>
+          <div class="a-fl-prev" id="a-fl-prev"></div>
+          <label class="a-check"
+            ><input type="checkbox" id="a-fl-acepto" />
+            <span>Acepto enviar esta foto a la IA para analizarla</span></label
+          >
+          <div class="a-row">
+            <button type="button" class="a-btn" id="a-fl-go" disabled>Analizar mi look</button
+            ><span class="a-msg" id="a-fl-msg"></span>
+          </div>
+        </div>
+        <div id="a-fl-out" class="a-out" aria-live="polite" hidden></div>
+        <div class="card a-yo" id="a-ancla" hidden>
+          <h2>Con esta prenda</h2>
+          <p class="a-msg">
+            ¿Hoy te apetece llevar algo en concreto? Elígelo de tu armario y te monto el look alrededor.
+          </p>
+          <div id="a-ancla-pick"></div>
+          <details class="a-ancla-otra">
+            <summary><b>¿No está en tu armario? Descríbela</b></summary>
+            <label class="a-f"
+              ><span>Qué prenda es</span
+              ><input
+                type="text"
+                id="a-ancla-n"
+                maxlength="60"
+                placeholder="Por ejemplo: falda de cuadros, blazer de lino"
+            /></label>
+            <div class="a-row">
+              <label class="a-f"
+                ><span>Tipo</span
+                ><select id="a-ancla-cat"></select></label
+              ><label class="a-f"
+                ><span>Color</span><input type="color" id="a-ancla-col" value="#c19a6b"
+              /></label>
+            </div>
+            <div class="a-row">
+              <button type="button" class="a-btn" id="a-ancla-go">Monta looks con ella</button
+              ><span class="a-msg" id="a-ancla-msg"></span>
+            </div>
+          </details>
+        </div>
+        <div class="card a-yo" id="a-yo" hidden>
+          <h2>Lo monto yo</h2>
+          <p class="a-msg">
+            Elige las prendas de tu look y te digo si pega con la ocasión y el tiempo que has marcado arriba.
+          </p>
+          <div id="a-yo-pick"></div>
+          <div class="a-row a-yo-bar">
+            <button type="button" class="a-btn" id="a-yo-go" disabled>¿Pega?</button
+            ><button type="button" class="a-btn ghost" id="a-yo-clear">Empezar de nuevo</button>
+          </div>
+        </div>
+        <div id="a-yo-out" class="a-out" aria-live="polite" hidden></div>
+        <div id="a-out" class="a-out" aria-live="polite"></div>
+      </div>
+    </section>
 
-<!-- ============ Armario ============ -->
-<section class="panel" id="tab-armario" data-panel="armario" hidden>
- <div class="wrap">
-  <header class="a-head"><p class="eyebrow">Tus prendas</p><h1 class="a-h1">Armario</h1></header>
-  <div class="a-sum" id="a-sum"></div>
-  <div class="a-row"><button type="button" class="a-btn" id="a-add">Añadir prenda</button><button type="button" class="a-btn ghost" id="a-buy">¿Lo compro?</button></div>
-  <form class="card a-form" id="a-form" hidden novalidate>
-    <h2 id="a-form-t">Nueva prenda</h2>
-    <label class="a-photo"><input type="file" id="a-file" accept="image/*"><span class="a-prev" id="a-prev"></span></label>
-    <div class="a-row"><button type="button" class="a-btn ghost" id="a-auto" hidden>Rellenar con IA (envía la foto)</button><span class="a-msg" id="a-auto-msg"></span></div>
-    <label class="a-f"><span>Nombre</span><input type="text" id="a-nombre" maxlength="60" placeholder="Falda midi de satén" autocomplete="off"></label>
-    <fieldset class="pick"><legend>Categoría</legend><div class="opts-r" id="a-cat"></div></fieldset>
-    <label class="a-f"><span>Tipo</span><input type="text" id="a-tipo" maxlength="40" placeholder="camiseta, vaquero, botas…" autocomplete="off"></label>
-    <div class="a-f"><span>Color principal</span><div class="a-col"><input type="color" id="a-color" value="#C19A6B" aria-label="Color principal"><span id="a-colinfo"></span></div></div>
-    <fieldset class="pick"><legend>Corte</legend><div class="opts-r" id="a-corte"></div></fieldset>
-    <fieldset class="pick"><legend>Estilo</legend><div class="opts-r" id="a-estilo"></div></fieldset>
-    <fieldset class="pick"><legend>Tejido</legend><div class="opts-r" id="a-tejido"></div></fieldset>
-    <fieldset class="pick"><legend>Abrigo</legend><div class="opts-r" id="a-abrigo"></div></fieldset>
-    <fieldset class="pick"><legend>Temporada</legend><p class="pick-h">La deduzco sola; cámbiala si no acierto.</p><div class="opts-r" id="a-temporada"></div></fieldset>
-    <label class="a-f"><span>Notas</span><input type="text" id="a-notas" maxlength="120" placeholder="Opcional" autocomplete="off"></label>
-    <div class="a-row"><button type="submit" class="a-btn" id="a-save">Guardar</button><button type="button" class="a-btn ghost" id="a-cancel">Cancelar</button></div>
-    <div class="a-row" id="a-edit-row" hidden><button type="button" class="a-btn ghost" id="a-retire">Retirar del armario</button><button type="button" class="a-btn danger" id="a-del">Eliminar</button></div>
-    <p class="a-msg" id="a-form-msg"></p>
-    <div class="a-verd" id="a-verd" hidden></div>
-  </form>
-  <div class="opts-r a-filter" id="a-filter"></div>
-  <ul class="a-grid" id="a-grid"></ul>
- </div>
-</section>
+    <!-- ============ Armario ============ -->
+    <section class="panel" id="tab-armario" data-panel="armario" hidden>
+      <div class="wrap">
+        <header class="a-head">
+          <p class="eyebrow">Tus prendas</p>
+          <h1 class="a-h1">Armario</h1>
+        </header>
+        <div class="a-sum" id="a-sum"></div>
+        <div class="a-row">
+          <button type="button" class="a-btn" id="a-add">Añadir prenda</button
+          ><button type="button" class="a-btn ghost" id="a-buy">¿Lo compro?</button>
+        </div>
+        <form class="card a-form" id="a-form" hidden novalidate>
+          <h2 id="a-form-t">Nueva prenda</h2>
+          <label class="a-photo"
+            ><input type="file" id="a-file" accept="image/*" /><span class="a-prev" id="a-prev"></span
+          ></label>
+          <div class="a-row">
+            <button type="button" class="a-btn ghost" id="a-auto" hidden>
+              Rellenar con IA (envía la foto)</button
+            ><span class="a-msg" id="a-auto-msg"></span>
+          </div>
+          <label class="a-f"
+            ><span>Nombre</span
+            ><input
+              type="text"
+              id="a-nombre"
+              maxlength="60"
+              placeholder="Falda midi de satén"
+              autocomplete="off"
+          /></label>
+          <fieldset class="pick">
+            <legend>Categoría</legend>
+            <div class="opts-r" id="a-cat"></div>
+          </fieldset>
+          <label class="a-f"
+            ><span>Tipo</span
+            ><input
+              type="text"
+              id="a-tipo"
+              maxlength="40"
+              placeholder="camiseta, vaquero, botas…"
+              autocomplete="off"
+          /></label>
+          <div class="a-f">
+            <span>Color principal</span>
+            <div class="a-col">
+              <input type="color" id="a-color" value="#C19A6B" aria-label="Color principal" /><span
+                id="a-colinfo"
+              ></span>
+            </div>
+          </div>
+          <fieldset class="pick">
+            <legend>Corte</legend>
+            <div class="opts-r" id="a-corte"></div>
+          </fieldset>
+          <fieldset class="pick">
+            <legend>Estilo</legend>
+            <div class="opts-r" id="a-estilo"></div>
+          </fieldset>
+          <fieldset class="pick">
+            <legend>Tejido</legend>
+            <div class="opts-r" id="a-tejido"></div>
+          </fieldset>
+          <fieldset class="pick">
+            <legend>Abrigo</legend>
+            <div class="opts-r" id="a-abrigo"></div>
+          </fieldset>
+          <fieldset class="pick">
+            <legend>Temporada</legend>
+            <p class="pick-h">La deduzco sola; cámbiala si no acierto.</p>
+            <div class="opts-r" id="a-temporada"></div>
+          </fieldset>
+          <label class="a-f"
+            ><span>Notas</span
+            ><input type="text" id="a-notas" maxlength="120" placeholder="Opcional" autocomplete="off"
+          /></label>
+          <div class="a-row">
+            <button type="submit" class="a-btn" id="a-save">Guardar</button
+            ><button type="button" class="a-btn ghost" id="a-cancel">Cancelar</button>
+          </div>
+          <div class="a-row" id="a-edit-row" hidden>
+            <button type="button" class="a-btn ghost" id="a-retire">Retirar del armario</button
+            ><button type="button" class="a-btn danger" id="a-del">Eliminar</button>
+          </div>
+          <p class="a-msg" id="a-form-msg"></p>
+          <div class="a-verd" id="a-verd" hidden></div>
+        </form>
+        <div class="opts-r a-filter" id="a-filter"></div>
+        <ul class="a-grid" id="a-grid"></ul>
+      </div>
+    </section>
 
-<!-- ============ Deseos ============ -->
-<section class="panel" id="tab-deseos" data-panel="deseos" hidden>
- <div class="wrap">
-  <header class="a-head"><p class="eyebrow">Lo que le falta a tu armario</p><h1 class="a-h1">Deseos</h1></header>
-  <p class="hand" id="w-nota"></p>
-  <div class="card w-buybox"><b>¿Has visto algo en una tienda?</b><span>Hazle una foto y te digo si merece la pena comprarlo.</span><button type="button" class="a-btn" id="w-buy">¿Lo compro?</button></div>
-  <div id="w-form-slot"></div>
-  <div class="opts-r a-filter" id="w-filter"></div>
-  <ul class="w-list" id="w-list"></ul>
-  <form class="card w-own" id="w-own" novalidate>
-    <label class="a-f"><span>¿Has visto algo que no está aquí?</span><input type="text" id="w-own-n" maxlength="60" placeholder="Corsé de ante camel" autocomplete="off"></label>
-    <div class="a-row"><button type="submit" class="a-btn">Añadir a mi lista</button><span class="a-msg" id="w-own-msg"></span></div>
-  </form>
- </div>
-</section>
+    <!-- ============ Deseos ============ -->
+    <section class="panel" id="tab-deseos" data-panel="deseos" hidden>
+      <div class="wrap">
+        <header class="a-head">
+          <p class="eyebrow">Lo que le falta a tu armario</p>
+          <h1 class="a-h1">Deseos</h1>
+        </header>
+        <p class="hand" id="w-nota"></p>
+        <div class="card w-buybox">
+          <b>¿Has visto algo en una tienda?</b
+          ><span>Hazle una foto y te digo si merece la pena comprarlo.</span
+          ><button type="button" class="a-btn" id="w-buy">¿Lo compro?</button>
+        </div>
+        <div id="w-form-slot"></div>
+        <div class="opts-r a-filter" id="w-filter"></div>
+        <ul class="w-list" id="w-list"></ul>
+        <form class="card w-own" id="w-own" novalidate>
+          <label class="a-f"
+            ><span>¿Has visto algo que no está aquí?</span
+            ><input
+              type="text"
+              id="w-own-n"
+              maxlength="60"
+              placeholder="Corsé de ante camel"
+              autocomplete="off"
+          /></label>
+          <div class="a-row">
+            <button type="submit" class="a-btn">Añadir a mi lista</button
+            ><span class="a-msg" id="w-own-msg"></span>
+          </div>
+        </form>
+      </div>
+    </section>
 
-<!-- ============ Historial ============ -->
-<section class="panel" id="tab-historial" data-panel="historial" hidden>
- <div class="wrap">
-  <header class="a-head"><p class="eyebrow">Lo que llevas y lo que entra</p><h1 class="a-h1">Historial</h1></header>
-  <ul class="a-stats" id="a-stats"></ul>
-  <h2 class="a-h2">Outfits que te has puesto</h2>
-  <ul class="a-log" id="a-usos"></ul>
-  <h2 class="a-h2">Guardados</h2>
-  <ul class="a-log" id="a-favs"></ul>
-  <h2 class="a-h2">Tus valoraciones</h2>
-  <div id="a-votos"></div>
-  <h2 class="a-h2">Altas en el armario</h2>
-  <div id="a-altas"></div>
- </div>
-</section>
+    <!-- ============ Historial ============ -->
+    <section class="panel" id="tab-historial" data-panel="historial" hidden>
+      <div class="wrap">
+        <header class="a-head">
+          <p class="eyebrow">Lo que llevas y lo que entra</p>
+          <h1 class="a-h1">Historial</h1>
+        </header>
+        <ul class="a-stats" id="a-stats"></ul>
+        <h2 class="a-h2">Outfits que te has puesto</h2>
+        <ul class="a-log" id="a-usos"></ul>
+        <h2 class="a-h2">Guardados</h2>
+        <ul class="a-log" id="a-favs"></ul>
+        <h2 class="a-h2">Tus valoraciones</h2>
+        <div id="a-votos"></div>
+        <h2 class="a-h2">Altas en el armario</h2>
+        <div id="a-altas"></div>
+      </div>
+    </section>
 
-<!-- ============ Mi análisis ============ -->
-<section class="panel" id="tab-analisis" data-panel="analisis" hidden>
- <div class="wrap" id="an-wrap"></div>
-</section>
+    <!-- ============ Mi análisis ============ -->
+    <section class="panel" id="tab-analisis" data-panel="analisis" hidden>
+      <div class="wrap" id="an-wrap"></div>
+    </section>
 
-<!-- ============ Ajustes ============ -->
-<section class="panel" id="tab-ajustes" data-panel="ajustes" hidden>
- <div class="wrap">
-  <header class="a-head"><p class="eyebrow">Tu app</p><h1 class="a-h1">Ajustes</h1></header>
-  <div class="card paso">
-    <h2>Inteligencia artificial</h2>
-    <label class="a-f"><span>Qué IA usar</span><select id="s-prov"></select></label>
-    <p class="a-msg" id="s-prov-nota"></p>
-    <div id="s-propia">
-    <label class="a-f"><span>Modelo</span><input type="text" id="s-modelo" autocomplete="off"><small>Tiene que entender imágenes para analizar fotos.</small></label>
-    <label class="a-f" id="s-url-f"><span>URL de la API</span><input type="url" id="s-url" autocomplete="off" placeholder="https://…/v1/chat/completions"></label>
-    <label class="a-f"><span>Tu clave</span><input type="password" id="s-clave" autocomplete="off"><small><a id="s-clave-link" href="#" target="_blank" rel="noopener">Consigue una clave ↗</a></small></label>
-    </div>
-    <div class="a-row"><button type="button" class="a-btn" id="s-guarda">Guardar</button><button type="button" class="a-btn ghost" id="s-prueba">Probar conexión</button><span class="a-msg" id="s-msg"></span></div>
-  </div>
-  <div class="card paso" id="s-instala" hidden>
-    <h2>Instálala en tu móvil</h2>
-    <p class="a-msg" id="s-instala-t"></p>
-    <div class="a-row"><button type="button" class="a-btn" id="s-instala-b" hidden>Instalar</button></div>
-  </div>
-  <div class="card paso">
-    <h2>Tus datos</h2>
-    <p class="a-msg">Todo vive en este navegador. Haz copias de vez en cuando: si borras los datos del navegador, se pierden.</p>
-    <div class="a-row"><button type="button" class="a-btn ghost" id="s-exporta">Descargar copia</button>
-      <label class="a-btn ghost" style="position:relative">Importar copia<input type="file" id="s-importa" accept="application/json,.json" style="position:absolute;inset:0;opacity:0"></label></div>
-    <div class="a-row"><button type="button" class="a-btn ghost" id="s-rehacer">Rehacer mi análisis</button><button type="button" class="a-btn danger" id="s-borra">Borrar todo</button></div>
-    <p class="a-msg" id="s-datos-msg"></p>
-  </div>
-  <p class="a-note" style="margin-top:18px">Proyecto de código abierto. Las recomendaciones son orientativas y no sustituyen a una asesora profesional.</p>
- </div>
-</section>
+    <!-- ============ Ajustes ============ -->
+    <section class="panel" id="tab-ajustes" data-panel="ajustes" hidden>
+      <div class="wrap">
+        <header class="a-head">
+          <p class="eyebrow">Tu app</p>
+          <h1 class="a-h1">Ajustes</h1>
+        </header>
+        <div class="card paso">
+          <h2>Inteligencia artificial</h2>
+          <label class="a-f"
+            ><span>Qué IA usar</span
+            ><select id="s-prov"></select
+          ></label>
+          <p class="a-msg" id="s-prov-nota"></p>
+          <div id="s-propia">
+            <label class="a-f"
+              ><span>Modelo</span><input type="text" id="s-modelo" autocomplete="off" /><small
+                >Tiene que entender imágenes para analizar fotos.</small
+              ></label
+            >
+            <label class="a-f" id="s-url-f"
+              ><span>URL de la API</span
+              ><input type="url" id="s-url" autocomplete="off" placeholder="https://…/v1/chat/completions"
+            /></label>
+            <label class="a-f"
+              ><span>Tu clave</span><input type="password" id="s-clave" autocomplete="off" /><small
+                ><a id="s-clave-link" href="#" target="_blank" rel="noopener">Consigue una clave ↗</a></small
+              ></label
+            >
+          </div>
+          <div class="a-row">
+            <button type="button" class="a-btn" id="s-guarda">Guardar</button
+            ><button type="button" class="a-btn ghost" id="s-prueba">Probar conexión</button
+            ><span class="a-msg" id="s-msg"></span>
+          </div>
+        </div>
+        <div class="card paso" id="s-instala" hidden>
+          <h2>Instálala en tu móvil</h2>
+          <p class="a-msg" id="s-instala-t"></p>
+          <div class="a-row">
+            <button type="button" class="a-btn" id="s-instala-b" hidden>Instalar</button>
+          </div>
+        </div>
+        <div class="card paso">
+          <h2>Tus datos</h2>
+          <p class="a-msg">
+            Todo vive en este navegador. Haz copias de vez en cuando: si borras los datos del navegador, se
+            pierden.
+          </p>
+          <div class="a-row">
+            <button type="button" class="a-btn ghost" id="s-exporta">Descargar copia</button>
+            <label class="a-btn ghost" style="position: relative"
+              >Importar copia<input
+                type="file"
+                id="s-importa"
+                accept="application/json,.json"
+                style="position: absolute; inset: 0; opacity: 0"
+            /></label>
+          </div>
+          <div class="a-row">
+            <button type="button" class="a-btn ghost" id="s-rehacer">Rehacer mi análisis</button
+            ><button type="button" class="a-btn danger" id="s-borra">Borrar todo</button>
+          </div>
+          <p class="a-msg" id="s-datos-msg"></p>
+        </div>
+        <p class="a-note" style="margin-top: 18px">
+          Proyecto de código abierto. Las recomendaciones son orientativas y no sustituyen a una asesora
+          profesional.
+        </p>
+      </div>
+    </section>
 
-<nav class="a-tabs" id="a-tabs" aria-label="Secciones" hidden><div class="in">
-  <button type="button" data-tab="hoy">Hoy</button><button type="button" data-tab="armario">Armario</button><button type="button" data-tab="deseos">Deseos</button><button type="button" data-tab="historial">Historial</button><button type="button" data-tab="analisis">Análisis</button>
-</div></nav>
+    <nav class="a-tabs" id="a-tabs" aria-label="Secciones" hidden>
+      <div class="in">
+        <button type="button" data-tab="hoy">Hoy</button
+        ><button type="button" data-tab="armario">Armario</button
+        ><button type="button" data-tab="deseos">Deseos</button
+        ><button type="button" data-tab="historial">Historial</button
+        ><button type="button" data-tab="analisis">Análisis</button>
+      </div>
+    </nav>
 
-<script type="module" src="./src/main.js"></script>
-</body>
+    <script type="module" src="./src/main.js"></script>
+  </body>
 </html>
