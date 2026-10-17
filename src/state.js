@@ -17,7 +17,10 @@ export function setPerfil(p) {
 }
 
 export function repinta(...cuales) {
-  (cuales.length ? cuales : Object.keys(app.pinta)).forEach((k) => { if (app.pinta[k]) app.pinta[k](); });
+  // Un fallo al pintar una pantalla no deja a las demás sin pintar; se avisa al final
+  let error = null;
+  (cuales.length ? cuales : Object.keys(app.pinta)).forEach((k) => { try { if (app.pinta[k]) app.pinta[k](); } catch (e) { error = error || e; } });
+  if (error) throw error;
 }
 
 export { estado };
