@@ -53,6 +53,7 @@ CI (`.github/workflows/ci.yml`) ejecuta `npm test` y `npm run build`: los dos ti
 - Tarea compleja o de varios ficheros → `/plan` primero, o `/grill-me` si el diseño no está claro.
 - Bug → primero un test que falle en `test/`, luego el arreglo.
 - Después de cambios grandes: `/revisar` (bugs) y luego `/limpiar` (simplificar).
+- Antes de abrir un PR: `/preparar-pr`.
 - Una rama por cambio, PR a `main`, commits pequeños con mensaje en imperativo.
 
 ## Prohibido
