@@ -9,7 +9,7 @@ Instrucciones para Claude en este repo. Cada línea está aquí porque sin ella 
 - TypeScript fijado en 6.0: typescript-eslint todavía no admite la 7. ESLint revisa también los `.ts`.
 - Imports con extensión `.ts` explícita (`allowImportingTsExtensions`). Tipos del dominio en `src/lib/tipos.ts`.
 - Backend: Cloudflare Worker (`worker/`) que solo hace de intermediario con la IA; config en `wrangler.jsonc`.
-- Datos: IndexedDB en el navegador (`src/lib/store.ts`). Sin cuentas ni base de datos en servidor.
+- Datos: IndexedDB en el navegador es la fuente de verdad (`src/lib/store.ts`); copia en la nube opcional y cifrada en el dispositivo (ver `docs/adr/0001-local-first-copia-cifrada.md`).
 - Tests: Vitest + `node:assert/strict`, con `fake-indexeddb` para el store. E2E: Playwright en `e2e/`, contra la app compilada; el armario de prueba (`e2e/datos/`) es inventado.
 
 | Qué            | Comando                                  |
@@ -32,10 +32,11 @@ CI (`.github/workflows/ci.yml`) ejecuta lint, formato, tipos, tests con cobertur
 - `src/ui/`: una pantalla por fichero. `src/data/`: constantes y catálogos.
 - `worker/`: `index.ts` (rutas `/api/*`) y `valida.ts` (validación de entrada).
 - `test/`: un `*.test.ts` por módulo de `src/lib` o `worker`.
+- `docs/adr/`: decisiones de arquitectura (una por fichero).
 
 ## Reglas del proyecto
 
-- **Privacidad ante todo.** Los datos de la persona no salen del dispositivo. Nada de cuentas, analítica ni guardar nada en el Worker.
+- **Privacidad ante todo.** Los datos de la persona viven en su dispositivo. La copia en la nube es opcional y solo guarda blobs cifrados en el dispositivo: el servidor nunca ve datos en claro. Nada de analítica ni guardar nada en el Worker.
 - La IA es opcional: cualquier envío de fotos a la IA pide permiso antes.
 - Sin fuentes, scripts ni CDNs de terceros: todo se sirve desde la propia app.
 - La clave de la IA es un secreto de Cloudflare (`IA_CLAVE`); nunca en el código ni en `wrangler.jsonc`.
