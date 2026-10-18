@@ -5,3 +5,4 @@ playwright-report/
 .wrangler/
 package-lock.json
 public/icons/
+.claude/

@@ -1,0 +1,21 @@
+{
+  "version": "1.0.1",
+  "paquetes": [
+    "cloudflare-workers",
+    "indexeddb",
+    "playwright",
+    "svelte",
+    "typescript",
+    "vite",
+    "vitest"
+  ],
+  "ficheros": {
+    ".claude/skills/cloudflare-workers/SKILL.md": "6d61795158e8b3a6bf86d81076d02e9e3b2bdf5d7c90e5441e93bda22b6a1bd7",
+    ".claude/skills/indexeddb/SKILL.md": "590017935dae303df27c89160a2a2a0616d9e8a2cfb8ef29dda3c33dad48d3f4",
+    ".claude/skills/playwright/SKILL.md": "e0e1d706082ac85c84f2c2935894ffa810ff84aee77a61d4e8c7449fadde0d83",
+    ".claude/skills/svelte/SKILL.md": "886d5c957b8ecc2b99e8267bdf0857b22f9a99d84bef1ddadac37fc9efd6eeed",
+    ".claude/skills/typescript/SKILL.md": "a5515e604e2ec00b02722d48187e4a075f335947bfdc4df9f5585be2e649ca6b",
+    ".claude/skills/vite/SKILL.md": "67305b9712855d3ea15d22431c888ef884546ee40b53357f30e3c1908095083a",
+    ".claude/skills/vitest/SKILL.md": "bf72cc2ec0d482b09485f411e44c940cd7752c01380a0cfe823e09c0144d51d3"
+  }
+}
