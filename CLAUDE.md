@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Solo lo propio de este repo; las reglas generales y las skills (`/revisar`, `/limpiar`, `/preparar-pr`, `/grill-me`) vienen de [claude-config](https://github.com/criisspl/claude-config). Cada línea está aquí porque sin ella Claude se equivocaría; si una deja de hacer falta, bórrala.
+Solo lo propio de este repo; las reglas generales y las skills (`/preparar-pr`, `/grill-me`; para revisar y limpiar, `/code-review` y `/simplify` de serie) vienen de [claude-config](https://github.com/criisspl/claude-config). Cada línea está aquí porque sin ella Claude se equivocaría; si una deja de hacer falta, bórrala.
 
 ## Stack y comandos
 
