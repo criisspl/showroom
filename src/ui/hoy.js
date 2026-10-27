@@ -193,6 +193,7 @@ function modoHoy() {
     fo = m === "foto";
   $("a-yo").hidden = !yo;
   $("a-yo-out").hidden = !yo;
+  $("a-espejo").hidden = !yo;
   $("a-out").hidden = yo || fo;
   $("a-prop-row").hidden = yo || an || fo;
   $("a-ancla").hidden = !an;

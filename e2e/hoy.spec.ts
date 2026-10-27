@@ -37,3 +37,18 @@ test("«Lo monto yo» juzga un look elegido a mano", async ({ page }) => {
   await page.getByRole("button", { name: "¿Pega? (3 prendas)" }).click();
   await expect(page.locator("#a-yo-out")).toContainText(/¡Pega!|Pega, con algún retoque|No pega/);
 });
+
+test("«Lo monto yo» trae el espejo de 30 segundos", async ({ page }) => {
+  await abreConArmario(page);
+  await pestana(page, "Hoy");
+  await expect(page.getByRole("region", { name: "Espejo, 30 segundos" })).toBeHidden();
+  await page.getByRole("radiogroup", { name: "Modo" }).getByText("Lo monto yo").click();
+  const espejo = page.getByRole("region", { name: "Espejo, 30 segundos" });
+  await expect(espejo.getByRole("checkbox")).toHaveCount(5);
+  await expect(espejo).toContainText("Marca lo que cumple el look.");
+  for (const caja of await espejo.getByRole("checkbox").all()) await caja.check();
+  await expect(espejo).toContainText("5/5");
+  await expect(espejo).toContainText("Listo. Sal por la puerta.");
+  await espejo.getByRole("button", { name: "Otro look" }).click();
+  await expect(espejo).toContainText("0/5");
+});
