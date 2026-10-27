@@ -15,6 +15,7 @@ import { initArmario } from "./ui/armario.js";
 import { initDeseos } from "./ui/deseos.js";
 import { mount } from "svelte";
 import Historial from "./ui/Historial.svelte";
+import Espejo from "./ui/Espejo.svelte";
 import { avisa } from "./ui/puente.svelte.ts";
 import { initAnalisis } from "./ui/analisis.js";
 import { initBienvenida } from "./ui/bienvenida.js";
@@ -51,6 +52,8 @@ async function arranca() {
   try {
     mount(Historial, { target: document.querySelector("#tab-historial .wrap") });
     app.pinta.historial = avisa;
+    mount(Espejo, { target: document.querySelector("#a-espejo") });
+    app.pinta.espejo = avisa;
   } catch (e) {
     falla(e);
   }
