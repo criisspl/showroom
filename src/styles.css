@@ -1966,3 +1966,14 @@ body {
 #a-fl-out {
   margin-top: 12px;
 }
+.maq-look dl {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.maq-look dt {
+  font-weight: 700;
+}
+.maq-look dd {
+  margin: 0;
+}

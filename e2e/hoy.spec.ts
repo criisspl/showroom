@@ -52,3 +52,18 @@ test("«Lo monto yo» trae el espejo de 30 segundos", async ({ page }) => {
   await espejo.getByRole("button", { name: "Otro look" }).click();
   await expect(espejo).toContainText("0/5");
 });
+
+test("cada look despliega el maquillaje para esa ropa", async ({ page }) => {
+  await abreConArmario(page);
+  await pestana(page, "Hoy");
+  await page.getByRole("button", { name: "Montar outfits" }).click();
+  const look = page.locator("#a-out article.a-fit").first();
+  const boton = look.getByRole("button", { name: "Maquillaje para este look" });
+  await expect(boton).toHaveAttribute("aria-expanded", "false");
+  await boton.click();
+  await expect(boton).toHaveAttribute("aria-expanded", "true");
+  await expect(look.getByText("Piel", { exact: true })).toBeVisible();
+  await expect(look.getByRole("link", { name: /Ver ideas en Pinterest/ })).toBeVisible();
+  await boton.click();
+  await expect(look.getByText("Piel", { exact: true })).toBeHidden();
+});
