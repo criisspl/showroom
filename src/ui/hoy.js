@@ -40,6 +40,8 @@ import {
 import { clasifica, familia, harm } from "../lib/color.ts";
 import { hayIA, preguntaJSON, abreImagen, imagenParaIA } from "../lib/ai.ts";
 import { textoPerfil } from "../lib/analysis.ts";
+import { mount } from "svelte";
+import Maquillaje from "./Maquillaje.svelte";
 import { thumb, icono, ver, falla } from "./comun.js";
 import { abreForm } from "./armario.js";
 import { ponDeseo } from "./deseos.js";
@@ -1148,6 +1150,15 @@ function tarjeta(o, n, c, origen, idx) {
     const pr = el("div", "a-row a-pin");
     pr.appendChild(pinA(pinOutfit(ps, c), "Ver looks así en Pinterest"));
     li.appendChild(pr);
+    const mk = el("div", "a-mk");
+    li.appendChild(mk);
+    mount(Maquillaje, {
+      target: mk,
+      props: {
+        prendas: ps.map((p) => ({ cat: p.cat, color: p.color })),
+        ocasion: oca.multi ? oca.multi[oca.multi.length - 1].id : oca.id
+      }
+    });
   }
   if (o.porque) li.appendChild(el("p", "a-msg", o.porque));
   const tips = el("ul", "a-tips"),
