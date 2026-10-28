@@ -200,3 +200,21 @@ export interface Contexto {
   est?: Temporada;
   cond?: Condiciones;
 }
+
+/** Lo que la IA ve en una foto de referencia (un look que le gusta a la persona). */
+export interface AnalisisRef {
+  resumen: string;
+  esteticas: string[];
+  registro: Estilo | null;
+  prendas: string[];
+  detalles: string[];
+  colores: { n: string; hex: string }[];
+}
+/** Foto de un look que le gusta a la persona; se guarda solo en su dispositivo. */
+export interface Referencia {
+  id: string;
+  foto: string | null;
+  creada: string;
+  /** null mientras no se haya analizado (analizar es opcional y pide permiso en cada envío). */
+  analisis: AnalisisRef | null;
+}

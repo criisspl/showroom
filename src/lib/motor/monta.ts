@@ -1,6 +1,7 @@
 // Montar outfits para una ocasión y un tiempo.
 import { S_OCA, ESTN, TEJN } from "../../data/constants.ts";
 import { harm } from "../color.ts";
+import { puntosGusto } from "../gusto.ts";
 import type { Cat, Condiciones, Prenda, Temporada } from "../tipos.ts";
 import { aprendido, clave2, usos } from "./aprende.ts";
 import { bandaDe, ocaDe } from "./contexto.ts";
@@ -97,6 +98,10 @@ export function monta(
       so += o;
     }
     s += (so / ps.length) * 2.2;
+    // Lo que le gusta de sus referencias: empuja un poco, sin pasar por encima de ocasión ni tiempo
+    ps.forEach((p) => {
+      s += puntosGusto(estado.G, famDe(p), estiloDe(p)) / ps.length;
+    });
     if (oca.id === "casa")
       ps.forEach((p) => {
         const t = tejidoDe(p);

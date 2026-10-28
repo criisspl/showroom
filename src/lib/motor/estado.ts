@@ -1,5 +1,6 @@
 // Estado del motor: prendas, outfits, votos y paleta de la persona, y búsquedas básicas.
 import { clasifica, familia } from "../color.ts";
+import type { Gusto } from "../gusto.ts";
 import type { Cat, ColorPaleta, DatosPrenda, Familia, Outfit, Perfil, Prenda, Voto } from "../tipos.ts";
 
 /** Lo aprendido de las valoraciones: pesos por clave y looks vetados. */
@@ -27,9 +28,11 @@ interface Estado {
   L: Aprendido | null;
   /** Prendas sugeridas que la persona aún no tiene, por id. */
   virt: Record<string, Prenda>;
+  /** Lo que se repite en sus referencias de gusto (null si no hay ninguna analizada). */
+  G: Gusto | null;
 }
 
-export const estado: Estado = { P: [], O: [], V: [], PAL: [], perfil: null, L: null, virt: {} };
+export const estado: Estado = { P: [], O: [], V: [], PAL: [], perfil: null, L: null, virt: {}, G: null };
 export function setEstado(patch: Partial<Estado>) {
   Object.assign(estado, patch);
   if ("V" in patch) estado.L = null;

@@ -130,6 +130,10 @@ test("una base de datos v1 de antes de las migraciones se abre sin perder nada",
   assert.deepEqual(await store.kget("perfil"), { resumen: "Otoño suave" });
   await store.kset("ajustes", { proveedor: "groq" });
   assert.deepEqual(await store.kget("ajustes"), { proveedor: "groq" });
+  // la migración 1 → 2 crea el almacén de referencias vacío y usable
+  assert.deepEqual(await store.todos("refs"), []);
+  const id = await store.add("refs", { foto: null, creada: "2026-10-28", analisis: null });
+  assert.equal((await store.get("refs", id))?.id, id);
 });
 
 test("rechaza una copia de una versión más nueva de la app", async () => {
@@ -150,4 +154,26 @@ test("una copia de la versión actual se sigue restaurando", async () => {
     (await store.todos("prendas")).map((p) => p.nombre),
     ["Falda camel"]
   );
+});
+
+test("una copia de la versión 1 (sin referencias) se restaura y deja las referencias vacías", async () => {
+  const store = await creaStore();
+  await store.borraTodo();
+  await store.add("refs", { foto: null, creada: "2026-10-28", analisis: null });
+  const antigua = await store.exporta();
+  delete antigua.refs;
+  await store.importa({ ...antigua, version: 1 });
+  assert.deepEqual(await store.todos("refs"), []);
+});
+
+test("las referencias van en la copia de seguridad y vuelven al restaurarla", async () => {
+  const store = await creaStore();
+  await store.borraTodo();
+  await store.add("refs", { foto: null, creada: "2026-10-28", analisis: null });
+  const copia = await store.exporta();
+  assert.equal(copia.refs?.length, 1);
+  await store.borraTodo();
+  assert.equal((await store.todos("refs")).length, 0);
+  await store.importa(copia);
+  assert.equal((await store.todos("refs")).length, 1);
 });

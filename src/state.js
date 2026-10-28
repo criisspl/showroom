@@ -6,6 +6,7 @@ export const app = {
   store: /** @type {import("./lib/store.ts").Store} */ (null), // lo abre main.js al arrancar
   ajustes: { proveedor: "integrada", modelo: "", url: "", clave: "" },
   perfil: null,
+  refs: [], // referencias de gusto guardadas
   D: {}, // deseos guardados por id (estado de cada prenda deseada)
   ui: {
     filter: "todo",
