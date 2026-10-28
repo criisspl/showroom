@@ -1,7 +1,7 @@
 // Almacenamiento local en IndexedDB. Todo se queda en el navegador de cada persona.
 // Colecciones de documentos con suscripción (on), fotos como Blob y un pequeño almacén clave-valor.
 
-import type { Outfit, Prenda, Voto } from "./tipos.ts";
+import type { Outfit, Prenda, Referencia, Voto } from "./tipos.ts";
 
 /** Estado de una prenda de «Deseos» (las del perfil y las que añade la persona). */
 export interface DeseoGuardado {
@@ -20,6 +20,7 @@ export interface Colecciones {
   outfits: Outfit;
   deseos: DeseoGuardado;
   votos: Voto;
+  refs: Referencia;
 }
 export type Coleccion = keyof Colecciones;
 type Almacen = Coleccion | "fotos" | "kv";
@@ -34,10 +35,12 @@ export interface Copia {
   outfits: Outfit[];
   deseos: DeseoGuardado[];
   votos: Voto[];
+  /** Referencias de gusto (desde la versión 2). */
+  refs?: Referencia[];
 }
 
 const DB_NAME = "armario";
-const COLS: Coleccion[] = ["prendas", "outfits", "deseos", "votos"];
+const COLS: Coleccion[] = ["prendas", "outfits", "deseos", "votos", "refs"];
 /**
  * Migraciones del esquema, en orden: la de índice i lleva de la versión i a la i+1.
  * Solo se añaden al final; nunca se cambia una que ya esté publicada.
@@ -45,18 +48,24 @@ const COLS: Coleccion[] = ["prendas", "outfits", "deseos", "votos"];
 const migraciones: ((db: IDBDatabase, tx: IDBTransaction) => void)[] = [
   // 0 → 1: esquema inicial. Crea solo lo que falte, por si la base ya existía.
   (db) => {
-    COLS.forEach((c) => {
+    ["prendas", "outfits", "deseos", "votos"].forEach((c) => {
       if (!db.objectStoreNames.contains(c)) db.createObjectStore(c, { keyPath: "id" });
     });
     if (!db.objectStoreNames.contains("fotos")) db.createObjectStore("fotos");
     if (!db.objectStoreNames.contains("kv")) db.createObjectStore("kv");
+  },
+  // 1 → 2: referencias de gusto. Los datos que ya había no se tocan.
+  (db) => {
+    if (!db.objectStoreNames.contains("refs")) db.createObjectStore("refs", { keyPath: "id" });
   }
 ];
 /** Versión del esquema: la de la base de datos y la que lleva la copia de seguridad. */
 export const VERSION = migraciones.length;
 
-/** Pone al día una copia antigua (version < VERSION). De momento no hay pasos. */
+/** Pone al día una copia antigua (version < VERSION). */
 function migraCopia(data: Copia): Copia {
+  // v1 → v2: las copias antiguas no traen referencias de gusto
+  if (data.version < 2) data = { ...data, refs: data.refs || [], version: 2 };
   return data;
 }
 
@@ -239,14 +248,15 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
         prendas: await todos("prendas"),
         outfits: await todos("outfits"),
         deseos: await todos("deseos"),
-        votos: await todos("votos")
+        votos: await todos("votos"),
+        refs: await todos("refs")
       };
       for (const k of ["perfil", "ajustes"]) {
         const v = await api.kget<Record<string, unknown>>(k);
         if (v !== undefined) out.kv[k] = k === "ajustes" ? { ...v, clave: "" } : v;
       }
       const ids = new Set<string>();
-      [...out.prendas, ...out.deseos].forEach((p) => {
+      [...out.prendas, ...out.deseos, ...(out.refs || [])].forEach((p) => {
         if (p.foto) ids.add(p.foto);
       });
       for (const id of ids) {

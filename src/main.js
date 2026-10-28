@@ -8,6 +8,7 @@ import "./styles.css";
 import { creaStore } from "./lib/store.ts";
 import { app, setPerfil, repinta } from "./state.js";
 import { setEstado } from "./lib/engine.ts";
+import { gustoDe } from "./lib/gusto.ts";
 import { normaliza } from "./lib/analysis.ts";
 import { ver, falla } from "./ui/comun.js";
 import { initHoy } from "./ui/hoy.js";
@@ -16,6 +17,7 @@ import { initDeseos } from "./ui/deseos.js";
 import { mount } from "svelte";
 import Historial from "./ui/Historial.svelte";
 import Espejo from "./ui/Espejo.svelte";
+import Gusto from "./ui/Gusto.svelte";
 import { avisa } from "./ui/puente.svelte.ts";
 import { initAnalisis } from "./ui/analisis.js";
 import { initBienvenida } from "./ui/bienvenida.js";
@@ -54,6 +56,8 @@ async function arranca() {
     app.pinta.historial = avisa;
     mount(Espejo, { target: document.querySelector("#a-espejo") });
     app.pinta.espejo = avisa;
+    mount(Gusto, { target: document.querySelector("#a-gusto") });
+    app.pinta.gusto = avisa;
   } catch (e) {
     falla(e);
   }
@@ -76,6 +80,11 @@ async function arranca() {
   app.store.on("deseos", (a) => {
     app.D = Object.fromEntries(a.map((d) => [d.id, d]));
     repinta("deseos", "hoy");
+  });
+  app.store.on("refs", (a) => {
+    app.refs = a;
+    setEstado({ G: gustoDe(a) });
+    repinta("gusto");
   });
   repinta("ajustes", "analisis");
 
