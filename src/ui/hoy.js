@@ -1156,8 +1156,14 @@ function tarjeta(o, n, c, origen, idx) {
     mount(Maquillaje, {
       target: mk,
       props: {
-        prendas: ps.map((p) => ({ cat: p.cat, color: p.color })),
-        ocasion: oca.multi ? oca.multi[oca.multi.length - 1].id : oca.id
+        prendas: ps.map((p) => ({
+          cat: p.cat,
+          color: p.color,
+          nombre: p.nombre,
+          colorN: p.colorN || clasifica(p.color, estado.PAL).n
+        })),
+        ocasion: oca.multi ? oca.multi[oca.multi.length - 1].id : oca.id,
+        ocasionNombre: oca.multi ? oca.multi[oca.multi.length - 1].n : oca.n
       }
     });
   }

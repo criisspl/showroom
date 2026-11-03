@@ -64,6 +64,9 @@ async function arranca() {
   document
     .querySelectorAll(".a-tabs button")
     .forEach((b) => b.addEventListener("click", () => ver(b.getAttribute("data-tab"))));
+  document
+    .querySelectorAll("[data-ir]")
+    .forEach((b) => b.addEventListener("click", () => ver(b.getAttribute("data-ir"))));
 
   app.store.on("prendas", (a) => {
     setEstado({ P: a });

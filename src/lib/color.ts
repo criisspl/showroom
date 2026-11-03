@@ -119,8 +119,17 @@ export function clasifica(
     : { n: hex ?? "", fam: familia(hex), tipo: "neutro" };
 }
 
-export function consejoColor(c: { tipo: TipoColor }): string {
+/** Color de tu paleta más claro, para sugerirlo en lugar del blanco. */
+function clarisimo(paleta: ColorPaleta[]): string | null {
+  const ok = paleta.filter((p) => p.tipo === "ok").sort((a, b) => b.lab[0] - a.lab[0]);
+  return ok.length ? ok[0].n.toLowerCase() : null;
+}
+
+export function consejoColor(c: { tipo: TipoColor; fam?: Familia }, paleta: ColorPaleta[] = []): string {
   if (c.tipo === "ok") return "En tu paleta";
   if (c.tipo === "neutro") return "Neutro de tu paleta";
+  if (c.fam === "negro") return "Fuera de paleta: mejor de cintura para abajo o en chaqueta abierta";
+  if (c.fam === "blanco")
+    return "Fuera de paleta: cerca de la cara, cámbialo por " + (clarisimo(paleta) ?? "un tono de tu paleta");
   return "Fuera de tu paleta: llévalo lejos de la cara";
 }

@@ -1,6 +1,6 @@
 import { test } from "vitest";
 import assert from "node:assert/strict";
-import { familia, dist, construyePaleta, clasifica } from "../src/lib/color.ts";
+import { familia, dist, construyePaleta, clasifica, consejoColor } from "../src/lib/color.ts";
 import { perfilManual } from "../src/lib/analysis.ts";
 import { ESTACIONES } from "../src/data/presets.ts";
 
@@ -21,4 +21,16 @@ test("cada estación genera una paleta y clasifica sus propios colores como suyo
     for (const c of e.paleta) assert.equal(clasifica(c.hex, pal).tipo, "ok", id + " " + c.n);
     for (const c of e.evitar) assert.equal(clasifica(c.hex, pal).tipo, "evita", id + " " + c.n);
   }
+});
+
+test("consejoColor: el negro y el blanco fuera de paleta llevan su consejo", () => {
+  const pal = construyePaleta(perfilManual("otono-suave", "natural-suave"));
+  assert.equal(consejoColor({ tipo: "ok" }, pal), "En tu paleta");
+  assert.match(consejoColor({ tipo: "evita", fam: "negro" }, pal), /cintura para abajo/);
+  assert.match(consejoColor({ tipo: "evita", fam: "blanco" }, pal), /cámbialo por \w+/);
+  assert.equal(
+    consejoColor({ tipo: "evita", fam: "verde" }, pal),
+    "Fuera de tu paleta: llévalo lejos de la cara"
+  );
+  assert.match(consejoColor({ tipo: "evita", fam: "blanco" }), /un tono de tu paleta/);
 });
