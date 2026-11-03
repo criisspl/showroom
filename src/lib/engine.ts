@@ -6,5 +6,6 @@ export * from "./motor/aprende.ts";
 export * from "./motor/contexto.ts";
 export * from "./motor/monta.ts";
 export * from "./motor/compra.ts";
+export * from "./motor/ancla.ts";
 export * from "./motor/juzga.ts";
 export { lab } from "./color.ts";

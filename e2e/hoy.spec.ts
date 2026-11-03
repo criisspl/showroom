@@ -68,3 +68,29 @@ test("cada look despliega el maquillaje para esa ropa", async ({ page }) => {
   await boton.click();
   await expect(look.getByText("Piel", { exact: true })).toBeHidden();
 });
+
+test("«Con estas prendas» monta alrededor de varias y sugiere qué añadir", async ({ page }) => {
+  await abreConArmario(page);
+  await pestana(page, "Hoy");
+  await page.getByRole("radiogroup", { name: "Modo" }).getByText("Con estas prendas").click();
+  const elige = page.locator("#a-ancla-pick");
+  await expect(elige).toContainText("Elige una o varias prendas");
+  await elige.getByText("Blusa fluida azul grisáceo").click();
+  await elige.getByText("Pantalón de pinzas marino").click();
+  await expect(elige).toContainText(/Elegidas: .*Blusa fluida azul grisáceo.*Pantalón de pinzas marino/);
+  const looks = page.locator("#a-out article.a-fit");
+  await expect(looks.first()).toContainText("Con tus prendas");
+  const ideas = page.locator("#a-ancla-ideas");
+  await expect(ideas.getByRole("heading")).toContainText(/Lo que mejor le pega|No encuentro qué añadirle/);
+  await expect(ideas.getByRole("button", { name: "Sí, la tengo" }).first()).toBeVisible();
+  const antes = await ideas.locator(".a-ask b").first().textContent();
+  await ideas.getByRole("button", { name: "No", exact: true }).first().click();
+  await expect(ideas).toContainText("Apuntado: no tienes");
+  expect(await ideas.locator(".a-ask b").first().textContent()).not.toBe(antes);
+  await elige.getByRole("button", { name: "Quitar todas" }).click();
+  await expect(elige).toContainText("Elige una o varias prendas");
+  await expect(looks).toHaveCount(0);
+  await elige.getByText("Vestido camisero lavanda").click();
+  await elige.getByText("Blusa fluida azul grisáceo").click();
+  await expect(elige).toContainText("Ojo: Vestido camisero lavanda se quita");
+});

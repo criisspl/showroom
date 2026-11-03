@@ -35,7 +35,11 @@ import {
   fueraTemporada,
   txtTemporada,
   setEstado,
-  esVirtual
+  esVirtual,
+  alternaAncla,
+  montaConAnclas,
+  sugiereIdeas,
+  delArmarioParaIdea
 } from "../lib/engine.ts";
 import { clasifica, familia, harm } from "../lib/color.ts";
 import { hayIA, preguntaJSON, abreImagen, imagenParaIA } from "../lib/ai.ts";
@@ -119,7 +123,7 @@ export function initHoy() {
     "a-modo",
     [
       ["propon", "Propónme looks"],
-      ["ancla", "Con esta prenda"],
+      ["ancla", "Con estas prendas"],
       ["yo", "Lo monto yo"],
       ["foto", "Foto de un look"]
     ],
@@ -186,7 +190,7 @@ function alCambiarCtx() {
   } else if (m === "yo") {
     if (app.ui.yoSel.length) juzgaYo();
   } else if (m === "ancla") {
-    if (app.ui.ancla) montarAncla(false);
+    if (anclas().length) montarAncla(false);
   } else montar(false);
 }
 function modoHoy() {
@@ -212,11 +216,8 @@ function modoHoy() {
     if (app.ui.yoSel.length) juzgaYo();
   } else if (an) {
     pintaAncla();
-    if (app.ui.ancla) montarAncla(false);
-    else {
-      $("a-out").textContent = "";
-      app.ui.res = null;
-    }
+    if (anclas().length) montarAncla(false);
+    else sinLooksAncla();
   } else montar(false);
 }
 
@@ -431,13 +432,63 @@ async function anadeTodasFoto(hs, btn) {
   }
 }
 
-/* ---------- Con esta prenda: looks alrededor de una prenda (subida o no) ---------- */
+/* ---------- Con estas prendas: looks alrededor de una o varias prendas (subidas o no) ---------- */
+const anclas = () => app.ui.anclas;
+function sinLooksAncla() {
+  $("a-out").textContent = "";
+  app.ui.res = null;
+}
+function anclaToggle(p, on) {
+  const antes = anclas(),
+    nuevas = alternaAncla(antes, p, on),
+    quitadas = on ? antes.filter((a) => a.id !== p.id && !nuevas.some((n) => n.id === a.id)) : [];
+  app.ui.anclas = nuevas;
+  pintaAncla();
+  if (quitadas.length)
+    $("a-ancla-pick").prepend(
+      el(
+        "p",
+        "a-msg",
+        "Ojo: " +
+          quitadas.map((a) => a.nombre).join(", ") +
+          " se quita porque ocupa el mismo sitio que " +
+          p.nombre +
+          "."
+      )
+    );
+  if (anclas().length) montarAncla(false);
+  else sinLooksAncla();
+}
 function pintaAncla() {
   const box = $("a-ancla-pick");
   if (!box) return;
   box.textContent = "";
   const A = activas(),
-    sel = app.ui.ancla && !app.ui.ancla.virtual ? app.ui.ancla.id : null;
+    sel = anclas().map((a) => a.id),
+    n = sel.length,
+    info = el("div", "a-row");
+  info.appendChild(
+    el(
+      "p",
+      "a-msg",
+      n
+        ? "Elegidas: " +
+            anclas()
+              .map((a) => a.nombre)
+              .join(", ") +
+            "."
+        : "Elige una o varias prendas, por ejemplo una camiseta y una cazadora."
+    )
+  );
+  if (n)
+    info.appendChild(
+      boton("Quitar todas", "a-btn ghost", () => {
+        app.ui.anclas = [];
+        pintaAncla();
+        sinLooksAncla();
+      })
+    );
+  box.appendChild(info);
   ["arriba", "abajo", "vestido", "capa", "calzado", "accesorio"].forEach((cat) => {
     const ps = A.filter((p) => p.cat === cat);
     if (!ps.length) return;
@@ -447,14 +498,11 @@ function pintaAncla() {
     ps.forEach((p) => {
       const l = el("label", "yo-p"),
         i = el("input");
-      i.type = "radio";
+      i.type = "checkbox";
       i.name = "a-ancla-p";
       i.value = p.id;
-      i.checked = p.id === sel;
-      i.addEventListener("change", () => {
-        app.ui.ancla = p;
-        montarAncla(false);
-      });
+      i.checked = sel.includes(p.id);
+      i.addEventListener("change", () => anclaToggle(p, i.checked));
       l.appendChild(i);
       l.appendChild(thumb(p));
       l.appendChild(el("span", null, p.nombre));
@@ -463,6 +511,7 @@ function pintaAncla() {
     sec.appendChild(g);
     box.appendChild(sec);
   });
+  pintaIdeas();
 }
 function anclaDescrita() {
   const n = $("a-ancla-n").value.trim();
@@ -494,63 +543,51 @@ function anclaDescrita() {
   };
   v.formal = { deportivo: 1, casual: 1, arreglado: 2, fiesta: 3 }[v.estilo];
   estado.virt[v.id] = v;
-  app.ui.ancla = v;
   $("a-ancla-msg").textContent = "";
-  document.querySelectorAll('input[name="a-ancla-p"]').forEach((i) => {
-    i.checked = false;
-  });
-  montarAncla(false);
-}
-/** Monta con la prenda fija: quita las que ocuparían su sitio y se asegura de que esté en el look. */
-function montaAncla(c, seed, evitar) {
-  const a = app.ui.ancla;
-  if (!a) return [];
-  const choca = (p) =>
-    p.id !== a.id &&
-    (a.cat === "vestido"
-      ? ["vestido", "arriba", "abajo"].includes(p.cat)
-      : a.cat === "arriba" || a.cat === "abajo"
-        ? p.cat === a.cat || p.cat === "vestido"
-        : p.cat === a.cat);
-  const real = estado.P;
-  let res = [];
-  try {
-    estado.P = real.filter((p) => !choca(p)).concat(a.virtual ? [a] : []);
-    res = monta(c.oca, c.banda, c.lluvia, seed, evitar, c.est, c.cond);
-  } finally {
-    estado.P = real;
-  }
-  res.forEach((o) => {
-    if (!o.ids.includes(a.id)) {
-      o.ids = o.ids.concat(a.id);
-      o.forzada = true;
-    }
-  });
-  return res;
+  $("a-ancla-n").value = "";
+  anclaToggle(v, true);
 }
 function montarAncla(otra) {
   const out = $("a-out");
   out.textContent = "";
   app.ui.res = null;
   app.ui.ultNo = null;
-  const a = app.ui.ancla;
-  if (!a) return;
+  if (!anclas().length) return;
   const c = ctx();
   app.ui.seed = otra ? app.ui.seed + 1 : 0;
-  const res = montaAncla(c, app.ui.seed, otra ? app.ui.last : null);
+  if (!otra) {
+    app.ui.ideaSeed = 0;
+    app.ui.noIdea = {};
+    app.ui.ideaAbierta = null;
+  }
+  pintaIdeas();
+  const res = montaConAnclas(anclas(), c, app.ui.seed, otra ? app.ui.last : null);
   app.ui.last = res.map((r) => r.key);
   if (!res.length) {
-    const j = juzga([a.id], c),
+    const j = juzga(
+        anclas().map((a) => a.id),
+        c
+      ),
       d = el("div", "a-fit"),
       mal = j ? j.mal.filter((t) => !/Falta la (base|parte)/.test(t)) : [];
-    d.appendChild(el("h3", null, "Con esta prenda no me sale un look para hoy"));
+    d.appendChild(
+      el(
+        "h3",
+        null,
+        anclas().length > 1
+          ? "Con estas prendas no me sale un look para hoy"
+          : "Con esta prenda no me sale un look para hoy"
+      )
+    );
     d.appendChild(
       el(
         "p",
         "a-msg",
         mal.length
           ? mal.join(" ")
-          : "No encuentro en tu armario prendas que casen con ella en registro, tejido y abrigo para «" +
+          : "No encuentro en tu armario prendas que casen con " +
+              (anclas().length > 1 ? "ellas" : "ella") +
+              " en registro, tejido y abrigo para «" +
               ocaDe(c.oca).n +
               "». Prueba con otra ocasión o sube más ropa."
       )
@@ -561,6 +598,112 @@ function montarAncla(otra) {
   app.ui.resCtx = c;
   app.ui.res = res.map((o) => ({ o, origen: "ancla" }));
   repintaHoy();
+}
+
+/** Qué añadirles a las prendas elegidas: una idea por hueco, con su motivo y «¿la tienes?». */
+function pintaIdeas() {
+  const box = $("a-ancla-ideas");
+  if (!box) return;
+  box.textContent = "";
+  if (!anclas().length) return;
+  const c = ctx(),
+    ideas = sugiereIdeas(anclas(), c, deseos(), app.ui.ideaSeed || 0, app.ui.noIdea || {});
+  box.appendChild(el("h3", null, ideas.length ? "Lo que mejor le pega" : "No encuentro qué añadirle"));
+  if (!ideas.length)
+    box.appendChild(
+      el(
+        "p",
+        "a-msg",
+        "Con «" +
+          ocaDe(c.oca).n +
+          "» y este tiempo, lo que has elegido ya va completo o no le encuentro pareja coherente. Prueba con otra ocasión."
+      )
+    );
+  ideas.forEach((idea) => {
+    const q = el("div", "a-ask"),
+      pic = el("div", "a-ask-pic"),
+      tx = el("div", "a-ask-tx"),
+      row = el("div", "a-row");
+    pic.style.background = idea.color;
+    tx.appendChild(el("small", null, CATN[idea.cat] + " · ¿la tienes?"));
+    tx.appendChild(
+      el(
+        "b",
+        null,
+        idea.nombre +
+          (idea.generica || idea.nombre.toLowerCase().includes(idea.colorN.toLowerCase())
+            ? ""
+            : ", en " + idea.colorN.toLowerCase())
+      )
+    );
+    tx.appendChild(el("span", null, idea.porque));
+    row.appendChild(
+      boton("Sí, la tengo", "a-btn", () => {
+        app.ui.ideaAbierta = app.ui.ideaAbierta === idea.id ? null : idea.id;
+        pintaIdeas();
+      })
+    );
+    row.appendChild(
+      boton("No", "a-btn ghost", () => {
+        app.ui.noIdea[idea.id] = 1;
+        app.ui.ideaAbierta = null;
+        app.ui.ideaNo = idea.nombre;
+        pintaIdeas();
+      })
+    );
+    q.appendChild(pic);
+    q.appendChild(tx);
+    q.appendChild(row);
+    box.appendChild(q);
+    if (app.ui.ideaAbierta === idea.id) box.appendChild(eligeDelArmario(idea, c));
+  });
+  if (app.ui.ideaNo) {
+    box.appendChild(
+      el(
+        "p",
+        "a-note hueco-n",
+        "Apuntado: no tienes " + app.ui.ideaNo.toLowerCase() + ". Te propongo otra cosa."
+      )
+    );
+    app.ui.ideaNo = null;
+  }
+  if (ideas.length)
+    box.appendChild(
+      boton("Otra idea", "a-btn ghost", () => {
+        app.ui.ideaSeed = (app.ui.ideaSeed || 0) + 1;
+        app.ui.ideaAbierta = null;
+        pintaIdeas();
+      })
+    );
+}
+/** «Sí, la tengo»: las prendas del armario que valen como esa idea; al elegir una, pasa a las fijas. */
+function eligeDelArmario(idea, c) {
+  const caja = el("div", "a-ask-armario"),
+    mias = delArmarioParaIdea(idea, anclas(), c);
+  if (!mias.length) {
+    caja.appendChild(el("p", "a-msg", "No tienes nada así en el armario que case con lo que has elegido."));
+    caja.appendChild(
+      boton("Subirla ahora", "a-link", () =>
+        anadeAlLook(
+          { id: idea.id, nombre: idea.nombre, cat: idea.cat, pre: idea.pre, ancla: true, wid: null },
+          "ancla"
+        )
+      )
+    );
+    return caja;
+  }
+  caja.appendChild(el("p", "a-msg", "¿Cuál es? La pongo con lo que has elegido."));
+  const g = el("div", "yo-grid");
+  mias.forEach((p) => {
+    const l = el("button", "yo-p");
+    l.type = "button";
+    l.appendChild(thumb(p));
+    l.appendChild(el("span", null, p.nombre));
+    l.addEventListener("click", () => anclaToggle(p, true));
+    g.appendChild(l);
+  });
+  caja.appendChild(g);
+  return caja;
 }
 
 /* ---------- Huecos: lo que falta para que el look esté completo ---------- */
@@ -786,7 +929,12 @@ function pregunta(q, dest) {
   return box;
 }
 function anadeAlLook(q, dest) {
-  app.ui.pendiente = { wid: q.ancla || q.foto ? null : q.id, dest, ancla: !!q.ancla, virtId: q.id };
+  app.ui.pendiente = {
+    wid: q.wid !== undefined ? q.wid : q.ancla || q.foto ? null : q.id,
+    dest,
+    ancla: !!q.ancla,
+    virtId: q.id
+  };
   ver("armario");
   abreForm(null, q.pre);
   $("a-form-msg").textContent =
@@ -800,7 +948,19 @@ export async function vuelveConPrenda(pd, nid) {
   if (pd.wid) await ponDeseo(pd.wid, "tengo");
   const p = byId(nid);
   ver("hoy");
-  if (p && pd.ancla && app.ui.ancla && app.ui.ancla.virtual && app.ui.ancla.cat === p.cat) app.ui.ancla = p;
+  if (p && pd.ancla) {
+    // La prenda subida sustituye a la descrita del mismo tipo (o se suma a las elegidas) y se remonta
+    app.ui.anclas = alternaAncla(
+      anclas().filter((a) => !(a.virtual && a.cat === p.cat)),
+      p,
+      true
+    );
+    if (val("a-modo") === "ancla") {
+      pintaAncla();
+      montarAncla(false);
+      return;
+    }
+  }
   const reemplaza = (ids) =>
     (p && (PRINC[p.cat] || p.cat === "calzado")
       ? ids.filter((id) => {
@@ -1047,21 +1207,27 @@ function tarjeta(o, n, c, origen, idx) {
           : origen === "foto"
             ? "Tu look de la foto · "
             : origen === "ancla"
-              ? "Con tu prenda · opción " + n + " · "
+              ? (anclas().length > 1 ? "Con tus prendas" : "Con tu prenda") + " · opción " + n + " · "
               : "Opción " + n + " · ") + lugarDe(c)
     )
   );
-  if (o.forzada && app.ui.ancla)
+  if (o.forzadas && o.forzadas.length) {
+    const nom = o.forzadas.map((id) => {
+        const n = byId(id) ? byId(id).nombre : "";
+        return n.charAt(0).toLowerCase() + n.slice(1);
+      }),
+      varias = nom.length > 1;
     li.appendChild(
       el(
         "p",
         "a-note hueco-n",
         "Ojo: " +
-          app.ui.ancla.nombre.charAt(0).toLowerCase() +
-          app.ui.ancla.nombre.slice(1) +
-          " no termina de casar con el resto; mira «¿Pega?» en «Lo monto yo» para ver por qué."
+          nom.join(" y ") +
+          (varias ? " no terminan" : " no termina") +
+          " de casar con el resto; mira «¿Pega?» en «Lo monto yo» para ver por qué."
       )
     );
+  }
   if (o.nuevo)
     li.appendChild(
       el(
@@ -1358,9 +1524,10 @@ function sustituye(idx, sinPrenda) {
   let nuevo = app.ui.res[idx].o.conVirtual ? montaConVirtual(c, vistos) : null;
   for (let sd = 0; sd < 6 && !nuevo; sd++)
     nuevo =
-      (anc ? montaAncla(c, sd, vistos) : monta(c.oca, c.banda, c.lluvia, sd, vistos, c.est, c.cond)).find(
-        (r) => !vistos.includes(r.key)
-      ) || null;
+      (anc
+        ? montaConAnclas(anclas(), c, sd, vistos)
+        : monta(c.oca, c.banda, c.lluvia, sd, vistos, c.est, c.cond)
+      ).find((r) => !vistos.includes(r.key)) || null;
   if (nuevo) {
     nuevo.nuevo = sinPrenda
       ? "Como no tienes " +
