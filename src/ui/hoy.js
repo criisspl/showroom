@@ -125,7 +125,8 @@ export function initHoy() {
       ["propon", "Propónme looks"],
       ["ancla", "Con estas prendas"],
       ["yo", "Lo monto yo"],
-      ["foto", "Foto de un look"]
+      ["foto", "Foto de un look"],
+      ["refs", "Referencias"]
     ],
     "propon"
   );
@@ -166,6 +167,7 @@ export function initHoy() {
   $("a-lluvia").addEventListener("change", alCambiarCtx);
   document.querySelectorAll('input[name="a-modo"]').forEach((i) => i.addEventListener("change", modoHoy));
   $("a-montar").addEventListener("click", () => montar(true));
+  $("a-refs-go").addEventListener("click", () => montar(true));
   $("a-ia").addEventListener("click", pedirIA);
   $("a-yo-go").addEventListener("click", juzgaYo);
   $("a-yo-clear").addEventListener("click", () => {
@@ -191,18 +193,22 @@ function alCambiarCtx() {
     if (app.ui.yoSel.length) juzgaYo();
   } else if (m === "ancla") {
     if (anclas().length) montarAncla(false);
+  } else if (m === "refs") {
+    if ($("a-out").childElementCount) montar(false);
   } else montar(false);
 }
 function modoHoy() {
   const m = val("a-modo"),
     yo = m === "yo",
     an = m === "ancla",
-    fo = m === "foto";
+    fo = m === "foto",
+    rf = m === "refs";
   $("a-yo").hidden = !yo;
   $("a-yo-out").hidden = !yo;
   $("a-espejo").hidden = !yo;
   $("a-out").hidden = yo || fo;
-  $("a-prop-row").hidden = yo || an || fo;
+  $("a-prop-row").hidden = yo || an || fo || rf;
+  $("a-refs").hidden = !rf;
   $("a-ancla").hidden = !an;
   $("a-fotolook").hidden = !fo;
   $("a-fl-out").hidden = !fo;
@@ -218,6 +224,8 @@ function modoHoy() {
     pintaAncla();
     if (anclas().length) montarAncla(false);
     else sinLooksAncla();
+  } else if (rf) {
+    $("a-out").textContent = "";
   } else montar(false);
 }
 

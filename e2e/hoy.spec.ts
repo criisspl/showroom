@@ -94,3 +94,15 @@ test("«Con estas prendas» monta alrededor de varias y sugiere qué añadir", a
   await elige.getByText("Blusa fluida azul grisáceo").click();
   await expect(elige).toContainText("Ojo: Vestido camisero lavanda se quita");
 });
+
+test("«Referencias» muestra tus looks de gusto y monta outfits desde Hoy", async ({ page }) => {
+  await abreConArmario(page);
+  await pestana(page, "Hoy");
+  await page.getByRole("radiogroup", { name: "Modo" }).getByText("Referencias").click();
+  const tarjeta = page.locator("#a-refs");
+  await expect(tarjeta).toContainText("Sube capturas de looks que te gusten");
+  await expect(tarjeta.getByText("Añadir referencias")).toBeVisible();
+  await expect(page.locator("#a-prop-row")).toBeHidden();
+  await tarjeta.getByRole("button", { name: "Looks como mis referencias" }).click();
+  await expect(page.locator("#a-out article.a-fit").first()).toBeVisible();
+});

@@ -57,6 +57,7 @@ async function arranca() {
     mount(Espejo, { target: document.querySelector("#a-espejo") });
     app.pinta.espejo = avisa;
     mount(Gusto, { target: document.querySelector("#a-gusto") });
+    mount(Gusto, { target: document.querySelector("#a-refs-gusto") });
     app.pinta.gusto = avisa;
   } catch (e) {
     falla(e);
