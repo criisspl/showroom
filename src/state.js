@@ -18,7 +18,10 @@ export const app = {
     editing: null,
     photo: null,
     prefoto: null,
-    modo: null
+    modo: null,
+    anclas: [], // prendas fijas de «Con estas prendas»
+    ideaSeed: 0,
+    noIdea: {}
   },
   pinta: {} // funciones de repintado que registra cada pantalla
 };

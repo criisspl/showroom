@@ -28,7 +28,7 @@ Está pensada para que la use cualquiera: no hay que registrarse, ni instalar na
 - **Prendas que no has subido:** una de las opciones incluye un básico que probablemente tienes (vaquero recto, camisa, jersey fino…) o una prenda que dijiste que tienes. Si es así, la subes y entra en el look; si no, desaparece y no vuelve a salir.
 - **Pinterest en cada look:** cada outfit trae un enlace a Pinterest con sus prendas, colores, ocasión y estación, para ver cómo queda en fotos reales.
 - **Todo el día fuera:** marca varias ocasiones (por ejemplo, oficina y luego cervezas) y dos tiempos (mañana fresca, tarde templada). El outfit sirve para todo, con una capa que se puede quitar y un consejo para pasar de un plan a otro.
-- **Con esta prenda:** elige una prenda que te apetezca llevar (de tu armario o descrita, aunque no la hayas subido) y te monta los looks alrededor de ella.
+- **Con estas prendas:** elige una o varias prendas que te apetezca llevar (de tu armario o descrita, aunque no la hayas subido) y te monta los looks alrededor de ellas, con ideas de qué añadirles.
 - **Foto de un look (con IA, opcional):** sube una foto de un outfit y te dice qué funciona y qué mejorar; reconoce las prendas que ya tienes y añade al armario las que no, con su recorte como foto.
 - **Lo monto yo:** elige tú las prendas y la app te dice si pega con la ocasión y el tiempo, qué funciona, qué falla y qué cambiarías por otras de tu armario.
 - **Viento, humedad y dónde vas a estar:** marca si hace viento o humedad y si vas a estar en la ciudad, un pueblo, la montaña o la playa. Con viento evita faldas con vuelo; en la montaña, calzado plano y pantalón; en la playa, nada de botas ni tejidos pesados.
