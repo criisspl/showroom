@@ -2,7 +2,8 @@
 import { $, el, boton, radios, setVal, pinA } from "../lib/dom.js";
 import { app, estado } from "../state.js";
 import { CATN } from "../data/constants.ts";
-import { activas, casan, famDe } from "../lib/engine.ts";
+import { activas, casan, famDe, palDe } from "../lib/engine.ts";
+import { partesDeArribaEnPaleta } from "../lib/armario.ts";
 import { clasifica, familia, harm } from "../lib/color.ts";
 import { icono, ver, falla } from "./comun.js";
 import { abreForm } from "./armario.js";
@@ -257,7 +258,9 @@ export function pintaDeseos() {
       ? "En tu armario todavía no hay " +
         falta.join(falta.length === 2 ? " ni " : ", ") +
         ": empieza por ahí."
-      : "Las piezas que más multiplican lo que ya tienes.";
+      : partesDeArribaEnPaleta(A.map((p) => ({ cat: p.cat, pal: palDe(p) }))) < 2
+        ? "Te faltan partes de arriba en tu paleta: mira el apartado Arriba."
+        : "Las piezas que más multiplican lo que ya tienes.";
 }
 
 async function nuevoDeseo(ev) {

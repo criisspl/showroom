@@ -240,6 +240,9 @@
         <div id="a-yo-out" class="a-out" aria-live="polite" hidden></div>
         <div id="a-espejo" class="a-out" hidden></div>
         <div id="a-out" class="a-out" aria-live="polite"></div>
+        <p class="a-foot">
+          <button type="button" class="a-link" data-ir="deseos">Prendas que te faltan</button>
+        </p>
       </div>
     </section>
 
@@ -257,6 +260,7 @@
         </div>
         <form class="card a-form" id="a-form" hidden novalidate>
           <h2 id="a-form-t">Nueva prenda</h2>
+          <p class="a-msg">La foto es opcional: sin ella también puedes guardar la prenda.</p>
           <label class="a-photo"
             ><input type="file" id="a-file" accept="image/*" /><span class="a-prev" id="a-prev"></span
           ></label>
@@ -290,7 +294,7 @@
           <div class="a-f">
             <span>Color principal</span>
             <div class="a-col">
-              <input type="color" id="a-color" value="#C19A6B" aria-label="Color principal" /><span
+              <input type="color" id="a-color" value="#A3B18A" aria-label="Color principal" /><span
                 id="a-colinfo"
               ></span>
             </div>
@@ -333,6 +337,9 @@
         </form>
         <div class="opts-r a-filter" id="a-filter"></div>
         <ul class="a-grid" id="a-grid"></ul>
+        <p class="a-foot">
+          <button type="button" class="a-link" data-ir="deseos">Ver qué prendas te faltan</button>
+        </p>
       </div>
     </section>
 
@@ -350,6 +357,10 @@
           ><button type="button" class="a-btn" id="w-buy">¿Lo compro?</button>
         </div>
         <div id="w-form-slot"></div>
+        <p class="a-note w-pin">
+          Cada botón de Pinterest abre una búsqueda ya hecha para esa prenda. Toca los círculos de color para
+          verla en otro tono de tu paleta.
+        </p>
         <div class="opts-r a-filter" id="w-filter"></div>
         <ul class="w-list" id="w-list"></ul>
         <form class="card w-own" id="w-own" novalidate>

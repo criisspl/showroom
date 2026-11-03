@@ -63,7 +63,8 @@ test("cada look despliega el maquillaje para esa ropa", async ({ page }) => {
   await boton.click();
   await expect(boton).toHaveAttribute("aria-expanded", "true");
   await expect(look.getByText("Piel", { exact: true })).toBeVisible();
-  await expect(look.getByRole("link", { name: /Ver ideas en Pinterest/ })).toBeVisible();
+  await expect(look.getByText("Estación", { exact: true })).toBeVisible();
+  await expect(look.getByRole("link", { name: /Versión élfica/ })).toBeVisible();
   await boton.click();
   await expect(look.getByText("Piel", { exact: true })).toBeHidden();
 });

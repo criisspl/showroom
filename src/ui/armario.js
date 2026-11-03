@@ -3,6 +3,7 @@ import { $, el, boton, radios, val, vals, setVal } from "../lib/dom.js";
 import { app, estado } from "../state.js";
 import { CATS, CATN, CORTES, ABRIGOS, EST, TEJ, FORMAL_DE, TEMPORADAS } from "../data/constants.ts";
 import { activas, byId, usos, estiloDe, tejidoDe, palDe, evalua, temporadaDe } from "../lib/engine.ts";
+import { avisoPartesDeArriba } from "../lib/armario.ts";
 import { clasifica, consejoColor, familia, lab } from "../lib/color.ts";
 import { hayIA, imagenParaIA, preguntaJSON, abreImagen } from "../lib/ai.ts";
 import { textoPerfil } from "../lib/analysis.ts";
@@ -89,6 +90,11 @@ export function pintaArmario() {
           " fuera"
       )
     );
+    const aviso = avisoPartesDeArriba(
+      A.map((p) => ({ cat: p.cat, pal: palDe(p) })),
+      estado.PAL
+    );
+    if (aviso) sum.appendChild(el("p", "hand", aviso));
   }
   if (!A.length) {
     grid.appendChild(
@@ -140,7 +146,7 @@ function infoColor() {
     s = $("a-colinfo");
   s.textContent = "";
   s.appendChild(el("b", null, c.n));
-  s.appendChild(document.createTextNode(consejoColor(c)));
+  s.appendChild(document.createTextNode(consejoColor(c, estado.PAL)));
 }
 
 function mueveForm(destino) {
@@ -186,7 +192,7 @@ export async function abreForm(p, pre, modo) {
   $("a-nombre").value = x.nombre || "";
   $("a-tipo").value = x.tipo || "";
   $("a-notas").value = (p && p.notas) || "";
-  $("a-color").value = x.color || "#C19A6B";
+  $("a-color").value = x.color || "#A3B18A";
   setVal("a-cat", x.cat || "arriba");
   setVal("a-corte", x.corte || "fluida");
   setVal("a-abrigo", String(x.abrigo || 2));
@@ -323,6 +329,7 @@ async function autoIA() {
         'La imagen es una prenda de ropa o un accesorio. Descríbela para un armario digital. Responde solo con JSON: {"nombre":"nombre corto en español, sin marca","cat":"arriba|abajo|vestido|capa|calzado|accesorio","tipo":"una o dos palabras","color":"#RRGGBB del color principal de la prenda, no del fondo","corte":"ajustada|fluida|amplia","registro":"deportivo (solo ropa de hacer deporte: chándal, mallas, ropa técnica) | casual (camisetas, polos, sudaderas, vaqueros) | arreglado | fiesta","tejido":"algodon|vaquero|punto|felpa|saten|ligero|piel","abrigo":1}  (abrigo: 1 ligera, 2 media, 3 abrigada).',
       imagenes: [url]
     });
+    if (!d.nombre && !CATN[d.cat]) throw new Error("No lo he visto claro. Rellénalo a mano.");
     if (d.nombre) $("a-nombre").value = String(d.nombre).slice(0, 60);
     if (CATN[d.cat]) setVal("a-cat", d.cat);
     if (d.tipo) $("a-tipo").value = String(d.tipo).slice(0, 40);
@@ -335,7 +342,7 @@ async function autoIA() {
     if (["algodon", "vaquero", "punto", "felpa", "saten", "ligero", "piel"].includes(d.tejido))
       setVal("a-tejido", d.tejido);
     if ([1, 2, 3].includes(+d.abrigo)) setVal("a-abrigo", String(+d.abrigo));
-    m.textContent = "Relleno hecho. Revísalo antes de seguir.";
+    m.textContent = "Relleno hecho. Revisa antes de guardar.";
   } catch (e) {
     m.textContent = e.message;
   }
