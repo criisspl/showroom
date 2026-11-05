@@ -25,3 +25,7 @@ export function avisoPartesDeArriba(prendas: PiezaAviso[], paleta: ColorPaleta[]
   const lista = cols.length > 1 ? cols.slice(0, -1).join(", ") + " o " + cols[cols.length - 1] : cols[0];
   return "Te faltan partes de arriba en tu paleta" + (lista ? ": empieza por " + lista + "." : ".");
 }
+
+/** ¿La prenda la dedujo la IA al mirar una foto de un look y no tiene foto propia? Conviene revisarla. */
+export const necesitaRevision = (p: { origen?: string; foto?: string | null; mini?: string | null }) =>
+  p.origen === "foto-look" && !p.foto && !p.mini;

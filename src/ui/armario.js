@@ -3,7 +3,7 @@ import { $, el, boton, radios, val, vals, setVal } from "../lib/dom.js";
 import { app, estado } from "../state.js";
 import { CATS, CATN, CORTES, ABRIGOS, EST, TEJ, FORMAL_DE, TEMPORADAS } from "../data/constants.ts";
 import { activas, byId, usos, estiloDe, tejidoDe, palDe, evalua, temporadaDe } from "../lib/engine.ts";
-import { avisoPartesDeArriba } from "../lib/armario.ts";
+import { avisoPartesDeArriba, necesitaRevision } from "../lib/armario.ts";
 import { clasifica, consejoColor, familia, lab } from "../lib/color.ts";
 import { hayIA, imagenParaIA, preguntaJSON, abreImagen } from "../lib/ai.ts";
 import { textoPerfil } from "../lib/analysis.ts";
@@ -119,6 +119,7 @@ export function pintaArmario() {
     b.type = "button";
     const t = thumb(p);
     if (palDe(p) === "evita") t.appendChild(el("span", "a-badge", "Fuera de paleta"));
+    else if (necesitaRevision(p)) t.appendChild(el("span", "a-badge rev", "Revisar"));
     b.appendChild(t);
     b.appendChild(el("b", null, p.nombre || "Sin nombre"));
     const m = el("span", "meta"),
@@ -406,6 +407,8 @@ async function guardaPrenda(ev) {
       d.mini = f.mini;
     }
     if (id) {
+      // Al revisarla y guardarla, deja de ser una prenda deducida por la IA
+      if (viejo && viejo.origen === "foto-look") d.origen = "usuario";
       await app.store.update("prendas", id, d);
       if (f && viejo && viejo.foto && viejo.foto !== f.foto) app.store.delFoto(viejo.foto);
     } else {

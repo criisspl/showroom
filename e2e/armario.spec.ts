@@ -1,5 +1,6 @@
+import { readFileSync, writeFileSync } from "node:fs";
 import { test, expect } from "@playwright/test";
-import { abreConArmario, pestana } from "./ayuda.ts";
+import { COPIA, abre, abreConArmario, pestana } from "./ayuda.ts";
 
 test("añade, edita y elimina una prenda", async ({ page }) => {
   await abreConArmario(page);
@@ -70,4 +71,23 @@ test("una prenda de Layering se guarda con temporada de otoño e invierno", asyn
   await expect(
     page.locator("#a-grid").getByRole("button", { name: /Jersey fino de cuello alto/ })
   ).toBeVisible();
+});
+
+test("una prenda deducida de una foto de look sale con «Revisar» hasta que la guardas", async ({
+  page
+}, info) => {
+  const copia = JSON.parse(readFileSync(COPIA, "utf8"));
+  const prenda = copia.prendas[0];
+  Object.assign(prenda, { origen: "foto-look", foto: null, mini: null });
+  const ruta = info.outputPath("copia-con-foto-look.json");
+  writeFileSync(ruta, JSON.stringify(copia));
+  await abre(page);
+  await page.locator("#b-importa").setInputFiles(ruta);
+  await pestana(page, "Armario");
+  const grid = page.locator("#a-grid");
+  const item = grid.getByRole("button", { name: new RegExp(prenda.nombre) });
+  await expect(item).toContainText("Revisar");
+  await item.click();
+  await page.locator("#a-form").getByRole("button", { name: "Guardar" }).click();
+  await expect(grid.getByRole("button", { name: new RegExp(prenda.nombre) })).not.toContainText("Revisar");
 });
