@@ -35,10 +35,65 @@ export function casan(p: DatosPrenda, q: DatosPrenda): number | null {
 }
 export const corto = (p: DatosPrenda) => /short|mini|bermuda/.test(txt(p));
 
+/* ---------- Layering: lo que asoma de la prenda de debajo ---------- */
+/** Largo de manga: 0 sin mangas, 1 corta, 2 tres cuartos, 3 larga. */
+export function mangaDe(p: DatosPrenda): number {
+  const t = txt(p);
+  if (
+    /tirantes|sin mangas|palabra de honor|strapless|lencer|slip|chaleco|bandeau|cors[eé]|halter|pichi|peto/.test(
+      t
+    )
+  )
+    return 0;
+  if (/manga 3\/4|tres cuartos|manga francesa/.test(t)) return 2;
+  if (/manga larga|manga campana|long sleeve|cuello alto|cuello vuelto|cuello cisne|turtleneck/.test(t))
+    return 3;
+  if (/manga corta|camiseta|\btee\b|polo|\btop\b|crop/.test(t)) return 1;
+  if (/camisa|blusa|jersey|sudadera|punto|cardigan|rebeca/.test(t)) return 3;
+  return 1;
+}
+export const cuelloAlto = (p: DatosPrenda) =>
+  /cuello alto|cuello vuelto|cuello cisne|turtleneck|mock neck|perkins/.test(txt(p));
+export const crop = (p: DatosPrenda) =>
+  /crop|cropped|\bcorto\b|\bcorta\b(?! de)/.test(txt(p).replace(/manga corta/g, ""));
+/** ¿Es una prenda sobre la que cabe otra fina debajo? (no abrigos, plumas ni sudaderas). */
+export function encima(p: DatosPrenda | null | undefined): boolean {
+  if (!p) return false;
+  if (/abrigo|plumas|borrego|sudadera/.test(txt(p))) return false;
+  return (
+    p.cat === "vestido" ||
+    /camiseta|tee|top|tirantes|lencer|chaleco|manga corta|polo|vestido|pichi|peto|blusa|camisa|crop/.test(
+      txt(p)
+    )
+  );
+}
+/** Qué se ve de la prenda de debajo con la de encima puesta; si no se ve nada, no hay layering. */
+export function asoma(bajo: DatosPrenda | null | undefined, sobre: DatosPrenda | null | undefined): string[] {
+  if (!bajo || !sobre) return [];
+  const r: string[] = [],
+    mb = mangaDe(bajo),
+    ms = mangaDe(sobre);
+  if (cuelloAlto(bajo) && !cuelloAlto(sobre)) r.push("el cuello");
+  if (mb > ms) r.push(ms === 2 ? "los puños" : "las mangas");
+  if (sobre.cat === "arriba" && crop(sobre) && !crop(bajo)) r.push("el bajo");
+  return r;
+}
+export function txtAsoma(r: string[]): string {
+  if (!r.length) return "";
+  const lista = r.length > 1 ? r.slice(0, -1).join(", ") + " y " + r[r.length - 1] : r[0];
+  return (
+    (r.length > 1 || /^l[ao]s /.test(r[0]) ? "Se ven " : "Se ve ") +
+    lista +
+    " de la de debajo: ese es el layering."
+  );
+}
+export const layerYa = (ps: DatosPrenda[]) => ps.some((p) => p.cat === "layering");
+
 /* ---------- Estación del año ---------- */
 /** Temporadas de una prenda: las que guardó la persona; si no, se deducen del nombre y del abrigo. */
 export function temporadaDe(p: DatosPrenda): { t: Temporada[]; fija: boolean } {
   if (Array.isArray(p.temporada) && p.temporada.length) return { t: p.temporada, fija: true };
+  if (p.cat === "layering") return { t: ["otono", "invierno"], fija: false };
   const t = txt(p),
     a = Number(p.abrigo) || 2;
   if (

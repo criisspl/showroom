@@ -8,9 +8,11 @@ import { monta } from "./monta.ts";
 import type { Look } from "./monta.ts";
 import { casan, estiloDe, fueraTemporada, penCond } from "./prenda.ts";
 
-/** ¿Dos prendas fijas se pisan el sitio? Un vestido quita arriba y abajo; arriba y accesorios se pueden apilar. */
+/** ¿Dos prendas fijas se pisan el sitio? Un vestido quita arriba y abajo; arriba y accesorios se pueden apilar, y el layering va debajo de arriba o vestido. */
 export function chocaAncla(a: Pick<Prenda, "id" | "cat">, p: Pick<Prenda, "id" | "cat">): boolean {
   if (a.id === p.id) return false;
+  // El layering va debajo de arriba o vestido: solo choca con otro layering
+  if (a.cat === "layering" || p.cat === "layering") return a.cat === p.cat;
   if (a.cat === "vestido") return p.cat === "vestido" || p.cat === "arriba" || p.cat === "abajo";
   if (p.cat === "vestido") return a.cat === "arriba" || a.cat === "abajo";
   if (a.cat === "arriba" || a.cat === "accesorio") return false;

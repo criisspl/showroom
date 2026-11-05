@@ -20,6 +20,7 @@ type Tabla = Record<string, number | null>;
 
 export const CATS: [Cat, string][] = [
   ["arriba", "Arriba"],
+  ["layering", "Layering"],
   ["abajo", "Abajo"],
   ["vestido", "Vestido"],
   ["capa", "Capa"],

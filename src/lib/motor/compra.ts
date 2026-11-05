@@ -13,7 +13,8 @@ export function tipoClave(p: { cat: Cat; nombre?: string; n?: string; tipo?: str
   return m ? m[1].replace("botín", "botin").replace("cárdigan", "cardigan") : p.cat;
 }
 const COMPI: Record<Cat, Cat[]> = {
-  arriba: ["abajo"],
+  arriba: ["abajo", "layering"],
+  layering: ["arriba", "vestido"],
   abajo: ["arriba"],
   vestido: ["capa", "calzado"],
   capa: ["arriba", "abajo", "vestido"],

@@ -6,7 +6,18 @@ import type { Cat, Condiciones, Prenda, Temporada } from "../tipos.ts";
 import { aprendido, clave2, usos } from "./aprende.ts";
 import { bandaDe, ocaDe } from "./contexto.ts";
 import { activas, estado, famDe, palDe, txt } from "./estado.ts";
-import { casan, corto, estiloDe, fueraTemporada, penCond, tejidoDe } from "./prenda.ts";
+import {
+  asoma,
+  casan,
+  corto,
+  encima,
+  estiloDe,
+  fueraTemporada,
+  layerYa,
+  penCond,
+  tejidoDe,
+  txtAsoma
+} from "./prenda.ts";
 
 /** Un look propuesto por monta(). */
 export interface Look {
@@ -50,7 +61,8 @@ export function monta(
     dress = by("vestido"),
     capas = by("capa"),
     shoes = by("calzado"),
-    accs = by("accesorio");
+    accs = by("accesorio"),
+    layers = by("layering");
   const rec: Record<string, 1> = {};
   estado.O.filter((o) => o.fecha)
     .sort((a, b) => ((a.fecha as string) < (b.fecha as string) ? 1 : -1))
@@ -193,6 +205,25 @@ export function monta(
       tips: string[] = [],
       warn: string[] = [],
       encasa = oca.id === "casa";
+    // Layering: una prenda fina debajo cuando hace fresco o frío, o en otoño e invierno sin calor
+    const bajo = c.ps[0],
+      layerSi =
+        layers.length > 0 &&
+        !layerYa(c.ps) &&
+        (bc.id === "frio" ||
+          bc.id === "fresco" ||
+          ((est === "otono" || est === "invierno") && bc.id !== "calor"));
+    if (layerSi && encima(bajo)) {
+      const ly = mejor(
+        layers.filter((p) => asoma(p, bajo).length),
+        c.ps,
+        (p) => (bc.id === "frio" ? 0.6 : 0.2) + (palDe(p) === "evita" ? -0.4 : 0.3)
+      );
+      if (ly) {
+        ps.splice(1, 0, ly);
+        tips.push(txtAsoma(asoma(ly, bajo)));
+      }
+    }
     if (!encasa && capaSi) {
       const capa = mejor(
         capas,
