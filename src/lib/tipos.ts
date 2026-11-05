@@ -1,6 +1,6 @@
 // Tipos del dominio: lo que se guarda en IndexedDB y lo que manejan el motor y el análisis.
 
-export type Cat = "arriba" | "abajo" | "vestido" | "capa" | "calzado" | "accesorio";
+export type Cat = "arriba" | "layering" | "abajo" | "vestido" | "capa" | "calzado" | "accesorio";
 export type Estilo = "deportivo" | "casual" | "arreglado" | "fiesta";
 export type Tejido = "algodon" | "vaquero" | "punto" | "felpa" | "saten" | "ligero" | "piel";
 export type Corte = "ajustada" | "fluida" | "amplia";

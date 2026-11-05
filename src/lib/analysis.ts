@@ -368,6 +368,7 @@ function normalizaDeseo(d: Crudo, i: number): Deseo | null {
 }
 const ICONO_POR_CAT: Record<Cat, string> = {
   arriba: "camiseta",
+  layering: "camiseta",
   abajo: "pantalon-ancho",
   vestido: "vestido",
   capa: "chaqueta",

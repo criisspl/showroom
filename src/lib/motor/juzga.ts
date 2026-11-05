@@ -5,7 +5,17 @@ import type { Cat, Contexto, Prenda, Temporada, Veredicto } from "../tipos.ts";
 import { aprendido } from "./aprende.ts";
 import { bandaDe, capaHace, ocaDe } from "./contexto.ts";
 import { VISTE, activas, byId, estado, famDe, palDe, txt } from "./estado.ts";
-import { condiciones, corto, estiloDe, fueraTemporada, tejidoDe, txtTemporada } from "./prenda.ts";
+import {
+  asoma,
+  condiciones,
+  corto,
+  encima,
+  estiloDe,
+  fueraTemporada,
+  tejidoDe,
+  txtAsoma,
+  txtTemporada
+} from "./prenda.ts";
 
 const PRINC: Partial<Record<Cat, 1>> = { arriba: 1, abajo: 1, vestido: 1 };
 const nomP = (p: Prenda) => p.nombre.charAt(0).toLowerCase() + p.nombre.slice(1);
@@ -62,6 +72,7 @@ export function juzga(ids: string[], c: Contexto): Juicio | null {
     tops = by("arriba"),
     bots = by("abajo"),
     capas = by("capa"),
+    lys = by("layering"),
     shoes = by("calzado"),
     base = ps.filter((p) => PRINC[p.cat]);
   if (!dress.length && !(tops.length && bots.length))
@@ -76,6 +87,31 @@ export function juzga(ids: string[], c: Contexto): Juicio | null {
   if (dress.length && bots.length)
     fallo(1, "Vestido y parte de abajo a la vez: solo funciona si el vestido hace de blusón.", bots);
   if (bots.length > 1) fallo(3, "Dos partes de abajo a la vez.", bots.slice(1));
+  // Layering: va debajo y solo vale si se ve algo
+  if (lys.length && !tops.length && !dress.length)
+    fallo(
+      1.5,
+      Cap(nomP(lys[0])) + " es para llevar debajo: ponle una camiseta, un chaleco o un vestido encima.",
+      lys
+    );
+  if (lys.length > 1) fallo(1, "Dos prendas de layering a la vez: con una basta.", lys.slice(1));
+  if (lys.length && (tops.length || dress.length)) {
+    const ar = tops[0] || dress[0],
+      se = asoma(lys[0], ar);
+    if (!encima(ar))
+      fallo(1, Cap(nomP(ar)) + " es demasiado grueso para llevar " + nomP(lys[0]) + " debajo.", lys);
+    else if (!se.length)
+      fallo(
+        1,
+        "Con " +
+          nomP(ar) +
+          " encima, " +
+          nomP(lys[0]) +
+          " no se ve: el layering no luce. Busca una de manga más larga, cuello alto o un top más corto encima.",
+        lys
+      );
+    else bien.push("Buen layering: " + nomP(lys[0]) + " debajo de " + nomP(ar) + ". " + txtAsoma(se));
+  }
   // Registro y tejido, por parejas
   const vis = ps.filter((p) => p.cat !== "accesorio");
   let choques = 0;
@@ -157,6 +193,9 @@ export function juzga(ids: string[], c: Contexto): Juicio | null {
     );
   // Tiempo
   const nT = mal.length;
+  lys.forEach((p) => {
+    if (cal.id === "calor") fallo(2, "Con calor, " + nomP(p) + " debajo sobra.", [p]);
+  });
   base.forEach((p) => {
     if (cal.id === "calor" && Number(p.abrigo) === 3)
       fallo(2, Cap(nomP(p)) + " da demasiado calor" + (banda.multi ? " para las horas de calor." : "."), [p]);

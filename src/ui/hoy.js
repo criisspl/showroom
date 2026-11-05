@@ -497,7 +497,7 @@ function pintaAncla() {
       })
     );
   box.appendChild(info);
-  ["arriba", "abajo", "vestido", "capa", "calzado", "accesorio"].forEach((cat) => {
+  ["arriba", "layering", "abajo", "vestido", "capa", "calzado", "accesorio"].forEach((cat) => {
     const ps = A.filter((p) => p.cat === cat);
     if (!ps.length) return;
     const sec = el("div", "yo-cat"),
@@ -1166,7 +1166,7 @@ const OCA_PIN = {
   viaje: "viaje",
   concierto: "concierto"
 };
-const ORDEN = { vestido: 0, arriba: 1, abajo: 2, capa: 3, calzado: 4, accesorio: 5 };
+const ORDEN = { vestido: 0, arriba: 1, layering: 1.5, abajo: 2, capa: 3, calzado: 4, accesorio: 5 };
 function pinOutfit(ps, c) {
   const oca = ocaDe(c.oca),
     o0 = oca.multi ? oca.multi[0] : oca;
@@ -1601,7 +1601,7 @@ function pintaYo() {
   if (!A.length) {
     box.appendChild(el("p", "a-note", "Cuando subas prendas al armario, podrás montar aquí tus looks."));
   }
-  ["arriba", "abajo", "vestido", "capa", "calzado", "accesorio"].forEach((cat) => {
+  ["arriba", "layering", "abajo", "vestido", "capa", "calzado", "accesorio"].forEach((cat) => {
     const ps = A.filter((p) => p.cat === cat);
     if (!ps.length) return;
     const sec = el("div", "yo-cat"),
@@ -1872,7 +1872,7 @@ async function pedirIA() {
       : "") +
     (noes.length ? "\nCombinaciones que NO se pondría (no las repitas): " + noes.join("; ") + "." : "") +
     (sies.length ? "\nCombinaciones que SÍ le gustan: " + sies.join("; ") + "." : "") +
-    '\n\nMonta hasta 3 outfits distintos usando SOLO prendas de esa lista, por su id. Cada outfit lleva arriba y abajo, o un vestido; añade capa si hace fresco o frío, calzado y como mucho un accesorio. Coherencia antes que color: nunca mezcles deportivo o felpa con arreglado, fiesta, satén o encaje; respeta la ocasión (la oficina normal es casual: vaqueros, polos y camisetas valen; la oficina formal pide prendas arregladas; deportivo es solo ropa de hacer deporte); una sola prenda amplia. Si le vendría muy bien una prenda que NO tiene, proponla en "falta"; si no, null. Español de España, frases cortas. Responde solo JSON: {"outfits":[{"prendas":["id1","id2"],"porque":"una frase","consejo":"un gesto","falta":{"nombre":"","cat":"arriba|abajo|vestido|capa|calzado|accesorio","tipo":"","color":"#RRGGBB","porque":""}}]}';
+    '\n\nMonta hasta 3 outfits distintos usando SOLO prendas de esa lista, por su id. Cada outfit lleva arriba y abajo, o un vestido; añade capa si hace fresco o frío, calzado y como mucho un accesorio. Las prendas de cat "layering" van DEBAJO de una camiseta, chaleco, top de tirantes o vestido, SOLO si se va a ver: manga más larga que la de encima (manga larga bajo manga corta, tirantes, chaleco o vestido sin mangas), cuello alto bajo un cuello normal, o un bajo más largo bajo un top corto/crop. Bajo una camisa o blusa de manga larga solo vale un cuello alto; bajo un jersey no pongas layering; si no se ve nada, no la pongas. Fíjate en el nombre. Úsalas solo con fresco o frío y como mucho una. Coherencia antes que color: nunca mezcles deportivo o felpa con arreglado, fiesta, satén o encaje; respeta la ocasión (la oficina normal es casual: vaqueros, polos y camisetas valen; la oficina formal pide prendas arregladas; deportivo es solo ropa de hacer deporte); una sola prenda amplia. Si le vendría muy bien una prenda que NO tiene, proponla en "falta"; si no, null. Español de España, frases cortas. Responde solo JSON: {"outfits":[{"prendas":["id1","id2"],"porque":"una frase","consejo":"un gesto","falta":{"nombre":"","cat":"arriba|abajo|vestido|capa|calzado|accesorio","tipo":"","color":"#RRGGBB","porque":""}}]}';
   btn.disabled = true;
   out.appendChild(el("p", "a-note", "La IA está mirando tu armario…"));
   try {

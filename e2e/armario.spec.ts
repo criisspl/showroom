@@ -52,3 +52,22 @@ test("¿Lo compro? da un veredicto sin guardar la prenda", async ({ page }) => {
   await pestana(page, "Armario");
   await expect(page.locator("#a-grid").getByRole("button")).toHaveCount(11);
 });
+
+test("una prenda de Layering se guarda con temporada de otoño e invierno", async ({ page }) => {
+  await abreConArmario(page);
+  await pestana(page, "Armario");
+  await page.getByRole("button", { name: "Añadir prenda" }).click();
+  const form = page.locator("#a-form");
+  await form.getByLabel("Nombre").fill("Jersey fino de cuello alto");
+  await form.getByRole("group", { name: "Categoría" }).getByText("Layering").click();
+  const temporada = form.getByRole("group", { name: "Temporada" });
+  await expect(temporada.getByLabel("Otoño")).toBeChecked();
+  await expect(temporada.getByLabel("Invierno")).toBeChecked();
+  await expect(temporada.getByLabel("Verano")).not.toBeChecked();
+  await form.getByRole("button", { name: "Guardar" }).click();
+
+  await page.locator("#a-filter").getByText("Layering").click();
+  await expect(
+    page.locator("#a-grid").getByRole("button", { name: /Jersey fino de cuello alto/ })
+  ).toBeVisible();
+});

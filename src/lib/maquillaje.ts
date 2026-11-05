@@ -128,7 +128,9 @@ export function maquillajeDeLook(
 
   const ropa = prendas.filter((p) => p.cat !== "calzado" && p.cat !== "accesorio");
   const fams = ropa.map((p) => familia(p.color));
-  const cara = ropa.find((p) => p.cat === "arriba" || p.cat === "vestido" || p.cat === "capa") ?? ropa[0];
+  const cara =
+    ropa.find((p) => p.cat === "arriba" || p.cat === "vestido" || p.cat === "layering" || p.cat === "capa") ??
+    ropa[0];
   const famCara = cara ? familia(cara.color) : null;
   const llamativa = fams.find((f) => LLAMATIVAS.includes(f));
 

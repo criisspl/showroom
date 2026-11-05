@@ -38,7 +38,7 @@ export function setEstado(patch: Partial<Estado>) {
   if ("V" in patch) estado.L = null;
 }
 
-export const VISTE: Partial<Record<Cat, 1>> = { arriba: 1, abajo: 1, vestido: 1, capa: 1 };
+export const VISTE: Partial<Record<Cat, 1>> = { arriba: 1, layering: 1, abajo: 1, vestido: 1, capa: 1 };
 export const activas = () => estado.P.filter((p) => p.activa !== false);
 export const byId = (id: string): Prenda | null =>
   estado.P.find((p) => p.id === id) || estado.virt[id] || null;
