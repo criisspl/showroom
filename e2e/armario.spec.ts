@@ -44,6 +44,7 @@ test("¿Lo compro? da un veredicto sin guardar la prenda", async ({ page }) => {
   await pestana(page, "Armario");
   await page.getByRole("button", { name: "¿Lo compro?" }).click();
   await expect(page.getByRole("heading", { name: "Deseos" })).toBeVisible();
+  await expect(page.locator("#w-filter").getByText("Layering")).toBeVisible();
   const form = page.locator("#a-form");
   await form.getByLabel("Tipo").fill("blusa");
   await form.getByLabel("Color principal").fill("#7a8fa6");

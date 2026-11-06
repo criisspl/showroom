@@ -28,7 +28,11 @@ test("normaliza limpia y recorta lo que devuelve la IA", () => {
     },
     cuerpo: { tipo: "Soft Natural", si: ["Cintura marcada", 3] },
     estetica: { palabras: ["a", "b", "c", "d", "e"] },
-    deseos: [{ n: "Falda midi", cat: "abajo", cols: [["Oliva", "#708238"]] }, null]
+    deseos: [
+      { n: "Falda midi", cat: "abajo", cols: [["Oliva", "#708238"]] },
+      { n: "Cuello alto fino", cat: "layering", cols: [["Oliva", "#708238"]] },
+      null
+    ]
   });
   assert.equal(p.resumen.length <= 800, true);
   assert.deepEqual(
@@ -38,6 +42,7 @@ test("normaliza limpia y recorta lo que devuelve la IA", () => {
   assert.equal(p.color.combinaciones.length, 0);
   assert.ok(p.estetica.palabras.length <= 4);
   assert.ok(p.deseos.length >= 1);
+  assert.ok(p.deseos.some((d) => d.cat === "layering"));
   assert.equal(p.rostro, null);
 });
 

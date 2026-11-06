@@ -159,7 +159,7 @@ const ESQUEMA = `{
  "pelo": {"cortes":[{"nombre":"","nota":"","pinterest":""}],"colores":[{"nombre":"","hex":"#RRGGBB","nota":""}],"evita":[""]},
  "estetica": {"nombre":"nombre evocador de su estética","subtitulo":"","palabras":["3 palabras"],"formula":["3 piezas que forman su fórmula"],"claves":["palabras de prendas o tejidos típicos de su estética"],"porque":[""],"pinterest":["3 búsquedas en inglés"]},
  "looks": [{"ocasion":"","prendas":["",""],"pinterest":""}], // 5 looks
- "deseos": [{"n":"nombre de la prenda","cat":"arriba|abajo|vestido|capa|calzado|accesorio","tipo":"una palabra","icono":"uno de: ${TIPOS_ICONO.join(", ")}","cols":[["nombre color","#RRGGBB"]],"nota":"por qué le favorece, 1 frase","corte":"ajustada|fluida|amplia","abrigo":1,"estilo":"deportivo|casual|arreglado|fiesta","tejido":"algodon|vaquero|punto|felpa|saten|ligero|piel","top":true,"q1":"búsqueda Pinterest de la prenda, en inglés","q2":"búsqueda Pinterest de outfits con ella, en inglés"}] // 16-24 prendas, 6 con top=true
+ "deseos": [{"n":"nombre de la prenda","cat":"arriba|layering|abajo|vestido|capa|calzado|accesorio","tipo":"una palabra","icono":"uno de: ${TIPOS_ICONO.join(", ")}","cols":[["nombre color","#RRGGBB"]],"nota":"por qué le favorece, 1 frase","corte":"ajustada|fluida|amplia","abrigo":1,"estilo":"deportivo|casual|arreglado|fiesta","tejido":"algodon|vaquero|punto|felpa|saten|ligero|piel","top":true,"q1":"búsqueda Pinterest de la prenda, en inglés","q2":"búsqueda Pinterest de outfits con ella, en inglés"}] // 16-24 prendas, 6 con top=true
 }`;
 
 export async function analizaConIA(
@@ -328,7 +328,7 @@ export function normaliza(j: Crudo, respuestas: Record<string, unknown> = {}, or
   return perfil;
 }
 
-const CATS = ["arriba", "abajo", "vestido", "capa", "calzado", "accesorio"];
+const CATS = ["arriba", "layering", "abajo", "vestido", "capa", "calzado", "accesorio"];
 function normalizaDeseo(d: Crudo, i: number): Deseo | null {
   if (!d || !d.n || !CATS.includes(d.cat)) return null;
   const cols = arr(d.cols)

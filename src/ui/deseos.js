@@ -12,6 +12,7 @@ const WFIL = [
   ["top", "Empieza aquí"],
   ["mia", "Mi lista"],
   ["arriba", "Arriba"],
+  ["layering", "Layering"],
   ["abajo", "Abajo"],
   ["vestido", "Vestidos"],
   ["capa", "Capas"],
