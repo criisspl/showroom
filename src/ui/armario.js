@@ -327,7 +327,7 @@ async function autoIA() {
     const url = await imagenParaIA(app.ui.photo.blob, 768);
     const d = await preguntaJSON(app.ajustes, {
       texto:
-        'La imagen es una prenda de ropa o un accesorio. Descríbela para un armario digital. Responde solo con JSON: {"nombre":"nombre corto en español, sin marca","cat":"arriba|abajo|vestido|capa|calzado|accesorio","tipo":"una o dos palabras","color":"#RRGGBB del color principal de la prenda, no del fondo","corte":"ajustada|fluida|amplia","registro":"deportivo (solo ropa de hacer deporte: chándal, mallas, ropa técnica) | casual (camisetas, polos, sudaderas, vaqueros) | arreglado | fiesta","tejido":"algodon|vaquero|punto|felpa|saten|ligero|piel","abrigo":1}  (abrigo: 1 ligera, 2 media, 3 abrigada).',
+        'La imagen es una prenda de ropa o un accesorio. Descríbela para un armario digital. Usa "layering" para lo fino que se lleva debajo de otra prenda (camiseta térmica, cuello alto, manga larga ajustada). Responde solo con JSON: {"nombre":"nombre corto en español, sin marca","cat":"arriba|layering|abajo|vestido|capa|calzado|accesorio","tipo":"una o dos palabras","color":"#RRGGBB del color principal de la prenda, no del fondo","corte":"ajustada|fluida|amplia","registro":"deportivo (solo ropa de hacer deporte: chándal, mallas, ropa técnica) | casual (camisetas, polos, sudaderas, vaqueros) | arreglado | fiesta","tejido":"algodon|vaquero|punto|felpa|saten|ligero|piel","abrigo":1}  (abrigo: 1 ligera, 2 media, 3 abrigada).',
       imagenes: [url]
     });
     if (!d.nombre && !CATN[d.cat]) throw new Error("No lo he visto claro. Rellénalo a mano.");
