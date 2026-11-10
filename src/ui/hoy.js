@@ -51,7 +51,7 @@ import { mount } from "svelte";
 import Maquillaje from "./Maquillaje.svelte";
 import { thumb, icono, ver, falla } from "./comun.js";
 import { abreForm } from "./armario.js";
-import { ponDeseo } from "./deseos.js";
+import { ponDeseo } from "./ponDeseo.js";
 
 const PRINC = { arriba: 1, abajo: 1, vestido: 1 };
 const LIMITE = { "a-oca": 3, "a-temp": 2 };

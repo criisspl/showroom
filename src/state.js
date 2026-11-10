@@ -5,13 +5,13 @@ import { construyePaleta } from "./lib/color.ts";
 export const app = {
   store: /** @type {import("./lib/store.ts").Store} */ (null), // lo abre main.js al arrancar
   ajustes: { proveedor: "integrada", modelo: "", url: "", clave: "" },
-  perfil: null,
+  perfil: /** @type {import("./lib/tipos.ts").Perfil | null} */ (null),
   refs: [], // referencias de gusto guardadas
-  D: {}, // deseos guardados por id (estado de cada prenda deseada)
+  D: /** @type {Record<string, import("./lib/store.ts").DeseoGuardado>} */ ({}), // deseos guardados por id (estado de cada prenda deseada)
   ui: {
     filter: "todo",
     wfil: "top",
-    wcol: {},
+    wcol: /** @type {Record<string, number>} */ ({}),
     seed: 0,
     last: [],
     preg: {},
@@ -21,7 +21,8 @@ export const app = {
     modo: null,
     anclas: [], // prendas fijas de «Con estas prendas»
     ideaSeed: 0,
-    noIdea: {}
+    noIdea: {},
+    vuelveA: /** @type {string | null} */ (null) // pantalla a la que volver tras guardar una prenda
   },
   pinta: {} // funciones de repintado que registra cada pantalla
 };
