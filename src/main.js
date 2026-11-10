@@ -19,8 +19,8 @@ import Espejo from "./ui/Espejo.svelte";
 import Ajustes from "./ui/Ajustes.svelte";
 import Gusto from "./ui/Gusto.svelte";
 import Deseos from "./ui/Deseos.svelte";
+import Analisis from "./ui/Analisis.svelte";
 import { avisa } from "./ui/puente.svelte.ts";
-import { initAnalisis } from "./ui/analisis.js";
 import { initBienvenida } from "./ui/bienvenida.js";
 import { initInstala, protegeDatos } from "./ui/instala.js";
 
@@ -56,8 +56,15 @@ async function arranca() {
   } catch (e) {
     falla(e);
   }
+  // Análisis también: el pie de Gusto vive aparte, en #a-gusto
+  try {
+    mount(Analisis, { target: document.getElementById("an-wrap") });
+    app.pinta.analisis = avisa;
+  } catch (e) {
+    falla(e);
+  }
   // Si una pantalla falla al arrancar, las demás (y la carga de tus prendas) siguen funcionando
-  [initHoy, initArmario, initAnalisis, initBienvenida, initInstala].forEach((f) => {
+  [initHoy, initArmario, initBienvenida, initInstala].forEach((f) => {
     try {
       f();
     } catch (e) {
