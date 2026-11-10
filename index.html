@@ -71,7 +71,7 @@
           <div class="a-row">
             <button type="button" class="a-btn" id="b-analiza">Hacer mi análisis</button>
           </div>
-          <p class="a-msg" id="b-msg"></p>
+          <p class="a-msg" id="b-msg" role="alert"></p>
         </div>
 
         <details class="card paso" id="b-ia">
@@ -94,9 +94,10 @@
             <button type="button" class="a-btn" id="b-analiza-ia">Hacer el análisis con IA</button>
           </div>
           <div class="progreso" id="b-prog" hidden>
-            <span class="a-msg" id="b-prog-t">Analizando…</span><span class="barra"><i></i></span>
+            <span class="a-msg" id="b-prog-t" role="status" aria-live="polite">Analizando…</span
+            ><span class="barra"><i></i></span>
           </div>
-          <p class="a-msg" id="b-msg-ia"></p>
+          <p class="a-msg" id="b-msg-ia" role="alert"></p>
         </details>
 
         <details class="card paso" id="b-manual">
@@ -192,7 +193,7 @@
           >
           <div class="a-row">
             <button type="button" class="a-btn" id="a-fl-go" disabled>Analizar mi look</button
-            ><span class="a-msg" id="a-fl-msg"></span>
+            ><span class="a-msg" id="a-fl-msg" role="status" aria-live="polite"></span>
           </div>
         </div>
         <div id="a-fl-out" class="a-out" aria-live="polite" hidden></div>
@@ -235,7 +236,7 @@
             </div>
             <div class="a-row">
               <button type="button" class="a-btn" id="a-ancla-go">Monta looks con ella</button
-              ><span class="a-msg" id="a-ancla-msg"></span>
+              ><span class="a-msg" id="a-ancla-msg" role="status" aria-live="polite"></span>
             </div>
           </details>
         </div>
@@ -280,7 +281,7 @@
           <div class="a-row">
             <button type="button" class="a-btn ghost" id="a-auto" hidden>
               Rellenar con IA (envía la foto)</button
-            ><span class="a-msg" id="a-auto-msg"></span>
+            ><span class="a-msg" id="a-auto-msg" role="status" aria-live="polite"></span>
           </div>
           <label class="a-f"
             ><span>Nombre</span
@@ -345,7 +346,7 @@
             <button type="button" class="a-btn ghost" id="a-retire">Retirar del armario</button
             ><button type="button" class="a-btn danger" id="a-del">Eliminar</button>
           </div>
-          <p class="a-msg" id="a-form-msg"></p>
+          <p class="a-msg" id="a-form-msg" role="status" aria-live="polite"></p>
           <div class="a-verd" id="a-verd" hidden></div>
         </form>
         <div class="opts-r a-filter" id="a-filter"></div>
@@ -388,7 +389,7 @@
           /></label>
           <div class="a-row">
             <button type="submit" class="a-btn">Añadir a mi lista</button
-            ><span class="a-msg" id="w-own-msg"></span>
+            ><span class="a-msg" id="w-own-msg" role="status" aria-live="polite"></span>
           </div>
         </form>
       </div>
@@ -418,7 +419,7 @@
             ><span>Qué IA usar</span
             ><select id="s-prov"></select
           ></label>
-          <p class="a-msg" id="s-prov-nota"></p>
+          <p class="a-msg" id="s-prov-nota" role="status" aria-live="polite"></p>
           <div id="s-propia">
             <label class="a-f"
               ><span>Modelo</span><input type="text" id="s-modelo" autocomplete="off" /><small
@@ -438,12 +439,12 @@
           <div class="a-row">
             <button type="button" class="a-btn" id="s-guarda">Guardar</button
             ><button type="button" class="a-btn ghost" id="s-prueba">Probar conexión</button
-            ><span class="a-msg" id="s-msg"></span>
+            ><span class="a-msg" id="s-msg" role="status" aria-live="polite"></span>
           </div>
         </div>
         <div class="card paso" id="s-instala" hidden>
           <h2>Instálala en tu móvil</h2>
-          <p class="a-msg" id="s-instala-t"></p>
+          <p class="a-msg" id="s-instala-t" role="status" aria-live="polite"></p>
           <div class="a-row">
             <button type="button" class="a-btn" id="s-instala-b" hidden>Instalar</button>
           </div>
@@ -468,7 +469,7 @@
             <button type="button" class="a-btn ghost" id="s-rehacer">Rehacer mi análisis</button
             ><button type="button" class="a-btn danger" id="s-borra">Borrar todo</button>
           </div>
-          <p class="a-msg" id="s-datos-msg"></p>
+          <p class="a-msg" id="s-datos-msg" role="status" aria-live="polite"></p>
         </div>
         <p class="a-note" style="margin-top: 18px">
           Proyecto de código abierto. Las recomendaciones son orientativas y no sustituyen a una asesora

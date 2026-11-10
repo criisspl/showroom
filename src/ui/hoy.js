@@ -1701,6 +1701,7 @@ function valora(o, c, dest) {
     head = el("div", "a-row"),
     msg = el("span", "a-msg"),
     panel = el("div", "a-rate-p");
+  msg.setAttribute("role", "status");
   const si = boton("Sí", "a-btn ghost"),
     no = boton("No", "a-btn ghost");
   panel.hidden = true;

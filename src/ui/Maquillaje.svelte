@@ -118,7 +118,7 @@
             {afinando ? "Pensando…" : afinado ? "Afinar otra vez con la IA" : "Afinar con la IA"}
           </button>
         {/if}
-        <p class="a-msg" aria-live="polite">{mensaje}</p>
+        <p class="a-msg" role="status" aria-live="polite">{mensaje}</p>
       {/if}
     {:else}
       <p class="a-msg">Haz primero tu análisis y te propongo un maquillaje para cada look.</p>

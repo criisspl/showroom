@@ -126,7 +126,7 @@
   {:else}
     <p class="a-msg">Tienes {MAX_REFS} referencias, el máximo. Borra alguna para añadir más.</p>
   {/if}
-  <p class="a-msg" aria-live="polite">{mensaje}</p>
+  <p class="a-msg" role="status" aria-live="polite">{mensaje}</p>
   {#if datos.refs.length}
     <ul class="ref-rejilla">
       {#each datos.refs as r (r.id)}
