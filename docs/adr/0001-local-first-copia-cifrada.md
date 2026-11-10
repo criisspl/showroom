@@ -1,7 +1,11 @@
 # 0001. Local-first con copia cifrada opcional
 
-- Estado: Aceptada
+- Estado: Aplazada (la parte local-first sigue vigente; la copia en la nube cifrada está pendiente)
 - Fecha: 2026-10-17
+
+## Estado actual
+
+Solo está implementada la parte local-first: IndexedDB es la fuente de verdad y la copia manual `.armario.json` sigue siendo la única copia. La copia en la nube no existe: Supabase no está instalado ni configurado, no hay login y `@supabase/supabase-js` no es dependencia. `src/lib/cripto.ts` (cifrado y envoltura de claves) está escrito y probado, pero solo lo usan los tests. Por eso el README dice «sin cuentas». La decisión de abajo queda como diseño para cuando se retome.
 
 ## Contexto
 
