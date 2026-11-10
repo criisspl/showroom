@@ -13,12 +13,12 @@ import { normaliza } from "./lib/analysis.ts";
 import { ver, falla } from "./ui/comun.js";
 import { initHoy } from "./ui/hoy.js";
 import { initArmario } from "./ui/armario.js";
-import { initDeseos } from "./ui/deseos.js";
 import { mount } from "svelte";
 import Historial from "./ui/Historial.svelte";
 import Espejo from "./ui/Espejo.svelte";
 import Ajustes from "./ui/Ajustes.svelte";
 import Gusto from "./ui/Gusto.svelte";
+import Deseos from "./ui/Deseos.svelte";
 import { avisa } from "./ui/puente.svelte.ts";
 import { initAnalisis } from "./ui/analisis.js";
 import { initBienvenida } from "./ui/bienvenida.js";
@@ -49,8 +49,15 @@ async function arranca() {
   } catch (e) {
     falla(e);
   }
+  // Deseos también: Armario engancha su formulario «¿Lo compro?» en #w-form-slot
+  try {
+    mount(Deseos, { target: document.querySelector("#tab-deseos .wrap") });
+    app.pinta.deseos = avisa;
+  } catch (e) {
+    falla(e);
+  }
   // Si una pantalla falla al arrancar, las demás (y la carga de tus prendas) siguen funcionando
-  [initHoy, initArmario, initDeseos, initAnalisis, initBienvenida, initInstala].forEach((f) => {
+  [initHoy, initArmario, initAnalisis, initBienvenida, initInstala].forEach((f) => {
     try {
       f();
     } catch (e) {

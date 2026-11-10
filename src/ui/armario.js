@@ -1,6 +1,6 @@
 // Pestaña Armario: rejilla de prendas, ficha de prenda (con foto) y el modo «¿Lo compro?».
 import { $, el, boton, radios, val, vals, setVal } from "../lib/dom.js";
-import { app, estado } from "../state.js";
+import { app, estado, repinta } from "../state.js";
 import { CATS, CATN, CORTES, ABRIGOS, EST, TEJ, FORMAL_DE, TEMPORADAS } from "../data/constants.ts";
 import { activas, byId, usos, estiloDe, tejidoDe, palDe, evalua, temporadaDe } from "../lib/engine.ts";
 import { avisoPartesDeArriba, necesitaRevision } from "../lib/armario.ts";
@@ -10,7 +10,6 @@ import { textoPerfil } from "../lib/analysis.ts";
 import { avisoEnvio, DATOS_SEGUNDA_OPINION } from "../lib/permisoia.ts";
 import { pidePermisoIA } from "./permiso.js";
 import { thumb, ver, falla } from "./comun.js";
-import { pintaDeseos } from "./deseos.js";
 import { vuelveConPrenda } from "./hoy.js";
 
 const VERD = { si: "Cómprala", quiza: "Piénsatelo", no: "Mejor no" };
@@ -48,7 +47,6 @@ export function initArmario() {
     ver("deseos");
     abreForm(null, null, "compra");
   });
-  $("w-buy").addEventListener("click", () => abreForm(null, null, "compra"));
   $("a-cancel").addEventListener("click", cancelaForm);
   $("a-form").addEventListener("submit", guardaPrenda);
   $("a-file").addEventListener("change", function () {
@@ -533,8 +531,7 @@ function analiza() {
       });
       row.appendChild(u);
       app.ui.wfil = "mia";
-      setVal("w-filter", "mia");
-      pintaDeseos();
+      repinta("deseos");
     } catch (e) {
       quiero.disabled = false;
       m.textContent = "";
