@@ -79,13 +79,14 @@ async function exporta() {
   const m = $("s-datos-msg");
   m.textContent = "Preparando la copia…";
   try {
-    const data = await app.store.exporta();
+    const url = URL.createObjectURL(await app.store.exportaBlob());
     const a = el("a");
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: "application/json" }));
+    a.href = url;
     a.download = "copia-" + new Date().toISOString().slice(0, 10) + ".armario.json";
     document.body.appendChild(a);
     a.click();
     a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
     m.textContent = "Copia descargada. La clave de la IA no se incluye.";
   } catch (e) {
     m.textContent = "";

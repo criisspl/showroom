@@ -160,7 +160,13 @@ function mueveForm(destino) {
   } else if (f.parentNode !== formCasa.p) formCasa.p.insertBefore(f, formCasa.n);
 }
 
+// URL temporal de la foto recién elegida (las de la base las gestiona el store): se libera al cambiarla.
+let urlPropia = null;
 async function pintaPrevia(src, txt) {
+  if (urlPropia && src !== urlPropia) {
+    URL.revokeObjectURL(urlPropia);
+    urlPropia = null;
+  }
   const prev = $("a-prev");
   prev.textContent = "";
   if (src) {
@@ -306,7 +312,9 @@ async function eligeFoto(file) {
     const blob = await new Promise((r) => big.toBlob(r, "image/jpeg", 0.84));
     if (bm.close) bm.close();
     app.ui.photo = { blob };
-    pintaPrevia(URL.createObjectURL(blob));
+    const u = URL.createObjectURL(blob);
+    pintaPrevia(u);
+    urlPropia = u;
     $("a-color").value = col;
     infoColor();
     $("a-auto").hidden = !hayIA(app.ajustes);
