@@ -177,3 +177,63 @@ test("las referencias van en la copia de seguridad y vuelven al restaurarla", as
   await store.importa(copia);
   assert.equal((await store.todos("refs")).length, 1);
 });
+
+test("una copia corrupta a mitad no altera lo que ya había", async () => {
+  const store = await creaStore();
+  await store.borraTodo();
+  await store.add("prendas", { nombre: "Falda camel", cat: "abajo" });
+  await store.kset("perfil", { resumen: "Otoño suave" });
+  const base = await store.exporta();
+  const nueva = {
+    ...base,
+    prendas: [{ id: "p1", nombre: "Blusa nueva", cat: "arriba" }],
+    outfits: [{ sinId: true }], // falla después de que prendas ya sea válida
+    kv: { perfil: { resumen: "Otro" } }
+  } as unknown as Copia;
+  await assert.rejects(store.importa(nueva), /dañada/);
+  assert.deepEqual(
+    (await store.todos("prendas")).map((p) => p.nombre),
+    ["Falda camel"]
+  );
+  assert.deepEqual(await store.kget("perfil"), { resumen: "Otoño suave" });
+});
+
+test("una foto que falla a mitad de la copia no deja la importación a medias", async () => {
+  const store = await creaStore();
+  await store.borraTodo();
+  await store.add("prendas", { nombre: "Falda camel", cat: "abajo" });
+  const base = await store.exporta();
+  const nueva: Copia = {
+    ...base,
+    prendas: [],
+    fotos: { f1: "data:image/png;base64,aG9sYQ==", f2: "data:image/png;base64,@@@" }
+  };
+  await assert.rejects(store.importa(nueva));
+  assert.equal((await store.todos("prendas")).length, 1);
+  assert.ok(!(await store.blobFoto("f1")));
+});
+
+test("rechaza fotos que no son data:image sin hacer ninguna petición", async () => {
+  const store = await creaStore();
+  await store.borraTodo();
+  await store.add("prendas", { nombre: "Falda camel", cat: "abajo" });
+  const base = await store.exporta();
+  const original = globalThis.fetch;
+  globalThis.fetch = (() => {
+    throw new Error("no debe haber fetch");
+  }) as typeof fetch;
+  try {
+    for (const url of [
+      "https://ejemplo.com/foto.jpg",
+      "http://127.0.0.1/x",
+      "data:text/html;base64,aG9sYQ==",
+      "data:image/svg+xml;base64,aG9sYQ==",
+      "blob:https://ejemplo.com/abc"
+    ])
+      await assert.rejects(store.importa({ ...base, fotos: { f1: url } }), /no es una imagen/);
+  } finally {
+    globalThis.fetch = original;
+  }
+  assert.equal((await store.todos("prendas")).length, 1);
+  assert.ok(!(await store.blobFoto("f1")));
+});
