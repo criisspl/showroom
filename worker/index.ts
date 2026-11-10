@@ -44,13 +44,16 @@ async function ia(request: Request, env: Env, url: URL): Promise<Response> {
   if (request.method !== "POST") return json({ error: "metodo" }, 405);
 
   // Solo desde la propia web (evita que otras webs usen tu clave desde sus páginas).
-  const origen = request.headers.get("origin");
-  if (origen && new URL(origen).host !== url.host) return json({ error: "origen" }, 403);
+  // Sin Origin solo pasa si el navegador declara que la petición es del mismo sitio.
+  if (!esMismoOrigen(request, url)) return json({ error: "origen" }, 403);
 
-  // Límite por persona (IP): unas pocas peticiones por minuto.
+  // Límite por persona: unas pocas peticiones por minuto.
+  // Limitación conocida: la app no tiene cuentas, así que la única clave posible es la red de
+  // origen (IP; en IPv6, el prefijo /64). Quien cambie de red o rote IPs puede esquivar el límite,
+  // y varias personas tras la misma IP (oficina, CGNAT) lo comparten. No hay mejor clave estable
+  // sin cuentas; el tope real de gasto lo pone el cupo del proveedor.
   if (env.LIMITE) {
-    const ip = request.headers.get("cf-connecting-ip") || "anon";
-    const { success } = await env.LIMITE.limit({ key: ip });
+    const { success } = await env.LIMITE.limit({ key: clavePorRed(request.headers.get("cf-connecting-ip")) });
     if (!success)
       return json(
         { error: "limite", mensaje: "Vas muy rápido: espera un minuto y vuelve a intentarlo." },
@@ -60,12 +63,17 @@ async function ia(request: Request, env: Env, url: URL): Promise<Response> {
 
   const largo = +(request.headers.get("content-length") || 0);
   if (largo > MAX_BYTES) return json({ error: "grande", mensaje: "Las fotos pesan demasiado." }, 413);
+  let texto: string | null;
+  try {
+    texto = await leeConTope(request, MAX_BYTES);
+  } catch {
+    return json({ error: "formato", mensaje: "Petición no válida." }, 400);
+  }
+  if (texto === null) return json({ error: "grande", mensaje: "Las fotos pesan demasiado." }, 413);
   let entrada: Entrada;
   try {
-    const t = await request.text();
-    if (t.length > MAX_BYTES) throw 0;
-    entrada = JSON.parse(t);
-  } catch (e) {
+    entrada = JSON.parse(texto);
+  } catch {
     return json({ error: "formato", mensaje: "Petición no válida." }, 400);
   }
   const fallo = valida(entrada);
@@ -118,4 +126,57 @@ async function ia(request: Request, env: Env, url: URL): Promise<Response> {
       429
     );
   return json({ error: "caida", mensaje: "La IA no responde ahora mismo. Prueba en un rato." }, 502);
+}
+
+function esMismoOrigen(request: Request, url: URL): boolean {
+  const origen = request.headers.get("origin");
+  if (origen) {
+    try {
+      return new URL(origen).host === url.host;
+    } catch {
+      return false; // p. ej. "null"
+    }
+  }
+  return request.headers.get("sec-fetch-site") === "same-origin";
+}
+
+/** Clave del límite: la IP; en IPv6, el prefijo /64 (una persona suele tener un /64 entero). */
+export function clavePorRed(ip: string | null): string {
+  if (!ip) return "anon";
+  if (!ip.includes(":")) return ip;
+  const [cabeza, cola = ""] = ip.split("::");
+  const izq = cabeza ? cabeza.split(":") : [];
+  const der = cola ? cola.split(":") : [];
+  const grupos = ip.includes("::") ? [...izq, ...Array(8 - izq.length - der.length).fill("0"), ...der] : izq;
+  return (
+    grupos
+      .slice(0, 4)
+      .map((g) => g.toLowerCase().replace(/^0+(?=.)/, ""))
+      .join(":") + "::/64"
+  );
+}
+
+/** Lee el cuerpo como texto sin pasar de `max` bytes; devuelve null si lo supera. */
+async function leeConTope(request: Request, max: number): Promise<string | null> {
+  if (!request.body) return "";
+  const lector = request.body.getReader();
+  const trozos: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await lector.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > max) {
+      await lector.cancel();
+      return null;
+    }
+    trozos.push(value);
+  }
+  const todo = new Uint8Array(total);
+  let pos = 0;
+  for (const t of trozos) {
+    todo.set(t, pos);
+    pos += t.byteLength;
+  }
+  return new TextDecoder().decode(todo);
 }

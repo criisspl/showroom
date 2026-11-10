@@ -1,5 +1,17 @@
 import { defineConfig } from "vitest/config";
+import { readFileSync } from "node:fs";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+
+// public/_headers es lo que sirve Cloudflare; el preview (y los e2e) usan las mismas cabeceras.
+const cabeceras = Object.fromEntries(
+  readFileSync("public/_headers", "utf8")
+    .split("\n")
+    .filter((l) => /^\s+[\w-]+:/.test(l))
+    .map((l) => {
+      const i = l.indexOf(":");
+      return [l.slice(0, i).trim(), l.slice(i + 1).trim()];
+    })
+);
 
 export default defineConfig({
   base: "./",
@@ -10,6 +22,7 @@ export default defineConfig({
   },
   // En desarrollo, /api va al servidor local de Cloudflare (npm run dev:api)
   server: { proxy: { "/api": "http://localhost:8787" } },
+  preview: { headers: cabeceras },
   test: {
     include: ["test/**/*.test.ts"],
     coverage: {
