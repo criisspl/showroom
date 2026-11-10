@@ -1,5 +1,4 @@
 import { defineConfig } from "vitest/config";
-import { readFileSync } from "node:fs";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
