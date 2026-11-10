@@ -211,6 +211,31 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
     }
   }
 
+  /** Copia con todo menos las fotos (`fotos` vacío) y los ids de las fotos que referencia. */
+  async function copiaSinFotos(): Promise<{ out: Copia; ids: Set<string> }> {
+    const out: Copia = {
+      app: "armario",
+      version: VERSION,
+      fecha: new Date().toISOString(),
+      kv: {},
+      fotos: {},
+      prendas: await todos("prendas"),
+      outfits: await todos("outfits"),
+      deseos: await todos("deseos"),
+      votos: await todos("votos"),
+      refs: await todos("refs")
+    };
+    for (const k of ["perfil", "ajustes"]) {
+      const v = await lee("kv", k);
+      if (v !== undefined) out.kv[k] = k === "ajustes" ? { ...(v as Record<string, unknown>), clave: "" } : v;
+    }
+    const ids = new Set<string>();
+    [...out.prendas, ...out.deseos, ...(out.refs || [])].forEach((p) => {
+      if (p.foto) ids.add(p.foto);
+    });
+    return { out, ids };
+  }
+
   const api = {
     /** Se suscribe a una colección: recibe el array completo cada vez que cambia. */
     on<C extends Coleccion>(c: C, cb: Sub<C>) {
@@ -282,31 +307,36 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
 
     /** Copia de seguridad completa en JSON (las fotos van en base64). */
     async exporta(): Promise<Copia> {
-      const out: Copia = {
-        app: "armario",
-        version: VERSION,
-        fecha: new Date().toISOString(),
-        kv: {},
-        fotos: {},
-        prendas: await todos("prendas"),
-        outfits: await todos("outfits"),
-        deseos: await todos("deseos"),
-        votos: await todos("votos"),
-        refs: await todos("refs")
-      };
-      for (const k of ["perfil", "ajustes"]) {
-        const v = await api.kget<Record<string, unknown>>(k);
-        if (v !== undefined) out.kv[k] = k === "ajustes" ? { ...v, clave: "" } : v;
-      }
-      const ids = new Set<string>();
-      [...out.prendas, ...out.deseos, ...(out.refs || [])].forEach((p) => {
-        if (p.foto) ids.add(p.foto);
-      });
+      const { out, ids } = await copiaSinFotos();
       for (const id of ids) {
         const b = await api.blobFoto(id);
         if (b) out.fotos[id] = await aDataURL(b);
       }
       return out;
+    },
+    /**
+     * La misma copia que `exporta()` ya serializada, pero construida por partes: cada foto se pasa a base64
+     * y se añade al Blob sin juntar todo en un único string (con muchas fotos, en móvil, se quedaba sin memoria).
+     * El resultado es idéntico byte a byte a `JSON.stringify(await exporta())`.
+     */
+    async exportaBlob(): Promise<Blob> {
+      const { out, ids } = await copiaSinFotos();
+      const partes: BlobPart[] = [
+        `{"app":${JSON.stringify(out.app)},"version":${JSON.stringify(out.version)},"fecha":${JSON.stringify(out.fecha)},` +
+          `"kv":${JSON.stringify(out.kv)},"fotos":{`
+      ];
+      let sep = "";
+      for (const id of ids) {
+        const b = await api.blobFoto(id);
+        if (!b) continue;
+        partes.push(`${sep}${JSON.stringify(id)}:${JSON.stringify(await aDataURL(b))}`);
+        sep = ",";
+      }
+      partes.push("}");
+      for (const k of ["prendas", "outfits", "deseos", "votos", "refs"] as const)
+        partes.push(`,"${k}":${JSON.stringify(out[k])}`);
+      partes.push("}");
+      return new Blob(partes, { type: "application/json" });
     },
     async importa(data: Copia, { reemplazar = true } = {}) {
       if (!data || data.app !== "armario") throw new Error("Este archivo no es una copia de la app.");

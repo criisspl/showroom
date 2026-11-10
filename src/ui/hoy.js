@@ -251,6 +251,7 @@ async function eligeFotoLook(file) {
     const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.85));
     app.ui.fotoLook = { blob, canvas: c };
     const prev = $("a-fl-prev");
+    prev.querySelectorAll("img").forEach((x) => URL.revokeObjectURL(x.src));
     prev.textContent = "";
     const im = new Image();
     im.alt = "Tu look";
