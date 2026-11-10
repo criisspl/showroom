@@ -408,74 +408,7 @@
 
     <!-- ============ Ajustes ============ -->
     <section class="panel" id="tab-ajustes" data-panel="ajustes" hidden>
-      <div class="wrap">
-        <header class="a-head">
-          <p class="eyebrow">Tu app</p>
-          <h1 class="a-h1">Ajustes</h1>
-        </header>
-        <div class="card paso">
-          <h2>Inteligencia artificial</h2>
-          <label class="a-f"
-            ><span>Qué IA usar</span
-            ><select id="s-prov"></select
-          ></label>
-          <p class="a-msg" id="s-prov-nota" role="status" aria-live="polite"></p>
-          <div id="s-propia">
-            <label class="a-f"
-              ><span>Modelo</span><input type="text" id="s-modelo" autocomplete="off" /><small
-                >Tiene que entender imágenes para analizar fotos.</small
-              ></label
-            >
-            <label class="a-f" id="s-url-f"
-              ><span>URL de la API</span
-              ><input type="url" id="s-url" autocomplete="off" placeholder="https://…/v1/chat/completions"
-            /></label>
-            <label class="a-f"
-              ><span>Tu clave</span><input type="password" id="s-clave" autocomplete="off" /><small
-                ><a id="s-clave-link" href="#" target="_blank" rel="noopener">Consigue una clave ↗</a></small
-              ></label
-            >
-          </div>
-          <div class="a-row">
-            <button type="button" class="a-btn" id="s-guarda">Guardar</button
-            ><button type="button" class="a-btn ghost" id="s-prueba">Probar conexión</button
-            ><span class="a-msg" id="s-msg" role="status" aria-live="polite"></span>
-          </div>
-        </div>
-        <div class="card paso" id="s-instala" hidden>
-          <h2>Instálala en tu móvil</h2>
-          <p class="a-msg" id="s-instala-t" role="status" aria-live="polite"></p>
-          <div class="a-row">
-            <button type="button" class="a-btn" id="s-instala-b" hidden>Instalar</button>
-          </div>
-        </div>
-        <div class="card paso">
-          <h2>Tus datos</h2>
-          <p class="a-msg">
-            Todo vive en este navegador. Haz copias de vez en cuando: si borras los datos del navegador, se
-            pierden.
-          </p>
-          <div class="a-row">
-            <button type="button" class="a-btn ghost" id="s-exporta">Descargar copia</button>
-            <label class="a-btn ghost" style="position: relative"
-              >Importar copia<input
-                type="file"
-                id="s-importa"
-                accept="application/json,.json"
-                style="position: absolute; inset: 0; opacity: 0"
-            /></label>
-          </div>
-          <div class="a-row">
-            <button type="button" class="a-btn ghost" id="s-rehacer">Rehacer mi análisis</button
-            ><button type="button" class="a-btn danger" id="s-borra">Borrar todo</button>
-          </div>
-          <p class="a-msg" id="s-datos-msg" role="status" aria-live="polite"></p>
-        </div>
-        <p class="a-note" style="margin-top: 18px">
-          Proyecto de código abierto. Las recomendaciones son orientativas y no sustituyen a una asesora
-          profesional.
-        </p>
-      </div>
+      <div class="wrap"></div>
     </section>
 
     <nav class="a-tabs" id="a-tabs" aria-label="Secciones" hidden>

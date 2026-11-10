@@ -17,11 +17,11 @@ import { initDeseos } from "./ui/deseos.js";
 import { mount } from "svelte";
 import Historial from "./ui/Historial.svelte";
 import Espejo from "./ui/Espejo.svelte";
+import Ajustes from "./ui/Ajustes.svelte";
 import Gusto from "./ui/Gusto.svelte";
 import { avisa } from "./ui/puente.svelte.ts";
 import { initAnalisis } from "./ui/analisis.js";
 import { initBienvenida } from "./ui/bienvenida.js";
-import { initAjustes } from "./ui/ajustes.js";
 import { initInstala, protegeDatos } from "./ui/instala.js";
 
 async function arranca() {
@@ -42,8 +42,15 @@ async function arranca() {
     }
   }
 
+  // Ajustes se monta antes: su tarjeta «Instálala» la rellena initInstala por id
+  try {
+    mount(Ajustes, { target: document.querySelector("#tab-ajustes .wrap") });
+    app.pinta.ajustes = avisa;
+  } catch (e) {
+    falla(e);
+  }
   // Si una pantalla falla al arrancar, las demás (y la carga de tus prendas) siguen funcionando
-  [initHoy, initArmario, initDeseos, initAnalisis, initBienvenida, initAjustes, initInstala].forEach((f) => {
+  [initHoy, initArmario, initDeseos, initAnalisis, initBienvenida, initInstala].forEach((f) => {
     try {
       f();
     } catch (e) {
