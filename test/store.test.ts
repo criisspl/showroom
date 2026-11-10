@@ -1,4 +1,4 @@
-import { test } from "vitest";
+import { test, vi } from "vitest";
 import assert from "node:assert/strict";
 import "fake-indexeddb/auto";
 import {
@@ -176,4 +176,126 @@ test("las referencias van en la copia de seguridad y vuelven al restaurarla", as
   assert.equal((await store.todos("refs")).length, 0);
   await store.importa(copia);
   assert.equal((await store.todos("refs")).length, 1);
+});
+
+test("una copia corrupta a mitad no altera lo que ya había", async () => {
+  const store = await creaStore();
+  await store.borraTodo();
+  await store.add("prendas", { nombre: "Falda camel", cat: "abajo" });
+  await store.kset("perfil", { resumen: "Otoño suave" });
+  const base = await store.exporta();
+  const nueva = {
+    ...base,
+    prendas: [{ id: "p1", nombre: "Blusa nueva", cat: "arriba" }],
+    outfits: [{ sinId: true }], // falla después de que prendas ya sea válida
+    kv: { perfil: { resumen: "Otro" } }
+  } as unknown as Copia;
+  await assert.rejects(store.importa(nueva), /dañada/);
+  assert.deepEqual(
+    (await store.todos("prendas")).map((p) => p.nombre),
+    ["Falda camel"]
+  );
+  assert.deepEqual(await store.kget("perfil"), { resumen: "Otoño suave" });
+});
+
+test("una foto que falla a mitad de la copia no deja la importación a medias", async () => {
+  const store = await creaStore();
+  await store.borraTodo();
+  await store.add("prendas", { nombre: "Falda camel", cat: "abajo" });
+  const base = await store.exporta();
+  const nueva: Copia = {
+    ...base,
+    prendas: [],
+    fotos: { f1: "data:image/png;base64,aG9sYQ==", f2: "data:image/png;base64,@@@" }
+  };
+  await assert.rejects(store.importa(nueva));
+  assert.equal((await store.todos("prendas")).length, 1);
+  assert.ok(!(await store.blobFoto("f1")));
+});
+
+test("rechaza fotos que no son data:image sin hacer ninguna petición", async () => {
+  const store = await creaStore();
+  await store.borraTodo();
+  await store.add("prendas", { nombre: "Falda camel", cat: "abajo" });
+  const base = await store.exporta();
+  const original = globalThis.fetch;
+  globalThis.fetch = (() => {
+    throw new Error("no debe haber fetch");
+  }) as typeof fetch;
+  try {
+    for (const url of [
+      "https://ejemplo.com/foto.jpg",
+      "http://127.0.0.1/x",
+      "data:text/html;base64,aG9sYQ==",
+      "data:image/svg+xml;base64,aG9sYQ==",
+      "blob:https://ejemplo.com/abc"
+    ])
+      await assert.rejects(store.importa({ ...base, fotos: { f1: url } }), /no es una imagen/);
+  } finally {
+    globalThis.fetch = original;
+  }
+  assert.equal((await store.todos("prendas")).length, 1);
+  assert.ok(!(await store.blobFoto("f1")));
+});
+
+/** FileReader mínimo para Node (solo readAsDataURL), que es lo único que usa la copia. */
+class FileReaderNode {
+  result: string | null = null;
+  error: unknown = null;
+  onload: (() => void) | null = null;
+  onerror: (() => void) | null = null;
+  readAsDataURL(blob: Blob) {
+    blob.arrayBuffer().then(
+      (b) => {
+        this.result = `data:${blob.type};base64,${Buffer.from(b).toString("base64")}`;
+        this.onload?.();
+      },
+      (e) => {
+        this.error = e;
+        this.onerror?.();
+      }
+    );
+  }
+}
+
+test("exportaBlob da exactamente los mismos bytes que serializar exporta() entero", async () => {
+  vi.stubGlobal("FileReader", FileReaderNode);
+  const store = await creaStore();
+  await store.borraTodo();
+  const f1 = await store.putFoto(new Blob(['una foto con «ñ» y "comillas"'], { type: "image/jpeg" }));
+  const f2 = await store.putFoto(new Blob(["otra"], { type: "image/png" }));
+  const huerfana = await store.putFoto(new Blob(["sin dueño"], { type: "image/png" }));
+  await store.add("prendas", { nombre: 'Blusa "salvia"\n', cat: "arriba", foto: f1 });
+  await store.add("prendas", { nombre: "Falda", cat: "abajo", foto: f2 });
+  await store.add("prendas", { nombre: "Sin foto", cat: "abajo" });
+  await store.add("refs", { foto: f1, creada: "2026-10-28", analisis: null });
+  await store.add("votos", { key: "a+b" } as Voto);
+  await store.kset("perfil", { resumen: "Otoño suave" });
+  await store.kset("ajustes", { proveedor: "groq", clave: "secreta" });
+
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-11-10T08:00:00.000Z"));
+  try {
+    // Serialización antigua, de referencia: todo junto en un único string
+    const esperado = JSON.stringify(await store.exporta());
+    const nuevo = await (await store.exportaBlob()).text();
+    assert.equal(nuevo, esperado);
+    assert.ok(JSON.parse(nuevo).fotos[f1]);
+    assert.equal(JSON.parse(nuevo).fotos[huerfana], undefined);
+  } finally {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  }
+});
+
+test("exportaBlob sin datos tampoco cambia el formato", async () => {
+  const store = await creaStore();
+  await store.borraTodo();
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-11-10T08:00:00.000Z"));
+  try {
+    assert.equal(await (await store.exportaBlob()).text(), JSON.stringify(await store.exporta()));
+  } finally {
+    vi.useRealTimers();
+  }
 });

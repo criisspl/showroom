@@ -7,6 +7,8 @@ import { avisoPartesDeArriba, necesitaRevision } from "../lib/armario.ts";
 import { clasifica, consejoColor, familia, lab } from "../lib/color.ts";
 import { hayIA, imagenParaIA, preguntaJSON, abreImagen } from "../lib/ai.ts";
 import { textoPerfil } from "../lib/analysis.ts";
+import { avisoEnvio, DATOS_SEGUNDA_OPINION } from "../lib/permisoia.ts";
+import { pidePermisoIA } from "./permiso.js";
 import { thumb, ver, falla } from "./comun.js";
 import { pintaDeseos } from "./deseos.js";
 import { vuelveConPrenda } from "./hoy.js";
@@ -158,7 +160,13 @@ function mueveForm(destino) {
   } else if (f.parentNode !== formCasa.p) formCasa.p.insertBefore(f, formCasa.n);
 }
 
+// URL temporal de la foto recién elegida (las de la base las gestiona el store): se libera al cambiarla.
+let urlPropia = null;
 async function pintaPrevia(src, txt) {
+  if (urlPropia && src !== urlPropia) {
+    URL.revokeObjectURL(urlPropia);
+    urlPropia = null;
+  }
   const prev = $("a-prev");
   prev.textContent = "";
   if (src) {
@@ -304,7 +312,9 @@ async function eligeFoto(file) {
     const blob = await new Promise((r) => big.toBlob(r, "image/jpeg", 0.84));
     if (bm.close) bm.close();
     app.ui.photo = { blob };
-    pintaPrevia(URL.createObjectURL(blob));
+    const u = URL.createObjectURL(blob);
+    pintaPrevia(u);
+    urlPropia = u;
     $("a-color").value = col;
     infoColor();
     $("a-auto").hidden = !hayIA(app.ajustes);
@@ -500,6 +510,7 @@ function analiza() {
   if (r.ocas.length) box.appendChild(el("p", "a-msg", "Te sirve para: " + r.ocas.join(", ") + "."));
   const row = el("div", "a-row"),
     m = el("p", "a-msg");
+  m.setAttribute("role", "status");
   const quiero = boton(
     r.v === "no" ? "Añadir a Mi lista igualmente" : "Añadir a Mi lista",
     r.v === "no" ? "a-btn ghost" : "a-btn"
@@ -542,7 +553,9 @@ function analiza() {
   );
   if (hayIA(app.ajustes)) {
     const otra = boton("Segunda opinión de la IA", "a-btn ghost");
-    otra.addEventListener("click", () => segundaOpinion(d, r, otra, m));
+    otra.addEventListener("click", () =>
+      pidePermisoIA(otra, avisoEnvio(app.ajustes, DATOS_SEGUNDA_OPINION), () => segundaOpinion(d, r, otra, m))
+    );
     row.appendChild(otra);
   }
   box.appendChild(row);

@@ -107,7 +107,10 @@ export function initBienvenida() {
       const file = i.files && i.files[0];
       if (!file) return;
       fotos[f.id] = file;
-      l.querySelectorAll("img").forEach((x) => x.remove());
+      l.querySelectorAll("img").forEach((x) => {
+        URL.revokeObjectURL(x.src);
+        x.remove();
+      });
       const im = new Image();
       im.alt = f.t;
       im.src = URL.createObjectURL(file);

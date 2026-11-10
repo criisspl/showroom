@@ -43,6 +43,8 @@ import {
 } from "../lib/engine.ts";
 import { clasifica, familia, harm } from "../lib/color.ts";
 import { hayIA, preguntaJSON, abreImagen, imagenParaIA } from "../lib/ai.ts";
+import { avisoEnvio, DATOS_PEDIR_IA } from "../lib/permisoia.ts";
+import { pidePermisoIA } from "./permiso.js";
 import { textoPerfil } from "../lib/analysis.ts";
 import { textoGusto } from "../lib/gusto.ts";
 import { mount } from "svelte";
@@ -168,7 +170,9 @@ export function initHoy() {
   document.querySelectorAll('input[name="a-modo"]').forEach((i) => i.addEventListener("change", modoHoy));
   $("a-montar").addEventListener("click", () => montar(true));
   $("a-refs-go").addEventListener("click", () => montar(true));
-  $("a-ia").addEventListener("click", pedirIA);
+  $("a-ia").addEventListener("click", () =>
+    pidePermisoIA($("a-ia"), avisoEnvio(app.ajustes, DATOS_PEDIR_IA), pedirIA, $("a-prop-row"))
+  );
   $("a-yo-go").addEventListener("click", juzgaYo);
   $("a-yo-clear").addEventListener("click", () => {
     app.ui.yoSel = [];
@@ -247,6 +251,7 @@ async function eligeFotoLook(file) {
     const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.85));
     app.ui.fotoLook = { blob, canvas: c };
     const prev = $("a-fl-prev");
+    prev.querySelectorAll("img").forEach((x) => URL.revokeObjectURL(x.src));
     prev.textContent = "";
     const im = new Image();
     im.alt = "Tu look";
@@ -1697,6 +1702,7 @@ function valora(o, c, dest) {
     head = el("div", "a-row"),
     msg = el("span", "a-msg"),
     panel = el("div", "a-rate-p");
+  msg.setAttribute("role", "status");
   const si = boton("Sí", "a-btn ghost"),
     no = boton("No", "a-btn ghost");
   panel.hidden = true;

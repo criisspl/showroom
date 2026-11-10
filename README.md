@@ -50,7 +50,7 @@ Está pensada para que la use cualquiera: no hay que registrarse, ni instalar na
   - En **Android**, la app muestra un botón «Instalar» en Ajustes.
   - En **iPhone**, explica cómo hacerlo: Compartir → «Añadir a pantalla de inicio».
 - **iPhone:** conviene instalarla, porque Safari puede borrar los datos de las webs que no se abren en 7 días. Las apps añadidas a la pantalla de inicio no tienen ese límite. Además, la app pide al navegador que no borre sus datos.
-- **Funciona sin conexión** (menos la IA), gracias a un service worker.
+- **Funciona sin conexión** (menos la IA), gracias a un service worker (su caché lleva el identificador de cada build y borra las versiones anteriores).
 - **Fotos:** en iPhone, Safari convierte las fotos HEIC a JPEG al elegirlas. Si algún navegador no puede abrir una foto, la app lo dice y sugiere el formato «Más compatible».
 - La interfaz está pensada para móvil (pantallas desde 320 px) y respeta la muesca y la barra inferior del iPhone.
 
@@ -95,6 +95,8 @@ npm run format     # Prettier
 npm run build      # genera dist/
 npm run deploy     # publica en Cloudflare desde tu ordenador
 ```
+
+Los hooks de git (Husky, se instalan con `npm install`): `pre-commit` pasa lint y formato, `commit-msg` valida el mensaje (Conventional Commits) y `pre-push` comprueba los tipos. Las actions de CI están fijadas a SHA completo; Dependabot propone cada semana las actualizaciones de npm y de actions, agrupadas en minor y patch.
 
 ## Estructura
 
