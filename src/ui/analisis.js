@@ -388,6 +388,6 @@ export function pintaAnalisis() {
   const pie = el("div", "a-row");
   pie.style.marginTop = "28px";
   pie.appendChild(boton("Rehacer mi análisis", "a-btn ghost no-print", () => ver("bienvenida")));
-  pie.appendChild(boton("Ajustes", "a-btn ghost", () => ver("ajustes")));
+  pie.appendChild(boton("Ajustes", "a-btn ghost no-print", () => ver("ajustes")));
   w.appendChild(pie);
 }

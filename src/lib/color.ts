@@ -21,6 +21,9 @@ export function lab(hex: string | undefined): Lab {
   return [116 * f(y) - 16, 500 * (f(x) - f(y)), 200 * (f(y) - f(z))];
 }
 
+/** ¿Conviene tinta oscura para escribir sobre este color? Sí si es claro (luminosidad CIELAB > 62). */
+export const fondoClaro = (hex: string | undefined): boolean => lab(hex)[0] > 62;
+
 export function dist(a: string, b: string): number {
   const p = lab(a),
     q = lab(b);

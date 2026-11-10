@@ -718,10 +718,18 @@ body {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #fff;
-  mix-blend-mode: difference;
-  opacity: 0.8;
+  /* Legible sobre cualquier color de prenda: el halo oscuro sustituye al modo de mezcla */
+  text-shadow:
+    0 0 3px rgba(0, 0, 0, 0.85),
+    0 0 1px rgba(0, 0, 0, 0.9);
   text-align: center;
   padding: 2px;
+}
+.a-th-l.osc {
+  color: #1d1814;
+  text-shadow:
+    0 0 3px rgba(255, 255, 255, 0.85),
+    0 0 1px rgba(255, 255, 255, 0.9);
 }
 .a-fit .dots {
   display: flex;
@@ -1983,6 +1991,16 @@ body {
   position: relative;
   justify-self: start;
   overflow: hidden;
+}
+/* La tarjeta de Referencias ya envuelve a esta: sin tarjeta dentro de tarjeta y con aire entre bloques */
+#a-refs-gusto > .card {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: none;
+  margin-bottom: 12px;
 }
 .ref-subir input {
   position: absolute;

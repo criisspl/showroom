@@ -2,6 +2,7 @@
   // Miniatura de una prenda: foto si la hay (se carga de IndexedDB), si no, su color con la categoría.
   import { app } from "../state.js";
   import { CATN } from "../data/constants.ts";
+  import { fondoClaro } from "../lib/color.ts";
   import type { Prenda } from "../lib/tipos.ts";
 
   const { p }: { p: Prenda | null } = $props();
@@ -30,6 +31,6 @@
   {#if src}
     <img alt="" {src} />
   {:else if etiqueta}
-    <span class="a-th-l">{p ? CATN[p.cat] || "" : ""}</span>
+    <span class="a-th-l" class:osc={fondoClaro(p?.color)}>{p ? CATN[p.cat] || "" : ""}</span>
   {/if}
 </div>
