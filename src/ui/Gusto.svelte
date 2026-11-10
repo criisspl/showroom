@@ -3,7 +3,8 @@
   // dejas, foto a foto, y entonces la app aprende qué colores y estilos te atraen.
   import { SvelteSet } from "svelte/reactivity";
   import { app } from "../state.js";
-  import { PROVEEDORES, config, hayIA, imagenParaIA, preguntaJSON } from "../lib/ai.ts";
+  import { hayIA, imagenParaIA, preguntaJSON } from "../lib/ai.ts";
+  import { destinoIA } from "../lib/permisoia.ts";
   import { PROMPT_REF, gustoDe, limpiaRef, repetidas } from "../lib/gusto.ts";
   import type { Referencia } from "../lib/tipos.ts";
   import { falla } from "./comun.js";
@@ -21,7 +22,7 @@
       refs,
       g,
       hayIA: hayIA(app.ajustes),
-      proveedor: PROVEEDORES[config(app.ajustes).id].n,
+      proveedor: destinoIA(app.ajustes),
       est: repetidas(g.est, g),
       pre: repetidas(g.pre, g),
       det: repetidas(g.det, g)

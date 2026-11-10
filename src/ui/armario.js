@@ -7,6 +7,8 @@ import { avisoPartesDeArriba, necesitaRevision } from "../lib/armario.ts";
 import { clasifica, consejoColor, familia, lab } from "../lib/color.ts";
 import { hayIA, imagenParaIA, preguntaJSON, abreImagen } from "../lib/ai.ts";
 import { textoPerfil } from "../lib/analysis.ts";
+import { avisoEnvio, DATOS_SEGUNDA_OPINION } from "../lib/permisoia.ts";
+import { pidePermisoIA } from "./permiso.js";
 import { thumb, ver, falla } from "./comun.js";
 import { pintaDeseos } from "./deseos.js";
 import { vuelveConPrenda } from "./hoy.js";
@@ -542,7 +544,9 @@ function analiza() {
   );
   if (hayIA(app.ajustes)) {
     const otra = boton("Segunda opinión de la IA", "a-btn ghost");
-    otra.addEventListener("click", () => segundaOpinion(d, r, otra, m));
+    otra.addEventListener("click", () =>
+      pidePermisoIA(otra, avisoEnvio(app.ajustes, DATOS_SEGUNDA_OPINION), () => segundaOpinion(d, r, otra, m))
+    );
     row.appendChild(otra);
   }
   box.appendChild(row);

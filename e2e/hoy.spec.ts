@@ -106,3 +106,29 @@ test("«Referencias» muestra tus looks de gusto y monta outfits desde Hoy", asy
   await tarjeta.getByRole("button", { name: "Looks como mis referencias" }).click();
   await expect(page.locator("#a-out article.a-fit").first()).toBeVisible();
 });
+
+test("«Pedir a la IA» no envía nada hasta aceptar el aviso", async ({ page }) => {
+  const envios: string[] = [];
+  await page.route("**/api/ia", async (route) => {
+    envios.push(route.request().postData() || "");
+    await route.fulfill({ json: { choices: [{ message: { content: JSON.stringify({ outfits: [] }) } }] } });
+  });
+  await abreConArmario(page);
+  await pestana(page, "Hoy");
+  await page.getByRole("button", { name: "Pedir a la IA" }).click();
+
+  const permiso = page.getByRole("group", { name: "Permiso para enviar a la IA" });
+  await expect(permiso).toContainText("Groq");
+  await expect(permiso).toContainText("Mistral");
+  await expect(permiso).toContainText("notas de los outfits que has votado");
+  expect(envios).toHaveLength(0);
+  await permiso.getByRole("button", { name: "No" }).click();
+  await expect(permiso).toHaveCount(0);
+  expect(envios).toHaveLength(0);
+
+  await page.getByRole("button", { name: "Pedir a la IA" }).click();
+  expect(envios).toHaveLength(0);
+  await permiso.getByRole("button", { name: "Sí, enviarlos" }).click();
+  await expect.poll(() => envios.length).toBe(1);
+  expect(envios[0]).toContain("Su armario");
+});
