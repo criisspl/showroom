@@ -39,7 +39,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/lib/**/*.ts", "worker/**/*.ts"],
-      thresholds: { lines: 82 }
+      thresholds: { lines: 93, statements: 90, functions: 89, branches: 79 }
     }
   }
 });
