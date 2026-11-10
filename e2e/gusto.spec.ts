@@ -8,7 +8,11 @@ const PNG = Buffer.from(
 );
 const foto = { name: "look.png", mimeType: "image/png", buffer: PNG };
 
-test("guarda una referencia sin IA y la analiza solo tras dar permiso", async ({ page }) => {
+const MOTIVO_WEBKIT =
+  "WebKit de Playwright (contexto efímero) falla al guardar Blobs en IndexedDB: «Error preparing Blob/File data to be stored in object store». Safari real los guarda bien";
+
+test("guarda una referencia sin IA y la analiza solo tras dar permiso", async ({ page }, info) => {
+  test.fixme(info.project.name === "iphone", MOTIVO_WEBKIT);
   const envios: string[] = [];
   await page.route("**/api/ia", async (route) => {
     envios.push(route.request().postData() || "");
@@ -51,7 +55,8 @@ test("guarda una referencia sin IA y la analiza solo tras dar permiso", async ({
   expect(envios).toHaveLength(1);
 });
 
-test("borrar una referencia pide confirmación", async ({ page }) => {
+test("borrar una referencia pide confirmación", async ({ page }, info) => {
+  test.fixme(info.project.name === "iphone", MOTIVO_WEBKIT);
   await abreConArmario(page);
   await pestana(page, "Análisis");
   const gusto = page.getByRole("region", { name: "Referencias de gusto" });

@@ -8,7 +8,13 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: { baseURL: "http://localhost:4173", trace: "on-first-retry", locale: "es-ES" },
-  projects: [{ name: "movil", use: { ...devices["Pixel 7"] } }],
+  projects: [
+    { name: "movil", use: { ...devices["Pixel 7"] } },
+    // El público principal es iPhone (iOS 15+): Safari usa WebKit.
+    // WebKit no pasa por page.route las peticiones de una página controlada por service worker: se bloquea
+    // para poder simular la API de la IA. La prueba sin conexión (sin-conexion.spec.ts) necesita el SW y no corre aquí.
+    { name: "iphone", use: { ...devices["iPhone 14"], serviceWorkers: "block" } }
+  ],
   webServer: {
     command: "npm run build && npx vite preview --port 4173 --strictPort",
     url: "http://localhost:4173",
