@@ -18,7 +18,7 @@
   } from "../lib/analisis.ts";
   import type { ColorNombrado, NotaZona, Perfil } from "../lib/tipos.ts";
   import { ver } from "./comun.js";
-  import { abreIA } from "./bienvenida.js";
+  import { abreIA } from "./abreIA.svelte.ts";
   import { cambios } from "./puente.svelte.ts";
 
   // El estado de la app no es reactivo: se relee cada vez que main.js avisa de un cambio
