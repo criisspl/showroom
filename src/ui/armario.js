@@ -510,6 +510,7 @@ function analiza() {
   if (r.ocas.length) box.appendChild(el("p", "a-msg", "Te sirve para: " + r.ocas.join(", ") + "."));
   const row = el("div", "a-row"),
     m = el("p", "a-msg");
+  m.setAttribute("role", "status");
   const quiero = boton(
     r.v === "no" ? "Añadir a Mi lista igualmente" : "Añadir a Mi lista",
     r.v === "no" ? "a-btn ghost" : "a-btn"

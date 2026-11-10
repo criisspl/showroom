@@ -37,9 +37,24 @@ export function icono(tipo, color) {
   return d;
 }
 
+let primeraVista = true;
+
+/** Lleva el foco al encabezado de la pantalla nueva (o a la propia pantalla) para que el lector de pantalla la anuncie. */
+function enfocaPanel(panel, nombre) {
+  const destino = panel.querySelector("h1, h2") || panel;
+  if (destino === panel && !panel.hasAttribute("aria-label")) panel.setAttribute("aria-label", nombre);
+  if (destino === panel && !panel.hasAttribute("role")) panel.setAttribute("role", "region");
+  destino.setAttribute("tabindex", "-1");
+  destino.focus({ preventScroll: true });
+}
+
 export function ver(tab, target) {
+  const antes = primeraVista;
+  primeraVista = false;
+  let panelNuevo = null;
   document.querySelectorAll(".panel").forEach((p) => {
     p.hidden = p.getAttribute("data-panel") !== tab;
+    if (!p.hidden) panelNuevo = p;
   });
   const nav = $("a-tabs");
   nav.hidden = tab === "bienvenida";
@@ -54,6 +69,11 @@ export function ver(tab, target) {
   }
   if (target) target.scrollIntoView({ block: "start" });
   else window.scrollTo(0, 0);
+  // En la carga inicial no se roba el foco; al cambiar de pantalla, sí
+  if (!antes && panelNuevo) {
+    const boton = document.querySelector('.a-tabs button[data-tab="' + tab + '"]');
+    enfocaPanel(panelNuevo, (boton && boton.textContent.trim()) || tab);
+  }
 }
 
 export function falla(e) {
