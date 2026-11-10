@@ -96,6 +96,8 @@ npm run build      # genera dist/
 npm run deploy     # publica en Cloudflare desde tu ordenador
 ```
 
+Los hooks de git (Husky, se instalan con `npm install`): `pre-commit` pasa lint y formato, `commit-msg` valida el mensaje (Conventional Commits) y `pre-push` comprueba los tipos. Las actions de CI están fijadas a SHA completo; Dependabot propone cada semana las actualizaciones de npm y de actions, agrupadas en minor y patch.
+
 ## Estructura
 
 ```

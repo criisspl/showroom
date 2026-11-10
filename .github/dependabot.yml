@@ -5,8 +5,8 @@ updates:
     schedule:
       interval: weekly
     groups:
-      dev:
-        dependency-type: development
+      minor-y-patch:
+        update-types: ["minor", "patch"]
     ignore:
       # typescript-eslint aún no admite TypeScript 7
       - dependency-name: typescript
@@ -14,4 +14,7 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: monthly
+      interval: weekly
+    groups:
+      minor-y-patch:
+        update-types: ["minor", "patch"]
