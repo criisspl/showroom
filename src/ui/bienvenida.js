@@ -7,7 +7,7 @@ import { PREGUNTAS, analizaConIA, perfilManual, normaliza } from "../lib/analysi
 import { perfilLocal } from "../lib/local.ts";
 import { ESTACIONES, CUERPOS } from "../data/presets.ts";
 import { ver, falla } from "./comun.js";
-import { importaArchivo } from "./ajustes.js";
+import { importaArchivo } from "./importa.js";
 import { protegeDatos, consejoIOS } from "./instala.js";
 
 const FOTOS_IA = [
@@ -134,7 +134,9 @@ export function initBienvenida() {
   $("m-crear").addEventListener("click", creaManual);
   $("b-analiza").addEventListener("click", analizaLocal);
   $("b-analiza-ia").addEventListener("click", analizaIA);
-  $("b-importa").addEventListener("change", (ev) => importaArchivo(ev.target, $("b-msg")));
+  $("b-importa").addEventListener("change", (ev) =>
+    importaArchivo(ev.target, (t) => ($("b-msg").textContent = t))
+  );
 }
 
 /** Abre la sección de IA desde otras pantallas. */
