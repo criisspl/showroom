@@ -1,6 +1,6 @@
 import { test } from "vitest";
 import assert from "node:assert/strict";
-import { familia, dist, construyePaleta, clasifica, consejoColor } from "../src/lib/color.ts";
+import { familia, dist, construyePaleta, clasifica, consejoColor, fondoClaro } from "../src/lib/color.ts";
 import { perfilManual } from "../src/lib/analysis.ts";
 import { ESTACIONES } from "../src/data/presets.ts";
 
@@ -33,4 +33,11 @@ test("consejoColor: el negro y el blanco fuera de paleta llevan su consejo", () 
     "Fuera de tu paleta: llévalo lejos de la cara"
   );
   assert.match(consejoColor({ tipo: "evita", fam: "blanco" }), /un tono de tu paleta/);
+});
+
+test("fondoClaro pide tinta oscura sobre crema y blanco, y clara sobre marino y azul", () => {
+  assert.equal(fondoClaro("#F3EBDD"), true);
+  assert.equal(fondoClaro("#F5F5F0"), true);
+  assert.equal(fondoClaro("#1B2440"), false);
+  assert.equal(fondoClaro("#5F7FA3"), false);
 });

@@ -3,12 +3,16 @@ import { el, $ } from "../lib/dom.js";
 import { app } from "../state.js";
 import { CATN } from "../data/constants.ts";
 import { ICONOS } from "../data/icons.ts";
+import { fondoClaro } from "../lib/color.ts";
 
 /** Miniatura de una prenda: foto si la hay (se carga de IndexedDB), si no, su color con la categoría. */
 export function thumb(p) {
   const d = el("div", "a-th");
   d.style.background = (p && p.color) || "#D9C9AE";
-  const etiqueta = () => d.appendChild(el("span", "a-th-l", p ? CATN[p.cat] || "" : ""));
+  const etiqueta = () =>
+    d.appendChild(
+      el("span", "a-th-l" + (fondoClaro(p && p.color) ? " osc" : ""), p ? CATN[p.cat] || "" : "")
+    );
   if (p && p.foto) {
     app.store.urlFoto(p.foto).then((u) => {
       if (!u) return etiqueta();
