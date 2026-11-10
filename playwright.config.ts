@@ -11,7 +11,9 @@ export default defineConfig({
   projects: [
     { name: "movil", use: { ...devices["Pixel 7"] } },
     // El público principal es iPhone (iOS 15+): Safari usa WebKit.
-    { name: "iphone", use: { ...devices["iPhone 14"] } }
+    // WebKit no pasa por page.route las peticiones de una página controlada por service worker: se bloquea
+    // para poder simular la API de la IA. La prueba sin conexión (sin-conexion.spec.ts) necesita el SW y no corre aquí.
+    { name: "iphone", use: { ...devices["iPhone 14"], serviceWorkers: "block" } }
   ],
   webServer: {
     command: "npm run build && npx vite preview --port 4173 --strictPort",
