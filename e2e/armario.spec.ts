@@ -92,3 +92,40 @@ test("una prenda deducida de una foto de look sale con «Revisar» hasta que la 
   await page.locator("#a-form").getByRole("button", { name: "Guardar" }).click();
   await expect(grid.getByRole("button", { name: new RegExp(prenda.nombre) })).not.toContainText("Revisar");
 });
+
+test("«Segunda opinión de la IA» no envía nada hasta aceptar el aviso", async ({ page }) => {
+  const envios: string[] = [];
+  await page.route("**/api/ia", async (route) => {
+    envios.push(route.request().postData() || "");
+    const contenido = {
+      veredicto: "si",
+      porque: "Te favorece mucho.",
+      combina: ["Pantalón de pinzas marino"]
+    };
+    await route.fulfill({ json: { choices: [{ message: { content: JSON.stringify(contenido) } }] } });
+  });
+  await abreConArmario(page);
+  await pestana(page, "Armario");
+  await page.getByRole("button", { name: "¿Lo compro?" }).click();
+  const form = page.locator("#a-form");
+  await form.getByLabel("Tipo").fill("blusa");
+  await form.getByLabel("Color principal").fill("#7a8fa6");
+  await form.getByRole("button", { name: "Analizar" }).click();
+  const verd = page.locator("#a-verd");
+  await verd.getByRole("button", { name: "Segunda opinión de la IA" }).click();
+
+  const permiso = verd.getByRole("group", { name: "Permiso para enviar a la IA" });
+  await expect(permiso).toContainText("Groq");
+  await expect(permiso).toContainText("Mistral");
+  await expect(permiso).toContainText("lista de tu armario");
+  expect(envios).toHaveLength(0);
+  await permiso.getByRole("button", { name: "No" }).click();
+  await expect(permiso).toHaveCount(0);
+  expect(envios).toHaveLength(0);
+
+  await verd.getByRole("button", { name: "Segunda opinión de la IA" }).click();
+  expect(envios).toHaveLength(0);
+  await permiso.getByRole("button", { name: "Sí, enviarlos" }).click();
+  await expect(verd).toContainText("Te favorece mucho.");
+  expect(envios).toHaveLength(1);
+});

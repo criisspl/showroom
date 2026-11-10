@@ -3,7 +3,8 @@
   // «Afinar con la IA» envía la descripción del look y el resumen del análisis, y siempre pide permiso antes.
   import { app } from "../state.js";
   import { pinterest } from "../lib/dom.js";
-  import { PROVEEDORES, config, hayIA, preguntaJSON } from "../lib/ai.ts";
+  import { hayIA, preguntaJSON } from "../lib/ai.ts";
+  import { avisoEnvio } from "../lib/permisoia.ts";
   import {
     aplicaAfinado,
     limpiaAfinado,
@@ -26,7 +27,15 @@
   // El perfil y los ajustes no son reactivos: se leen al desplegar, no antes
   const base = $derived(abierto ? maquillajeDeLook(app.perfil, prendas, ocasion) : null);
   const ia = $derived(
-    abierto ? { hay: hayIA(app.ajustes), proveedor: PROVEEDORES[config(app.ajustes).id].n } : null
+    abierto
+      ? {
+          hay: hayIA(app.ajustes),
+          aviso: avisoEnvio(
+            app.ajustes,
+            "las prendas y colores de este look, la ocasión y el resumen de tu análisis (sin fotos)"
+          )
+        }
+      : null
   );
 
   let pidiendo = $state(false);
@@ -100,10 +109,7 @@
       {#if ia?.hay}
         {#if pidiendo}
           <div class="ref-permiso" role="group" aria-label="Permiso para enviar el look">
-            <p>
-              Se enviarán a {ia.proveedor} las prendas y colores de este look, la ocasión y el resumen de tu análisis
-              (sin fotos). ¿Los envío?
-            </p>
+            <p>{ia.aviso}</p>
             <button type="button" class="a-btn" onclick={afina}>Sí, enviarlo</button>
             <button type="button" class="a-btn ghost" onclick={() => (pidiendo = false)}>No</button>
           </div>
