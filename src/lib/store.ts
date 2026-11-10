@@ -69,6 +69,49 @@ function migraCopia(data: Copia): Copia {
   return data;
 }
 
+const FOTO_PERMITIDA = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/]*={0,2})$/;
+const esObjeto = (v: unknown): v is Record<string, unknown> =>
+  !!v && typeof v === "object" && !Array.isArray(v);
+const invalida = () => new Error("La copia está dañada o no es válida: no se ha importado nada.");
+
+/**
+ * Comprueba la copia entera y decodifica las fotos sin red (solo data:image/jpeg|png|webp).
+ * Lanza si algo no cuadra; no toca la base de datos.
+ */
+function validaCopia(data: Copia) {
+  const docs = {} as { [C in Coleccion]: Colecciones[C][] };
+  for (const c of COLS) {
+    const lista: unknown = data[c] ?? [];
+    if (!Array.isArray(lista)) throw invalida();
+    for (const d of lista) if (!esObjeto(d) || typeof d.id !== "string" || !d.id) throw invalida();
+    (docs as Record<Coleccion, unknown[]>)[c] = lista;
+  }
+  const rawFotos: unknown = data.fotos ?? {};
+  if (!esObjeto(rawFotos)) throw invalida();
+  const fotos: [string, Blob][] = [];
+  for (const [id, url] of Object.entries(rawFotos)) {
+    const m = typeof url === "string" ? FOTO_PERMITIDA.exec(url) : null;
+    if (!m) throw new Error("La copia lleva una foto que no es una imagen JPEG, PNG o WebP incrustada.");
+    let bin: string;
+    try {
+      bin = atob(m[2]);
+    } catch (e) {
+      throw invalida();
+    }
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    fotos.push([id, new Blob([bytes], { type: m[1] })]);
+  }
+  const kv: Record<string, unknown> = {};
+  const rawKv: unknown = data.kv ?? {};
+  if (!esObjeto(rawKv)) throw invalida();
+  for (const [k, v] of Object.entries(rawKv)) {
+    if (k === "ajustes" && !esObjeto(v)) throw invalida();
+    kv[k] = v;
+  }
+  return { docs, fotos, kv };
+}
+
 function abrir(): Promise<IDBDatabase> {
   return new Promise((res, rej) => {
     const r = indexedDB.open(DB_NAME, VERSION);
@@ -270,19 +313,28 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
       if (data.version > VERSION)
         throw new Error("Esta copia es de una versión más nueva de la app: actualízala y vuelve a probar.");
       if (data.version < VERSION) data = migraCopia(data);
-      for (const c of COLS) {
-        await usa(c, "readwrite", async (s) => {
-          if (reemplazar) await req(s.clear());
-          for (const d of data[c] || []) await req(s.put(d));
+      // 1. Valida y decodifica todo antes de tocar la base: si algo falla, no cambia nada.
+      const { docs, fotos, kv } = validaCopia(data);
+      const cur = (await api.kget<{ clave?: string }>("ajustes")) || {};
+      if (kv.ajustes) kv.ajustes = { ...(kv.ajustes as object), clave: cur.clave || "" };
+      // 2. Una sola transacción (sin await ajeno a IndexedDB dentro): o entra todo o no entra nada.
+      const nombres: Almacen[] = [...COLS, "fotos", "kv"];
+      const escribe = (d: IDBDatabase) =>
+        new Promise<void>((res, rej) => {
+          const tx = d.transaction(nombres, "readwrite");
+          tx.oncomplete = () => res();
+          tx.onerror = () => rej(tx.error);
+          tx.onabort = () => rej(tx.error || new Error("No he podido guardar la copia."));
+          if (reemplazar) for (const c of COLS) tx.objectStore(c).clear();
+          for (const c of COLS) for (const d of docs[c]) tx.objectStore(c).put(d);
+          for (const [id, blob] of fotos) tx.objectStore("fotos").put(blob, id);
+          for (const [k, v] of Object.entries(kv)) tx.objectStore("kv").put(v, k);
         });
-      }
-      for (const [id, url] of Object.entries(data.fotos || {}))
-        await pon("fotos", await (await fetch(url)).blob(), id);
-      for (const [k, v] of Object.entries(data.kv || {})) {
-        if (k === "ajustes") {
-          const cur = (await api.kget<{ clave?: string }>("ajustes")) || {};
-          await api.kset(k, { ...(v as object), clave: cur.clave || "" });
-        } else await api.kset(k, v);
+      try {
+        await escribe(await conexion());
+      } catch (e) {
+        if (!perdida(e)) throw e;
+        await escribe(await conexion(true));
       }
       COLS.forEach((c) => emit(c));
     },
