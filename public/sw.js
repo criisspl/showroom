@@ -1,6 +1,7 @@
 // Service worker: guarda la app para que abra rápido y funcione sin conexión
 // (todo menos la IA, que necesita internet). Los datos de cada persona están en IndexedDB, no aquí.
-const CACHE = "armario-v1";
+// El build sustituye el marcador del nombre por el identificador de la versión (en desarrollo se queda tal cual).
+const CACHE = "armario-__BUILD_ID__";
 const BASE = new URL("./", self.location).pathname;
 
 self.addEventListener("install", (e) => {
@@ -15,7 +16,9 @@ self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches
       .keys()
-      .then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((ks) =>
+        Promise.all(ks.filter((k) => k.startsWith("armario-") && k !== CACHE).map((k) => caches.delete(k)))
+      )
       .then(() => self.clients.claim())
   );
 });
@@ -29,8 +32,10 @@ self.addEventListener("fetch", (e) => {
     e.respondWith(
       fetch(req)
         .then((r) => {
-          const copia = r.clone();
-          caches.open(CACHE).then((c) => c.put(BASE, copia));
+          if (r.ok) {
+            const copia = r.clone();
+            caches.open(CACHE).then((c) => c.put(BASE, copia));
+          }
           return r;
         })
         .catch(() => caches.match(BASE))
