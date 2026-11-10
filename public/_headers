@@ -1,0 +1,8 @@
+# Cabeceras de seguridad de la web (Cloudflare Workers Assets).
+# connect-src admite cualquier https: porque la clave propia de IA puede apuntar a cualquier proveedor;
+# data: y blob: porque la app hace fetch() de fotos en data URL (reducir imagen, importar copia).
+# style-src-attr 'unsafe-inline': hay atributos style="" en el HTML (no se permiten <style> en línea).
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; img-src 'self' blob: data:; style-src 'self'; style-src-attr 'unsafe-inline'; connect-src 'self' https: data: blob:; manifest-src 'self'; worker-src 'self'
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
