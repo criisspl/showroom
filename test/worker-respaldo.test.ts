@@ -16,7 +16,7 @@ const env = (o: Partial<Env> = {}): Env => ({
 const pide = (body: unknown, headers: Record<string, string> = {}) =>
   new Request("https://armario.test/api/ia", {
     method: "POST",
-    headers: { "content-type": "application/json", ...headers },
+    headers: { "content-type": "application/json", origin: "https://armario.test", ...headers },
     body: JSON.stringify(body)
   });
 const real = globalThis.fetch;
