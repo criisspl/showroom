@@ -17,3 +17,21 @@ test("crea el perfil a mano y lo recuerda al volver", async ({ page }) => {
   await pestana(page, "Análisis");
   await expect(analisis).toContainText("Verano Suave");
 });
+
+test("«Guardar mi guía en PDF» imprime solo el informe", async ({ page }) => {
+  await abre(page);
+  await page.getByText("Ya sé mi estación y mi tipo de cuerpo").click();
+  await page.getByRole("button", { name: "Crear mi perfil" }).click();
+  await page.evaluate(() => {
+    (window as unknown as { impresiones: number }).impresiones = 0;
+    window.print = () => {
+      (window as unknown as { impresiones: number }).impresiones++;
+    };
+  });
+  await page.getByRole("button", { name: "Guardar mi guía en PDF" }).click();
+  expect(await page.evaluate(() => (window as unknown as { impresiones: number }).impresiones)).toBe(1);
+  await page.emulateMedia({ media: "print" });
+  await expect(page.locator("#tab-analisis")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Guardar mi guía en PDF" })).toBeHidden();
+  await expect(page.locator(".a-tabs")).toBeHidden();
+});

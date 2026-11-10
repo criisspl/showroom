@@ -73,6 +73,8 @@ export function pintaAnalisis() {
     fic.appendChild(li);
   });
   w.appendChild(fic);
+  // Sin librerías ni servidores: el navegador genera el PDF desde esta misma pantalla
+  w.appendChild(boton("Guardar mi guía en PDF", "a-btn ghost no-print", () => window.print()));
   if (p.resumen) w.appendChild(el("p", "a-note", p.resumen));
   if (p.origen !== "ia") {
     const k = el("div", "card a-cta");
@@ -385,7 +387,7 @@ export function pintaAnalisis() {
 
   const pie = el("div", "a-row");
   pie.style.marginTop = "28px";
-  pie.appendChild(boton("Rehacer mi análisis", "a-btn ghost", () => ver("bienvenida")));
+  pie.appendChild(boton("Rehacer mi análisis", "a-btn ghost no-print", () => ver("bienvenida")));
   pie.appendChild(boton("Ajustes", "a-btn ghost", () => ver("ajustes")));
   w.appendChild(pie);
 }

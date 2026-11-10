@@ -2046,3 +2046,26 @@ body {
 .a-ask-armario {
   margin: 0 0 0.75rem;
 }
+
+/* Guardar la guía en PDF: solo se imprime el informe de Mi análisis */
+@media print {
+  body > *:not(#tab-analisis),
+  .a-tabs,
+  .toc,
+  .a-cta,
+  .no-print,
+  #an-inspo,
+  #a-gusto {
+    display: none !important;
+  }
+  #tab-analisis[hidden] {
+    display: block !important;
+  }
+  body {
+    background: #fff;
+  }
+  .b,
+  .card {
+    break-inside: avoid;
+  }
+}
