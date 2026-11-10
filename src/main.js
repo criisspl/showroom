@@ -20,8 +20,8 @@ import Ajustes from "./ui/Ajustes.svelte";
 import Gusto from "./ui/Gusto.svelte";
 import Deseos from "./ui/Deseos.svelte";
 import Analisis from "./ui/Analisis.svelte";
+import Bienvenida from "./ui/Bienvenida.svelte";
 import { avisa } from "./ui/puente.svelte.ts";
-import { initBienvenida } from "./ui/bienvenida.js";
 import { initInstala, protegeDatos } from "./ui/instala.js";
 
 async function arranca() {
@@ -63,8 +63,14 @@ async function arranca() {
   } catch (e) {
     falla(e);
   }
+  // Bienvenida es de estado propio: no necesita repintarse con el puente
+  try {
+    mount(Bienvenida, { target: document.querySelector("#tab-bienvenida .wrap") });
+  } catch (e) {
+    falla(e);
+  }
   // Si una pantalla falla al arrancar, las demás (y la carga de tus prendas) siguen funcionando
-  [initHoy, initArmario, initBienvenida, initInstala].forEach((f) => {
+  [initHoy, initArmario, initInstala].forEach((f) => {
     try {
       f();
     } catch (e) {
