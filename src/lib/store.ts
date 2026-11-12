@@ -1,43 +1,11 @@
-// Almacenamiento local en IndexedDB. Todo se queda en el navegador de cada persona.
+// Adaptador de IndexedDB del contrato `Almacen` (almacen.ts). Todo se queda en el navegador de cada persona.
 // Colecciones de documentos con suscripción (on), fotos como Blob y un pequeño almacén clave-valor.
 
-import type { Outfit, Prenda, Referencia, Voto } from "./tipos.ts";
+import type { Almacen, Coleccion, Colecciones, Copia } from "./almacen.ts";
 
-/** Estado de una prenda de «Deseos» (las del perfil y las que añade la persona). */
-export interface DeseoGuardado {
-  id: string;
-  estado?: string;
-  cuando?: string;
-  propio?: boolean;
-  nombre?: string;
-  foto?: string | null;
-  mini?: string | null;
-  [k: string]: unknown;
-}
-/** Lo que guarda cada colección. */
-export interface Colecciones {
-  prendas: Prenda;
-  outfits: Outfit;
-  deseos: DeseoGuardado;
-  votos: Voto;
-  refs: Referencia;
-}
-export type Coleccion = keyof Colecciones;
-type Almacen = Coleccion | "fotos" | "kv";
-/** Copia de seguridad (.armario.json). */
-export interface Copia {
-  app: "armario";
-  version: number;
-  fecha: string;
-  kv: Record<string, unknown>;
-  fotos: Record<string, string>;
-  prendas: Prenda[];
-  outfits: Outfit[];
-  deseos: DeseoGuardado[];
-  votos: Voto[];
-  /** Referencias de gusto (desde la versión 2). */
-  refs?: Referencia[];
-}
+export type { Almacen, Coleccion, Colecciones, Copia, DeseoGuardado } from "./almacen.ts";
+
+type Tabla = Coleccion | "fotos" | "kv";
 
 const DB_NAME = "armario";
 const COLS: Coleccion[] = ["prendas", "outfits", "deseos", "votos", "refs"];
@@ -147,9 +115,9 @@ const perdida = (e: unknown) =>
   "name" in e &&
   (e.name === "InvalidStateError" || e.name === "UnknownError");
 
-export type Store = Awaited<ReturnType<typeof creaStore>>;
+export type Store = Almacen;
 
-export async function creaStore({ onError = (e: unknown) => console.error(e) } = {}) {
+export async function creaStore({ onError = (e: unknown) => console.error(e) } = {}): Promise<Almacen> {
   let db: IDBDatabase | null = null;
   async function conexion(nueva = false): Promise<IDBDatabase> {
     if (nueva || !db) {
@@ -177,7 +145,7 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
   const urls = new Map<string, string>();
   /** Ejecuta fn con el almacén pedido; si la conexión se ha perdido, reconecta y lo repite una vez. */
   async function usa<T>(
-    store: Almacen,
+    store: Tabla,
     modo: IDBTransactionMode,
     fn: (s: IDBObjectStore) => Promise<T>
   ): Promise<T> {
@@ -188,10 +156,10 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
       return fn((await conexion(true)).transaction(store, modo).objectStore(store));
     }
   }
-  const lee = (store: Almacen, k: string) => usa(store, "readonly", (s) => req(s.get(k)));
-  const pon = (store: Almacen, v: unknown, k?: string) =>
+  const lee = (store: Tabla, k: string) => usa(store, "readonly", (s) => req(s.get(k)));
+  const pon = (store: Tabla, v: unknown, k?: string) =>
     usa(store, "readwrite", (s) => req(k === undefined ? s.put(v) : s.put(v, k)));
-  const quita = (store: Almacen, k: string) => usa(store, "readwrite", (s) => req(s.delete(k)));
+  const quita = (store: Tabla, k: string) => usa(store, "readwrite", (s) => req(s.delete(k)));
 
   async function todos<C extends Coleccion>(c: C): Promise<Colecciones[C][]> {
     return usa(c, "readonly", (s) => req(s.getAll()));
@@ -236,7 +204,7 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
     return { out, ids };
   }
 
-  const api = {
+  const api: Almacen = {
     /** Se suscribe a una colección: recibe el array completo cada vez que cambia. */
     on<C extends Coleccion>(c: C, cb: Sub<C>) {
       (subs[c] as Sub<C>[]).push(cb);
@@ -302,7 +270,7 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
       return lee("kv", k) as Promise<T | undefined>;
     },
     async kset(k: string, v: unknown) {
-      return pon("kv", v, k);
+      await pon("kv", v, k);
     },
 
     /** Copia de seguridad completa en JSON (las fotos van en base64). */
@@ -348,7 +316,7 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
       const cur = (await api.kget<{ clave?: string }>("ajustes")) || {};
       if (kv.ajustes) kv.ajustes = { ...(kv.ajustes as object), clave: cur.clave || "" };
       // 2. Una sola transacción (sin await ajeno a IndexedDB dentro): o entra todo o no entra nada.
-      const nombres: Almacen[] = [...COLS, "fotos", "kv"];
+      const nombres: Tabla[] = [...COLS, "fotos", "kv"];
       const escribe = (d: IDBDatabase) =>
         new Promise<void>((res, rej) => {
           const tx = d.transaction(nombres, "readwrite");
@@ -369,7 +337,7 @@ export async function creaStore({ onError = (e: unknown) => console.error(e) } =
       COLS.forEach((c) => emit(c));
     },
     async borraTodo() {
-      for (const c of [...COLS, "fotos", "kv"] as Almacen[]) await usa(c, "readwrite", (s) => req(s.clear()));
+      for (const c of [...COLS, "fotos", "kv"] as Tabla[]) await usa(c, "readwrite", (s) => req(s.clear()));
       COLS.forEach((c) => emit(c));
     }
   };

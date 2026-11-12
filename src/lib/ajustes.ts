@@ -1,5 +1,6 @@
 // Lógica de la pantalla Ajustes (sin DOM): qué campos enseña cada proveedor y cómo se guardan.
-import { PROVEEDORES, config } from "./ai.ts";
+import { config } from "./ai.ts";
+import { SUGERENCIAS } from "./ia/sugerencias.ts";
 import type { Ajustes } from "./ai.ts";
 
 /** Lo que cambia en el formulario según el proveedor elegido. */
@@ -25,15 +26,15 @@ export interface Campos {
 
 /** Proveedores para el desplegable: id y nombre. */
 export const opcionesProveedor = (): { id: string; n: string }[] =>
-  Object.entries(PROVEEDORES).map(([id, p]) => ({ id, n: p.n }));
+  Object.entries(SUGERENCIAS).map(([id, p]) => ({ id, n: p.n }));
 
 export function vistaProveedor(id: string): VistaProveedor {
-  const p = PROVEEDORES[id];
+  const p = SUGERENCIAS[id];
   return {
     nota: p.nota,
     placeholderModelo: p.modelo || "nombre-del-modelo",
     placeholderUrl: p.url || "https://…/v1/chat/completions",
-    propia: !p.sinClave,
+    propia: p.tipo !== "integrada",
     pideUrl: id === "otro",
     enlaceClave: p.clave
   };

@@ -2,7 +2,13 @@
 // necesita clave. Opcionalmente, cada persona puede usar su propia clave de cualquier proveedor
 // compatible con la API de OpenAI (chat/completions); esa clave se guarda solo en su navegador.
 
+import { creaIntegrada } from "./ia/integrada.ts";
+import { creaOpenAICompatible } from "./ia/openai-compatible.ts";
+import type { Pregunta, ProveedorIA } from "./ia/proveedor.ts";
+import { SUGERENCIAS } from "./ia/sugerencias.ts";
 import type { Crudo } from "./tipos.ts";
+
+export type { Pregunta, ProveedorIA } from "./ia/proveedor.ts";
 
 /** Ajustes de IA de la persona (se guardan solo en su navegador). */
 export interface Ajustes {
@@ -11,84 +17,15 @@ export interface Ajustes {
   url?: string;
   clave?: string;
 }
-interface Proveedor {
-  n: string;
-  url: string;
-  modelo: string;
-  /** Dónde sacar la clave (vacío si no hace falta). */
-  clave: string;
-  nota: string;
-  /** Cómo quiere el proveedor las imágenes: como texto o como objeto { url }. */
-  imagen: "texto" | "objeto";
-  sinClave?: boolean;
-}
-export interface Pregunta {
-  sistema?: string;
-  texto: string;
-  imagenes?: string[];
-  json?: boolean;
-  signal?: AbortSignal;
-}
-type Contenido = { type: "text"; text: string } | { type: "image_url"; image_url: string | { url: string } };
-
-export const PROVEEDORES: Record<string, Proveedor> = {
-  integrada: {
-    n: "IA de la app (sin clave)",
-    url: "api/ia",
-    modelo: "",
-    clave: "",
-    nota: "No tienes que hacer nada: la app ya trae la IA. Tiene un cupo diario compartido; si se llena, prueba más tarde o usa tu propia clave.",
-    imagen: "objeto",
-    sinClave: true
-  },
-  mistral: {
-    n: "Mistral (Francia)",
-    url: "https://api.mistral.ai/v1/chat/completions",
-    modelo: "mistral-small-latest",
-    clave: "https://console.mistral.ai/api-keys",
-    nota: "Empresa europea con plan gratuito. El modelo Small entiende fotos.",
-    imagen: "texto" // Mistral acepta image_url como texto
-  },
-  groq: {
-    n: "Groq",
-    url: "https://api.groq.com/openai/v1/chat/completions",
-    modelo: "meta-llama/llama-4-scout-17b-16e-instruct",
-    clave: "https://console.groq.com/keys",
-    nota: "Plan gratuito muy rápido. Elige un modelo con visión.",
-    imagen: "objeto"
-  },
-  openrouter: {
-    n: "OpenRouter",
-    url: "https://openrouter.ai/api/v1/chat/completions",
-    modelo: "openrouter/free",
-    clave: "https://openrouter.ai/keys",
-    nota: "Da acceso a varios modelos gratuitos (los que acaban en :free). Pocas peticiones al día.",
-    imagen: "objeto"
-  },
-  gemini: {
-    n: "Google Gemini",
-    url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-    modelo: "gemini-flash-latest",
-    clave: "https://aistudio.google.com/apikey",
-    nota: "Ojo: según las condiciones de Google, en la UE, Suiza y Reino Unido solo se permite el plan de pago.",
-    imagen: "objeto"
-  },
-  otro: {
-    n: "Otro compatible con OpenAI",
-    url: "",
-    modelo: "",
-    clave: "",
-    nota: "Cualquier servicio con la API chat/completions.",
-    imagen: "objeto"
-  }
-};
 
 export function config(ajustes: Ajustes | null | undefined) {
   let id = (ajustes && ajustes.proveedor) || "integrada";
   // Sin clave propia, siempre la integrada
-  if (!PROVEEDORES[id] || (!PROVEEDORES[id].sinClave && !(ajustes && ajustes.clave))) id = "integrada";
-  const p = PROVEEDORES[id];
-  if (p.sinClave) return { id, url: p.url, modelo: "", clave: "", imagen: p.imagen, sinClave: true };
+  if (!SUGERENCIAS[id] || (SUGERENCIAS[id].tipo !== "integrada" && !(ajustes && ajustes.clave)))
+    id = "integrada";
+  const p = SUGERENCIAS[id];
+  if (p.tipo === "integrada")
+    return { id, url: p.url, modelo: "", clave: "", imagen: p.imagen, sinClave: true };
   return {
     id,
     url: (ajustes && ajustes.url) || p.url,
@@ -98,6 +35,12 @@ export function config(ajustes: Ajustes | null | undefined) {
   };
 }
 export const hayIA = (ajustes: Ajustes | null | undefined) => !!config(ajustes).url;
+
+/** Adaptador que toca con estos ajustes. */
+export function proveedorDe(ajustes: Ajustes | null | undefined): ProveedorIA {
+  const cfg = config(ajustes);
+  return SUGERENCIAS[cfg.id].tipo === "integrada" ? creaIntegrada() : creaOpenAICompatible(cfg);
+}
 
 /** Reduce una imagen (Blob o File) a JPEG de como mucho `max` px y la devuelve como data URL. */
 export async function imagenParaIA(blob: Blob, max = 1024): Promise<string> {
@@ -144,85 +87,11 @@ export async function abreImagen(blob: Blob): Promise<ImageBitmap | HTMLImageEle
 }
 
 /**
- * Llama al modelo. `imagenes` son data URLs. Devuelve el texto de la respuesta.
- * Lanza Error con un mensaje en español si algo falla.
+ * Llama al modelo con el proveedor que tocan los ajustes. `imagenes` son data URLs.
+ * Devuelve el texto de la respuesta. Lanza Error con un mensaje en español si algo falla.
  */
-export async function pregunta(
-  ajustes: Ajustes | null | undefined,
-  { sistema, texto, imagenes = [], json = true, signal }: Pregunta
-): Promise<string> {
-  const cfg = config(ajustes);
-  const contenido: Contenido[] = [{ type: "text", text: texto }];
-  imagenes.forEach((u) =>
-    contenido.push(
-      cfg.imagen === "texto"
-        ? { type: "image_url", image_url: u }
-        : { type: "image_url", image_url: { url: u } }
-    )
-  );
-  const body: Record<string, unknown> = {
-    ...(cfg.sinClave ? {} : { model: cfg.modelo }),
-    messages: [
-      ...(sistema ? [{ role: "system", content: sistema }] : []),
-      { role: "user", content: imagenes.length ? contenido : texto }
-    ],
-    temperature: 0.4
-  };
-  if (json) body.response_format = { type: "json_object" };
-  let r;
-  try {
-    r = await fetch(cfg.url, {
-      method: "POST",
-      signal,
-      headers: {
-        "Content-Type": "application/json",
-        ...(cfg.sinClave ? {} : { Authorization: "Bearer " + cfg.clave })
-      },
-      body: JSON.stringify(body)
-    });
-  } catch (e) {
-    throw new Error(
-      cfg.sinClave
-        ? "No se ha podido conectar con la IA. Revisa tu conexión a internet."
-        : "No se ha podido conectar con la IA. Revisa tu conexión o prueba otro proveedor (algunos no aceptan llamadas desde el navegador)."
-    );
-  }
-  if (!r.ok) {
-    let det = "",
-      propio = "";
-    try {
-      const j = await r.json();
-      propio = cfg.sinClave && j.mensaje ? j.mensaje : "";
-      det = (j.error && (j.error.message || j.error)) || j.message || "";
-    } catch (e) {
-      /* sin detalle */
-    }
-    if (r.status === 400 && json && /response_format|json/i.test(String(det)))
-      return pregunta(ajustes, { sistema, texto, imagenes, json: false, signal });
-    if (propio) throw new Error(propio);
-    if (cfg.sinClave && r.status === 404)
-      throw new Error(
-        "La IA integrada no está disponible en esta copia de la app. Puedes usar tu propia clave en Ajustes."
-      );
-    if (r.status === 401 || r.status === 403)
-      throw new Error("La IA ha rechazado la clave. Revisa que esté bien copiada.");
-    if (r.status === 429)
-      throw new Error("Has llegado al límite gratuito de la IA por ahora. Prueba en un rato.");
-    throw new Error(
-      "La IA ha devuelto un error (" + r.status + ")" + (det ? ": " + String(det).slice(0, 160) : ".")
-    );
-  }
-  const j = await r.json();
-  const m = j.choices && j.choices[0] && j.choices[0].message;
-  const out =
-    m &&
-    (typeof m.content === "string"
-      ? m.content
-      : Array.isArray(m.content)
-        ? m.content.map((x: { text?: string }) => x.text || "").join("")
-        : "");
-  if (!out) throw new Error("La IA no ha devuelto respuesta.");
-  return out;
+export function pregunta(ajustes: Ajustes | null | undefined, p: Pregunta): Promise<string> {
+  return proveedorDe(ajustes).pregunta(p);
 }
 
 /** Extrae el primer objeto JSON de un texto (quita ``` y texto alrededor). */
