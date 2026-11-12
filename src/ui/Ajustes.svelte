@@ -3,6 +3,8 @@
   import { app } from "../state.js";
   import { nombreCopia } from "../lib/ajustes.ts";
   import { ver, falla } from "./comun.js";
+  import CambiarAlmacen from "./CambiarAlmacen.svelte";
+  import { descarga } from "./descarga.ts";
   import FormConfig from "./FormConfig.svelte";
   import { importaArchivo } from "./importa.js";
 
@@ -12,14 +14,7 @@
   async function exporta() {
     datosMsg = "Preparando la copia…";
     try {
-      const enlace = URL.createObjectURL(await app.store.exportaBlob());
-      const a = document.createElement("a");
-      a.href = enlace;
-      a.download = nombreCopia();
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(enlace), 60000);
+      descarga(await app.store.exportaBlob(), nombreCopia());
       datosMsg = "Copia descargada. La clave de la IA no se incluye.";
     } catch (e) {
       datosMsg = "";
@@ -77,6 +72,7 @@
   </div>
   <p class="a-msg" id="s-datos-msg" role="status" aria-live="polite">{datosMsg}</p>
 </div>
+<CambiarAlmacen />
 <p class="a-note" style="margin-top: 18px">
   Proyecto de código abierto. Las recomendaciones son orientativas y no sustituyen a una asesora profesional.
 </p>
