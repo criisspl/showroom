@@ -55,7 +55,8 @@ export async function llamaChat(
     throw new Error(
       cfg.integrada
         ? "No se ha podido conectar con la IA. Revisa tu conexión a internet."
-        : "No se ha podido conectar con la IA. Revisa tu conexión o prueba otro proveedor (algunos no aceptan llamadas desde el navegador)."
+        : "No se ha podido conectar con la IA. Revisa tu conexión o prueba otro proveedor (algunos no aceptan llamadas desde el navegador).",
+      { cause: e }
     );
   }
   if (!r.ok) {

@@ -45,7 +45,7 @@ export function montaConAnclas(
   if (!anclas.length) return [];
   const ids = anclas.map((a) => a.id),
     real = estado.P;
-  let res: Look[] = [];
+  let res: Look[];
   try {
     estado.P = real
       .filter((p) => ids.includes(p.id) || !anclas.some((a) => ocupaHueco(a, p)))

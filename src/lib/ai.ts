@@ -84,7 +84,8 @@ export async function abreImagen(blob: Blob): Promise<ImageBitmap | HTMLImageEle
     return img;
   } catch (e) {
     throw new Error(
-      "No he podido abrir esa foto. Prueba con una en JPG o PNG (en iPhone: Ajustes → Cámara → Formatos → Más compatible)."
+      "No he podido abrir esa foto. Prueba con una en JPG o PNG (en iPhone: Ajustes → Cámara → Formatos → Más compatible).",
+      { cause: e }
     );
   } finally {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
