@@ -1,6 +1,12 @@
 import { test } from "vitest";
 import assert from "node:assert/strict";
-import { avisoEnvio, destinoIA, DATOS_PEDIR_IA, DATOS_SEGUNDA_OPINION } from "../src/lib/permisoia.ts";
+import {
+  avisoEnvio,
+  destinoIA,
+  DATOS_PEDIR_IA,
+  DATOS_RELLENAR_PRENDA,
+  DATOS_SEGUNDA_OPINION
+} from "../src/lib/permisoia.ts";
 
 test("sin clave propia nombra a Groq y a Mistral de reserva", () => {
   const d = destinoIA(null);
@@ -27,4 +33,11 @@ test("el aviso dice a quién y qué datos salen", () => {
   assert.match(a, /^Se enviarán a Mistral \(Francia\) la foto de la prenda/);
   assert.ok(a.endsWith("¿Los envío?"));
   assert.match(avisoEnvio(null, DATOS_PEDIR_IA), /notas de los outfits que has votado/);
+});
+
+test("el aviso de rellenar prenda solo habla de la foto y no de armario ni perfil como datos enviados", () => {
+  const a = avisoEnvio(null, DATOS_RELLENAR_PRENDA);
+  assert.match(a, /^Se enviarán a .* la foto de la prenda/);
+  assert.match(a, /nada de tu armario ni de tu perfil/);
+  assert.doesNotMatch(a, /outfits|gustos|ocasión/);
 });
