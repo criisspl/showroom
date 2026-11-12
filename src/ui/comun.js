@@ -21,13 +21,13 @@ export function ver(tab, target) {
     if (!p.hidden) panelNuevo = p;
   });
   const nav = $("a-tabs");
-  nav.hidden = tab === "bienvenida";
+  nav.hidden = tab === "bienvenida" || tab === "configuracion";
   document.querySelectorAll(".a-tabs button").forEach((b) => {
     if (b.getAttribute("data-tab") === tab) b.setAttribute("aria-current", "page");
     else b.removeAttribute("aria-current");
   });
   try {
-    if (tab !== "bienvenida") localStorage.setItem("armario-tab", tab);
+    if (tab !== "bienvenida" && tab !== "configuracion") localStorage.setItem("armario-tab", tab);
   } catch (e) {
     /* sin almacenamiento */
   }

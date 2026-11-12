@@ -16,12 +16,17 @@ export interface Ajustes {
   modelo?: string;
   url?: string;
   clave?: string;
+  /** Hay una clave cifrada que aún no se ha desbloqueado con la contraseña (solo en memoria). */
+  bloqueada?: boolean;
 }
 
 export function config(ajustes: Ajustes | null | undefined) {
   let id = (ajustes && ajustes.proveedor) || "integrada";
-  // Sin clave propia, siempre la integrada
-  if (!SUGERENCIAS[id] || (SUGERENCIAS[id].tipo !== "integrada" && !(ajustes && ajustes.clave)))
+  // Sin clave propia, siempre la integrada (una clave bloqueada cuenta como propia: no se cambia de destino en silencio)
+  if (
+    !SUGERENCIAS[id] ||
+    (SUGERENCIAS[id].tipo !== "integrada" && !(ajustes && (ajustes.clave || ajustes.bloqueada)))
+  )
     id = "integrada";
   const p = SUGERENCIAS[id];
   if (p.tipo === "integrada")
@@ -91,6 +96,10 @@ export async function abreImagen(blob: Blob): Promise<ImageBitmap | HTMLImageEle
  * Devuelve el texto de la respuesta. Lanza Error con un mensaje en español si algo falla.
  */
 export function pregunta(ajustes: Ajustes | null | undefined, p: Pregunta): Promise<string> {
+  if (ajustes?.bloqueada && !ajustes.clave)
+    return Promise.reject(
+      new Error("Tu clave de IA está bloqueada. Desbloquéala con tu contraseña en Ajustes.")
+    );
   return proveedorDe(ajustes).pregunta(p);
 }
 

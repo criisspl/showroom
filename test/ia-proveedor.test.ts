@@ -73,7 +73,12 @@ contratoProveedorIA("integrada", () => creaIntegrada(), "api/ia");
 describe("diferencias entre adaptadores", () => {
   test("openai-compatible manda modelo y clave; las imágenes como texto u objeto según el proveedor", async () => {
     responde(ok("x"));
-    await creaOpenAICompatible({ url: "u", modelo: "m", clave: "k", imagen: "texto" }).pregunta({
+    await creaOpenAICompatible({
+      url: "https://u.example/v1",
+      modelo: "m",
+      clave: "k",
+      imagen: "texto"
+    }).pregunta({
       texto: "t",
       imagenes: [IMG]
     });

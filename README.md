@@ -66,7 +66,8 @@ La app trae su propio servidor intermediario (`worker/`, en Cloudflare Workers).
   - solo reenvía texto y hasta 5 fotos, de 6 MB en total como máximo
   - el modelo y los límites los decide el servidor, no el navegador
 - **Cupo gratuito:** es compartido. Cuando se llena, la app lo explica y el análisis en el móvil sigue funcionando.
-- **Clave propia:** quien quiera puede poner la suya en Ajustes (Mistral, Groq, OpenRouter, Gemini o cualquier servicio compatible con la API de OpenAI).
+- **Clave propia:** quien quiera puede elegir otra IA y poner su clave en Ajustes (Mistral, Groq, OpenRouter, Gemini o cualquier servicio compatible con la API de OpenAI; la URL tiene que ser https). La clave se cifra en el navegador con una contraseña de al menos 8 caracteres, no va en las copias y no se puede recuperar si se olvida la contraseña: en cada sesión hay que desbloquearla en Ajustes. Las claves guardadas sin cifrar por versiones anteriores siguen funcionando hasta que se les pone contraseña.
+- **Configuración:** tras la bienvenida (y luego en Ajustes) cada persona elige dónde se guardan sus datos y qué IA usa. Hoy solo hay almacenamiento en este dispositivo; la app sugiere ese y la IA integrada. Quien ya usaba la app conserva su configuración sin hacer nada.
 
 ## Publicarla (gratis) en Cloudflare
 
@@ -116,6 +117,9 @@ src/lib/              lógica sin interfaz, en TypeScript estricto
   engine.ts           punto de entrada del motor de outfits (reexporta motor/)
   motor/              estado, rasgos de prenda, aprendizaje, contexto, montar looks,
                       «¿Lo compro?» y «Lo monto yo»
+  config.ts           configuración elegida (almacenamiento e IA), sugerida y migración
+  claveia.ts          clave de la IA cifrada con contraseña
+  url.ts              validación de URLs https
   almacen.ts          contrato `Almacen`: colecciones, fotos, clave-valor y copias de seguridad
   store.ts            adaptador de IndexedDB del contrato `Almacen`
 src/data/             estaciones, tipos de cuerpo, estéticas, maquillaje e iconos

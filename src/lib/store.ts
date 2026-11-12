@@ -74,6 +74,8 @@ function validaCopia(data: Copia) {
   const rawKv: unknown = data.kv ?? {};
   if (!esObjeto(rawKv)) throw invalida();
   for (const [k, v] of Object.entries(rawKv)) {
+    // La configuración y la clave cifrada son de este dispositivo: una copia ajena no las toca
+    if (k === "config" || k === "claveIA") continue;
     if (k === "ajustes" && !esObjeto(v)) throw invalida();
     kv[k] = v;
   }
