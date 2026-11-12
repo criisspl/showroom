@@ -68,6 +68,7 @@ La app trae su propio servidor intermediario (`worker/`, en Cloudflare Workers).
 - **Cupo gratuito:** es compartido. Cuando se llena, la app lo explica y el análisis en el móvil sigue funcionando.
 - **Clave propia:** quien quiera puede elegir otra IA y poner su clave en Ajustes (Mistral, Groq, OpenRouter, Gemini o cualquier servicio compatible con la API de OpenAI; la URL tiene que ser https). La clave se cifra en el navegador con una contraseña de al menos 8 caracteres, no va en las copias y no se puede recuperar si se olvida la contraseña: en cada sesión hay que desbloquearla en Ajustes. Las claves guardadas sin cifrar por versiones anteriores siguen funcionando hasta que se les pone contraseña.
 - **Configuración:** tras la bienvenida (y luego en Ajustes) cada persona elige dónde se guardan sus datos y qué IA usa. Hoy solo hay almacenamiento en este dispositivo; la app sugiere ese y la IA integrada. Quien ya usaba la app conserva su configuración sin hacer nada.
+- **Copiar a otro almacenamiento:** en Ajustes se pueden copiar todos los datos (fotos incluidas) a otro almacenamiento sin tocar el actual. Un destino con datos solo se reemplaza con confirmación y tras descargar una copia suya; si algo falla, el destino vuelve a como estaba y el origen sigue intacto. La clave de IA y la configuración no viajan. Hoy no hay más almacenamientos que el del dispositivo, así que la tarjeta solo lo explica.
 
 ## Publicarla (gratis) en Cloudflare
 
@@ -122,6 +123,8 @@ src/lib/              lógica sin interfaz, en TypeScript estricto
   url.ts              validación de URLs https
   almacen.ts          contrato `Almacen`: colecciones, fotos, clave-valor y copias de seguridad
   store.ts            adaptador de IndexedDB del contrato `Almacen`
+  almacenes.ts        registro de adaptadores y copia a otro almacenamiento
+  migracion.ts        servicio de migración entre dos `Almacen` (validación, copia previa, verificación)
 src/data/             estaciones, tipos de cuerpo, estéticas, maquillaje e iconos
 src/ui/               una pantalla por archivo; pasando de JavaScript a Svelte 5 (Historial ya está)
 test/                 pruebas con Vitest

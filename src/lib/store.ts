@@ -31,7 +31,7 @@ const migraciones: ((db: IDBDatabase, tx: IDBTransaction) => void)[] = [
 export const VERSION = migraciones.length;
 
 /** Pone al día una copia antigua (version < VERSION). */
-function migraCopia(data: Copia): Copia {
+export function migraCopia(data: Copia): Copia {
   // v1 → v2: las copias antiguas no traen referencias de gusto
   if (data.version < 2) data = { ...data, refs: data.refs || [], version: 2 };
   return data;
@@ -46,7 +46,7 @@ const invalida = () => new Error("La copia está dañada o no es válida: no se 
  * Comprueba la copia entera y decodifica las fotos sin red (solo data:image/jpeg|png|webp).
  * Lanza si algo no cuadra; no toca la base de datos.
  */
-function validaCopia(data: Copia) {
+export function validaCopia(data: Copia) {
   const docs = {} as { [C in Coleccion]: Colecciones[C][] };
   for (const c of COLS) {
     const lista: unknown = data[c] ?? [];

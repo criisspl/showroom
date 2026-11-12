@@ -138,3 +138,11 @@ test("al cambiar de proveedor la clave guardada no se reutiliza en el nuevo dest
   await expect(page.locator("#s-msg")).toHaveText("Sin clave se usa la IA de la app.");
   await expect(page.getByLabel(/^Tu clave/)).toBeVisible();
 });
+
+test("Ajustes avisa de que todavía no hay otro almacenamiento al que copiar los datos", async ({ page }) => {
+  await irAAjustes(page);
+  await expect(page.getByRole("heading", { name: "Copiar a otro almacenamiento" })).toBeVisible();
+  await expect(page.locator("#s-migra")).toContainText("En este dispositivo (IndexedDB)");
+  await expect(page.locator("#s-migra-nada")).toContainText("Todavía no hay otro almacenamiento disponible");
+  await expect(page.getByRole("button", { name: "Copiar", exact: true })).toHaveCount(0);
+});
