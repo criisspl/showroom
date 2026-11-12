@@ -211,7 +211,7 @@ export async function migraAlmacen(
   }
 
   avisa("verificando", 4);
-  let correcto = false;
+  let correcto: boolean;
   try {
     correcto = coincide(copia, await destino.exporta());
   } catch {
