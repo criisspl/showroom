@@ -3,9 +3,15 @@
   import { app } from "../state.js";
   import { CATN } from "../data/constants.ts";
   import { fondoClaro } from "../lib/color.ts";
+  import type { Snippet } from "svelte";
   import type { Prenda } from "../lib/tipos.ts";
 
-  const { p }: { p: Prenda | null } = $props();
+  interface Props {
+    p: Prenda | null;
+    /** Lo que se pinta encima de la miniatura (p. ej. una insignia). */
+    children?: Snippet;
+  }
+  const { p, children }: Props = $props();
 
   let url: string | null = $state(null);
   let sinFoto = $state(false);
@@ -33,4 +39,5 @@
   {:else if etiqueta}
     <span class="a-th-l" class:osc={fondoClaro(p?.color)}>{p ? CATN[p.cat] || "" : ""}</span>
   {/if}
+  {@render children?.()}
 </div>
