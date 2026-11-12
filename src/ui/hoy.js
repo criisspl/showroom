@@ -50,7 +50,7 @@ import { textoGusto } from "../lib/gusto.ts";
 import { mount } from "svelte";
 import Maquillaje from "./Maquillaje.svelte";
 import { thumb, icono, ver, falla } from "./comun.js";
-import { abreForm } from "./armario.js";
+import { abreForm } from "./formPrenda.svelte.ts";
 import { ponDeseo } from "./ponDeseo.js";
 
 const PRINC = { arriba: 1, abajo: 1, vestido: 1 };
@@ -949,9 +949,12 @@ function anadeAlLook(q, dest) {
     virtId: q.id
   };
   ver("armario");
-  abreForm(null, q.pre);
-  $("a-form-msg").textContent =
-    "Revisa los datos (y hazle una foto si quieres). Al guardar, la pongo en tu look.";
+  abreForm(
+    null,
+    q.pre,
+    undefined,
+    "Revisa los datos (y hazle una foto si quieres). Al guardar, la pongo en tu look."
+  );
 }
 const repintaDest = (dest) =>
   dest === "yo" ? juzgaYo() : dest === "foto" ? pintaFotoLook() : repintaHoy(dest);

@@ -9,19 +9,16 @@ export const app = {
   refs: [], // referencias de gusto guardadas
   D: /** @type {Record<string, import("./lib/store.ts").DeseoGuardado>} */ ({}), // deseos guardados por id (estado de cada prenda deseada)
   ui: {
-    filter: "todo",
     wfil: "top",
     wcol: /** @type {Record<string, number>} */ ({}),
     seed: 0,
     last: [],
     preg: {},
-    editing: null,
-    photo: null,
-    prefoto: null,
-    modo: null,
     anclas: [], // prendas fijas de «Con estas prendas»
     ideaSeed: 0,
     noIdea: {},
+    pendiente:
+      /** @type {{ wid?: string | null, dest?: string, ancla?: boolean, virtId?: string } | null} */ (null), // prenda de Hoy que se está añadiendo al armario
     vuelveA: /** @type {string | null} */ (null) // pantalla a la que volver tras guardar una prenda
   },
   pinta: {} // funciones de repintado que registra cada pantalla
