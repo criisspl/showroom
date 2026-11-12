@@ -27,5 +27,7 @@ export function avisoEnvio(ajustes: Ajustes | null | undefined, datos: string): 
 
 export const DATOS_SEGUNDA_OPINION =
   "la foto de la prenda (si la hay), sus datos, tu perfil y la lista de tu armario";
+export const DATOS_RELLENAR_PRENDA =
+  "la foto de la prenda y el pedido de que la describa (nada de tu armario ni de tu perfil)";
 export const DATOS_PEDIR_IA =
   "tu perfil, tus gustos, la lista de tu armario, la ocasión y el tiempo, y las notas de los outfits que has votado (sin fotos)";

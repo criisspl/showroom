@@ -1,11 +1,13 @@
 <script lang="ts">
   // Formulario de prenda: alta, edición y «¿Lo compro?». Su estado vive en formPrenda.svelte.ts
   // porque lo pinta Armario o Deseos según cómo se abra.
+  import { tick } from "svelte";
   import { app, estado } from "../state.js";
   import { CATS, CORTES, ABRIGOS, EST, TEJ, TEMPORADAS } from "../data/constants.ts";
   import { byId, evalua } from "../lib/engine.ts";
   import { clasifica, consejoColor } from "../lib/color.ts";
   import { imagenParaIA, preguntaJSON } from "../lib/ai.ts";
+  import { avisoEnvio, DATOS_RELLENAR_PRENDA } from "../lib/permisoia.ts";
   import { PEDIDO_RELLENO, leePrenda, rellenoDe } from "../lib/prendaform.ts";
   import type { Temporada } from "../lib/tipos.ts";
   import { ver, falla } from "./comun.js";
@@ -20,10 +22,15 @@
   let campoNombre: HTMLInputElement | undefined = $state();
   let guardando = $state(false);
   let rellenando = $state(false);
+  let pidiendo = $state(false);
+  let aviso = $state("");
+  let si: HTMLButtonElement | undefined = $state();
+  let botonAuto: HTMLButtonElement | undefined = $state();
 
   // Cada vez que se abre: se vacía el selector de foto y se lleva la vista al formulario
   $effect(() => {
     void form.abiertoN;
+    pidiendo = false;
     if (archivo) archivo.value = "";
     formEl?.scrollIntoView({ block: "start" });
   });
@@ -73,8 +80,24 @@
     return r.prenda;
   }
 
+  function pidePermiso() {
+    if (!fotos.photo) return;
+    aviso = avisoEnvio(app.ajustes, DATOS_RELLENAR_PRENDA);
+    pidiendo = true;
+  }
+  $effect(() => {
+    if (pidiendo) si?.focus();
+  });
+
+  async function cierraAviso() {
+    pidiendo = false;
+    await tick();
+    botonAuto?.focus();
+  }
+
   async function autoIA() {
     if (!fotos.photo) return;
+    await cierraAviso();
     rellenando = true;
     form.autoMsg = "La IA está mirando la foto…";
     try {
@@ -201,12 +224,19 @@
       type="button"
       class="a-btn ghost"
       id="a-auto"
-      hidden={!form.autoVisible}
+      bind:this={botonAuto}
+      hidden={!form.autoVisible || pidiendo}
       disabled={rellenando}
-      onclick={autoIA}
+      onclick={pidePermiso}
     >
       Rellenar con IA (envía la foto)</button
-    ><span class="a-msg" id="a-auto-msg" role="status" aria-live="polite">{form.autoMsg}</span>
+    >{#if pidiendo}
+      <div class="ref-permiso" role="group" aria-label="Permiso para enviar a la IA">
+        <p>{aviso}</p>
+        <button type="button" class="a-btn" bind:this={si} onclick={autoIA}>Sí, enviarlo</button>
+        <button type="button" class="a-btn ghost" onclick={cierraAviso}>No</button>
+      </div>
+    {/if}<span class="a-msg" id="a-auto-msg" role="status" aria-live="polite">{form.autoMsg}</span>
   </div>
   <label class="a-f"
     ><span>Nombre</span><input
