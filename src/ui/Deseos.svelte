@@ -20,7 +20,8 @@
   import type { DeseoGuardado } from "../lib/store.ts";
   import type { Deseo, Perfil } from "../lib/tipos.ts";
   import { ver, falla } from "./comun.js";
-  import { abreForm } from "./armario.js";
+  import { abreForm, form } from "./formPrenda.svelte.ts";
+  import FormPrenda from "./FormPrenda.svelte";
   import { ponDeseo } from "./ponDeseo.js";
   import { avisa, cambios } from "./puente.svelte.ts";
   import FotoDeseo from "./FotoDeseo.svelte";
@@ -134,7 +135,9 @@
     >¿Lo compro?</button
   >
 </div>
-<div id="w-form-slot"></div>
+<div id="w-form-slot">
+  {#if form.abierto && form.lugar === "deseos"}<FormPrenda />{/if}
+</div>
 <p class="a-note w-pin">
   Cada botón de Pinterest abre una búsqueda ya hecha para esa prenda. Toca los círculos de color para verla en
   otro tono de tu paleta.
