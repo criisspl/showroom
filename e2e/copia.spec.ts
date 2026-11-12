@@ -7,7 +7,8 @@ test("la copia se descarga sin la clave de la IA, se borra todo y se recupera", 
   await pestana(page, "Análisis");
   await page.getByRole("button", { name: "Ajustes" }).click();
   await page.getByLabel("Qué IA usar").selectOption({ label: "Groq" });
-  await page.getByLabel("Tu clave").fill("gsk_secreta");
+  await page.getByLabel(/^Tu clave/).fill("gsk_secreta");
+  await page.getByLabel("Contraseña de tu clave").fill("contraseña-larga");
   await page.locator("#s-guarda").click();
   await expect(page.locator("#s-msg")).toHaveText("Guardado.");
 
@@ -21,7 +22,10 @@ test("la copia se descarga sin la clave de la IA, se borra todo y se recupera", 
   const copia = JSON.parse(fs.readFileSync(ruta, "utf8"));
   expect(copia.app).toBe("armario");
   expect(copia.prendas).toHaveLength(11);
-  expect(copia.kv.ajustes).toMatchObject({ proveedor: "groq", clave: "" });
+  expect(copia.kv.ajustes?.clave ?? "").toBe("");
+  expect(JSON.stringify(copia)).not.toContain("gsk_secreta");
+  expect(copia.kv.claveIA).toBeUndefined();
+  expect(copia.kv.config).toBeUndefined();
 
   await page.getByRole("button", { name: "Borrar todo" }).click();
   await page.getByRole("button", { name: "Pulsa otra vez: se borra todo" }).click();

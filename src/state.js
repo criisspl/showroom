@@ -1,10 +1,19 @@
 // Estado compartido de la interfaz.
 import { estado, setEstado } from "./lib/engine.ts";
 import { construyePaleta } from "./lib/color.ts";
+import { sugerida } from "./lib/config.ts";
 
 export const app = {
   store: /** @type {import("./lib/store.ts").Store} */ (null), // lo abre main.js al arrancar
-  ajustes: { proveedor: "integrada", modelo: "", url: "", clave: "" },
+  config: /** @type {import("./lib/config.ts").Config} */ (sugerida()), // dónde se guardan los datos y qué IA se usa (lo carga main.js)
+  configElegida: true, // false en una instalación nueva: se enseña la configuración inicial
+  claveCifrada: false, // hay una clave de IA cifrada guardada
+  ajustes: /** @type {import("./lib/ai.ts").Ajustes} */ ({
+    proveedor: "integrada",
+    modelo: "",
+    url: "",
+    clave: ""
+  }), // la clave solo vive aquí, en memoria
   perfil: /** @type {import("./lib/tipos.ts").Perfil | null} */ (null),
   refs: [], // referencias de gusto guardadas
   D: /** @type {Record<string, import("./lib/store.ts").DeseoGuardado>} */ ({}), // deseos guardados por id (estado de cada prenda deseada)

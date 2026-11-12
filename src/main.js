@@ -6,6 +6,8 @@ import "@fontsource/caveat/latin-700.css";
 import "@fontsource-variable/dm-sans/opsz.css";
 import "./styles.css";
 import { creaStore } from "./lib/store.ts";
+import { cargaConfig } from "./lib/config.ts";
+import { cargaAjustes } from "./lib/claveia.ts";
 import { app, setPerfil, repinta } from "./state.js";
 import { setEstado } from "./lib/engine.ts";
 import { gustoDe } from "./lib/gusto.ts";
@@ -17,6 +19,7 @@ import Historial from "./ui/Historial.svelte";
 import Hoy from "./ui/Hoy.svelte";
 import { hoy } from "./ui/hoyEstado.svelte.ts";
 import Ajustes from "./ui/Ajustes.svelte";
+import Configuracion from "./ui/Configuracion.svelte";
 import Gusto from "./ui/Gusto.svelte";
 import Deseos from "./ui/Deseos.svelte";
 import Analisis from "./ui/Analisis.svelte";
@@ -32,7 +35,18 @@ async function arranca() {
       "Este navegador no permite guardar datos (IndexedDB). Prueba con otro navegador o sal del modo privado.";
     return;
   }
-  app.ajustes = { ...app.ajustes, ...((await app.store.kget("ajustes")) || {}) };
+  // Configuración: quien ya usaba la app se migra sin pasos (proveedor, modelo y URL); la clave de IA
+  // queda cifrada y bloqueada, o en claro hasta que la proteja con una contraseña
+  try {
+    const { config, elegida } = await cargaConfig(app.store);
+    app.config = config;
+    app.configElegida = elegida;
+    const { ajustes, cifrada } = await cargaAjustes(app.store, config);
+    app.ajustes = ajustes;
+    app.claveCifrada = cifrada;
+  } catch (e) {
+    falla(e);
+  }
   const p = await app.store.kget("perfil");
   if (p) {
     try {
@@ -46,6 +60,13 @@ async function arranca() {
   try {
     mount(Ajustes, { target: document.querySelector("#tab-ajustes .wrap") });
     app.pinta.ajustes = avisa;
+  } catch (e) {
+    falla(e);
+  }
+  // La configuración inicial se enseña tras la bienvenida, solo en una instalación nueva
+  try {
+    mount(Configuracion, { target: document.querySelector("#tab-configuracion .wrap") });
+    app.pinta.configuracion = avisa;
   } catch (e) {
     falla(e);
   }

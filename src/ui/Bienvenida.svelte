@@ -151,7 +151,7 @@
     await app.store.kset("perfil", perfil);
     setPerfil(perfil);
     repinta();
-    ver("analisis");
+    ver(app.configElegida ? "analisis" : "configuracion");
     protegeDatos();
     const c = consejoIOS();
     if (c) aviso(c, 9000);

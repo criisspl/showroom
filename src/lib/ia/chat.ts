@@ -1,6 +1,7 @@
 // Llamada a chat/completions y traducción de sus fallos a mensajes en español. La comparten los dos
 // adaptadores: la IA integrada habla el mismo protocolo, pero sin modelo ni clave y con sus propios mensajes.
 
+import { esUrlHttps } from "../url.ts";
 import type { Pregunta } from "./proveedor.ts";
 
 export interface ConfigChat {
@@ -36,6 +37,9 @@ export async function llamaChat(
     temperature: 0.4
   };
   if (json) body.response_format = { type: "json_object" };
+  // Destino configurable: la clave solo sale hacia una URL https
+  if (!cfg.integrada && !esUrlHttps(cfg.url))
+    throw new Error("La URL de la IA tiene que empezar por https://");
   let r;
   try {
     r = await fetch(cfg.url, {
