@@ -109,12 +109,15 @@ src/lib/              lógica sin interfaz, en TypeScript estricto
   tipos.ts            tipos del dominio: prenda, outfit, voto, perfil…
   local.ts            análisis en el móvil: color desde el selfie, cuerpo y estética
   analysis.ts         preguntas, análisis con IA y normalización del perfil
-  ai.ts               cliente de IA (integrada o con clave propia) y lectura de fotos
+  ai.ts               cliente de IA (elige el adaptador según los ajustes) y lectura de fotos
+  ia/                 contrato `ProveedorIA`, adaptadores `openai-compatible` e `integrada`
+                      y registro de sugerencias de proveedor (valores por defecto, no lista cerrada)
   color.ts            color en CIELAB, familias, paleta y clasificación
   engine.ts           punto de entrada del motor de outfits (reexporta motor/)
   motor/              estado, rasgos de prenda, aprendizaje, contexto, montar looks,
                       «¿Lo compro?» y «Lo monto yo»
-  store.ts            IndexedDB: colecciones, fotos y copias de seguridad
+  almacen.ts          contrato `Almacen`: colecciones, fotos, clave-valor y copias de seguridad
+  store.ts            adaptador de IndexedDB del contrato `Almacen`
 src/data/             estaciones, tipos de cuerpo, estéticas, maquillaje e iconos
 src/ui/               una pantalla por archivo; pasando de JavaScript a Svelte 5 (Historial ya está)
 test/                 pruebas con Vitest
