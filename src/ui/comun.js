@@ -1,41 +1,5 @@
-// Piezas de interfaz compartidas: miniaturas, navegación por pestañas e iconos.
-import { el, $ } from "../lib/dom.js";
-import { app } from "../state.js";
-import { CATN } from "../data/constants.ts";
-import { ICONOS } from "../data/icons.ts";
-import { fondoClaro } from "../lib/color.ts";
-
-/** Miniatura de una prenda: foto si la hay (se carga de IndexedDB), si no, su color con la categoría. */
-export function thumb(p) {
-  const d = el("div", "a-th");
-  d.style.background = (p && p.color) || "#D9C9AE";
-  const etiqueta = () =>
-    d.appendChild(
-      el("span", "a-th-l" + (fondoClaro(p && p.color) ? " osc" : ""), p ? CATN[p.cat] || "" : "")
-    );
-  if (p && p.foto) {
-    app.store.urlFoto(p.foto).then((u) => {
-      if (!u) return etiqueta();
-      const i = new Image();
-      i.alt = "";
-      i.src = u;
-      d.appendChild(i);
-    });
-  } else if (p && p.mini) {
-    const i = new Image();
-    i.alt = "";
-    i.src = p.mini;
-    d.appendChild(i);
-  } else etiqueta();
-  return d;
-}
-
-export function icono(tipo, color) {
-  const d = el("div", "w-pic");
-  d.innerHTML = ICONOS[tipo] || ICONOS.camiseta;
-  if (color) d.style.color = color;
-  return d;
-}
+// Piezas de interfaz compartidas: navegación por pestañas y avisos de error.
+import { $ } from "./dom.js";
 
 let primeraVista = true;
 

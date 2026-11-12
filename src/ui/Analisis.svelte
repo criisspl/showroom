@@ -2,7 +2,7 @@
   // Pestaña Análisis: tu informe visual (color, cuerpo, rostro, maquillaje, pelo, estética y looks)
   // e «Inspo a la carta»: galerías de Pinterest según estación del año y ocasión.
   import { app } from "../state.js";
-  import { pinterest } from "../lib/dom.js";
+  import { pinterest } from "./dom.js";
   import { OCAS } from "../data/constants.ts";
   import {
     ESTACIONES,

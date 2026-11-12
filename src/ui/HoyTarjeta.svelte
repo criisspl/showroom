@@ -5,7 +5,7 @@
   import { CATN } from "../data/constants.ts";
   import { esVirtual } from "../lib/engine.ts";
   import { iconoSvg } from "../lib/deseos.ts";
-  import { hoyISO, pinterest } from "../lib/dom.js";
+  import { hoyISO, pinterest } from "./dom.js";
   import { etiquetaHueco, nombreConColor, porqueDe } from "../lib/hoy.ts";
   import type { CtxHoy, Hueco, LookHoy, Origen, TarjetaVista } from "../lib/hoy.ts";
   import { falla } from "./comun.js";
