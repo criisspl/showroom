@@ -9,7 +9,7 @@
   import { PEDIDO_RELLENO, leePrenda, rellenoDe } from "../lib/prendaform.ts";
   import type { Temporada } from "../lib/tipos.ts";
   import { ver, falla } from "./comun.js";
-  import { vuelveConPrenda } from "./hoy.js";
+  import { vuelveConPrenda } from "./hoyEstado.svelte.ts";
   import { cambios } from "./puente.svelte.ts";
   import { cierraForm, eligeFoto, form, fotoParaGuardar, fotos, temporadaAuto } from "./formPrenda.svelte.ts";
   import Opciones from "./Opciones.svelte";

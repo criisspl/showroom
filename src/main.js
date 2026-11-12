@@ -11,11 +11,11 @@ import { setEstado } from "./lib/engine.ts";
 import { gustoDe } from "./lib/gusto.ts";
 import { normaliza } from "./lib/analysis.ts";
 import { ver, falla } from "./ui/comun.js";
-import { initHoy } from "./ui/hoy.js";
 import { mount } from "svelte";
 import Armario from "./ui/Armario.svelte";
 import Historial from "./ui/Historial.svelte";
-import Espejo from "./ui/Espejo.svelte";
+import Hoy from "./ui/Hoy.svelte";
+import { hoy } from "./ui/hoyEstado.svelte.ts";
 import Ajustes from "./ui/Ajustes.svelte";
 import Gusto from "./ui/Gusto.svelte";
 import Deseos from "./ui/Deseos.svelte";
@@ -69,6 +69,13 @@ async function arranca() {
   } catch (e) {
     falla(e);
   }
+  // Hoy: su estado vive en hoyEstado; al avisar el puente se monta lo que toque al llegar a la pestaña
+  try {
+    mount(Hoy, { target: document.querySelector("#tab-hoy .wrap") });
+    app.pinta.hoy = () => hoy.alPintar();
+  } catch (e) {
+    falla(e);
+  }
   // Bienvenida es de estado propio: no necesita repintarse con el puente
   try {
     mount(Bienvenida, { target: document.querySelector("#tab-bienvenida .wrap") });
@@ -76,7 +83,7 @@ async function arranca() {
     falla(e);
   }
   // Si una pantalla falla al arrancar, las demás (y la carga de tus prendas) siguen funcionando
-  [initHoy, initInstala].forEach((f) => {
+  [initInstala].forEach((f) => {
     try {
       f();
     } catch (e) {
@@ -87,10 +94,7 @@ async function arranca() {
   try {
     mount(Historial, { target: document.querySelector("#tab-historial .wrap") });
     app.pinta.historial = avisa;
-    mount(Espejo, { target: document.querySelector("#a-espejo") });
-    app.pinta.espejo = avisa;
     mount(Gusto, { target: document.querySelector("#a-gusto") });
-    mount(Gusto, { target: document.querySelector("#a-refs-gusto") });
     app.pinta.gusto = avisa;
   } catch (e) {
     falla(e);
