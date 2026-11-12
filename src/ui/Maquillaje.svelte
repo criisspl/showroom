@@ -2,7 +2,7 @@
   // «Maquillaje para este look»: botón que despliega el maquillaje ajustado a la ropa y la ocasión de la tarjeta.
   // «Afinar con la IA» envía la descripción del look y el resumen del análisis, y siempre pide permiso antes.
   import { app } from "../state.js";
-  import { pinterest } from "../lib/dom.js";
+  import { pinterest } from "./dom.js";
   import { hayIA, preguntaJSON } from "../lib/ai.ts";
   import { avisoEnvio } from "../lib/permisoia.ts";
   import {

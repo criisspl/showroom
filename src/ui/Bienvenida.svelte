@@ -3,7 +3,7 @@
   // Opcional: análisis más completo con IA (con consentimiento expreso) o perfil a mano.
   import { tick } from "svelte";
   import { app, setPerfil, repinta } from "../state.js";
-  import { aviso } from "../lib/dom.js";
+  import { aviso } from "./dom.js";
   import { imagenParaIA, abreImagen, hayIA } from "../lib/ai.ts";
   import { PREGUNTAS, analizaConIA, perfilManual, normaliza } from "../lib/analysis.ts";
   import type { PreguntaAnalisis } from "../lib/analysis.ts";

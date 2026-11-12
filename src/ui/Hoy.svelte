@@ -3,7 +3,7 @@
   // se juzga el suyo, se parte de unas prendas o de una foto.
   import { BANDAS, ENTORNOS, OCAS, TEMPORADAS } from "../data/constants.ts";
   import { claveDe } from "../lib/engine.ts";
-  import { fechaLarga, hoyISO } from "../lib/dom.js";
+  import { fechaLarga, hoyISO } from "./dom.js";
   import { MODOS, tarjetaDe, textoSinAncla, textoSinOutfit } from "../lib/hoy.ts";
   import type { Modo } from "../lib/hoy.ts";
   import { avisoEnvio, DATOS_PEDIR_IA } from "../lib/permisoia.ts";

@@ -1,5 +1,5 @@
 // Instalación como app (PWA), funcionamiento sin conexión y protección de los datos.
-import { $ } from "../lib/dom.js";
+import { $ } from "./dom.js";
 
 const esIOS = () =>
   /iphone|ipad|ipod/i.test(navigator.userAgent) ||

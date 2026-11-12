@@ -1,7 +1,7 @@
 <script lang="ts">
   // Pestaña Deseos: las prendas que le faltan a tu armario según tu análisis, y las que añades tú.
   import { app } from "../state.js";
-  import { pinterest } from "../lib/dom.js";
+  import { pinterest } from "./dom.js";
   import {
     FILTROS,
     combinaCon,

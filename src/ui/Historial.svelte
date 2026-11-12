@@ -2,7 +2,7 @@
   // Pestaña Historial: lo que te has puesto, lo guardado, lo que la app ha aprendido y las altas.
   import { untrack } from "svelte";
   import { SvelteSet } from "svelte/reactivity";
-  import { hoyISO, fechaLarga } from "../lib/dom.js";
+  import { hoyISO, fechaLarga } from "./dom.js";
   import { app } from "../state.js";
   import { byId, estado, ocaDe, bandaDe } from "../lib/engine.ts";
   import { cifras, puestos, guardados, altasPorMes, aprendizaje } from "../lib/historial.ts";
