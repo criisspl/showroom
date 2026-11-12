@@ -42,6 +42,7 @@ import { avisa } from "./puente.svelte.ts";
 type UltNo = { dest: number | string; id: string | null; nombre: string };
 
 class EstadoHoy {
+  version = $state(0);
   modo: Modo = $state("propon");
   ocas: string[] = $state([ocaInicial()]);
   bandas: string[] = $state([MESBANDA[new Date().getMonth()]]);
@@ -399,11 +400,12 @@ class EstadoHoy {
 
   /** Cada vez que main.js avisa de un cambio: al llegar a la pestaña se monta lo que toque. */
   alPintar() {
-    avisa();
+    this.version++;
     if (this.modo !== "propon" || this.res || this.cargandoIA) return;
     if (this.vacio || !this.sinLooks) this.montar(false);
   }
   get hayIA() {
+    void this.version;
     return hayIA(app.ajustes);
   }
 }

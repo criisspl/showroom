@@ -195,7 +195,7 @@
       {/each}
     </div>
   </fieldset>
-  <div class="a-row" hidden={modo !== "propon"}>
+  <div class="a-row" id="a-prop-row" hidden={modo !== "propon"}>
     <button type="button" class="a-btn" onclick={() => hoy.montar(true)}>Montar outfits</button><button
       type="button"
       class="a-btn ghost"
@@ -213,23 +213,23 @@
   {/if}
 </div>
 <HoyFoto activo={enFoto} />
-<div class="card a-yo" hidden={modo !== "refs"}>
+<div class="card a-yo" id="a-refs" hidden={modo !== "refs"}>
   <h2>Referencias</h2>
   <p class="a-msg">
     Sube capturas de looks que te gusten. La IA las mira (solo si tú la dejas, foto a foto), apunta colores,
     estéticas y prendas, y lo uso para proponerte outfits más a tu gusto.
   </p>
-  <Gusto />
+  <div id="a-refs-gusto"><Gusto /></div>
   <div class="a-row">
     <button type="button" class="a-btn" onclick={() => hoy.montar(true)}>Looks como mis referencias</button>
   </div>
 </div>
 <HoyAncla activo={modo === "ancla"} />
 <HoyYo activo={enYo} />
-<div class="a-out" hidden={!enYo}>
+<div class="a-out" id="a-espejo" hidden={!enYo}>
   <Espejo />
 </div>
-<div class="a-out" aria-live="polite" hidden={enYo || enFoto} bind:this={salida}>
+<div class="a-out" id="a-out" aria-live="polite" hidden={enYo || enFoto} bind:this={salida}>
   {#if hoy.cargandoIA}
     <p class="a-note" role="status">La IA está mirando tu armario…</p>
   {/if}

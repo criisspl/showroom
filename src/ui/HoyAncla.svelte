@@ -62,7 +62,7 @@
   <p class="a-msg">
     ¿Hoy te apetece llevar algo en concreto? Elige una o varias de tu armario y te monto el look alrededor.
   </p>
-  <div>
+  <div id="a-ancla-pick">
     {#if hoy.anclaAviso}<p class="a-msg" role="status">{hoy.anclaAviso}</p>{/if}
     <div class="a-row">
       <p class="a-msg">
@@ -95,7 +95,7 @@
       </div>
     {/each}
   </div>
-  <div class="a-ideas" aria-live="polite">
+  <div class="a-ideas" id="a-ancla-ideas" aria-live="polite">
     {#if ideas}
       <h3>{ideas.lista.length ? "Lo que mejor le pega" : "No encuentro qué añadirle"}</h3>
       {#if !ideas.lista.length}

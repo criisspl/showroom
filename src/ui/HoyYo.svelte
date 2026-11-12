@@ -49,7 +49,7 @@
   <p class="a-msg">
     Elige las prendas de tu look y te digo si pega con la ocasión y el tiempo que has marcado arriba.
   </p>
-  <div>
+  <div id="a-yo-pick">
     {#if grupos.vacio}
       <p class="a-note">Cuando subas prendas al armario, podrás montar aquí tus looks.</p>
     {/if}
@@ -80,7 +80,7 @@
     <button type="button" class="a-btn ghost" onclick={() => hoy.empiezaYo()}>Empezar de nuevo</button>
   </div>
 </div>
-<div class="a-out" aria-live="polite" hidden={!activo}>
+<div class="a-out" id="a-yo-out" aria-live="polite" hidden={!activo}>
   {#if juicio}
     {@const { j, m } = juicio}
     <HoyTarjeta t={juicio.t} o={juicio.o} c={juicio.c} origen="yo" idx="yo">

@@ -176,7 +176,7 @@
     ><span class="a-msg" role="status" aria-live="polite">{mensaje}</span>
   </div>
 </div>
-<div class="a-out" aria-live="polite" hidden={!activo}>
+<div class="a-out" id="a-fl-out" aria-live="polite" hidden={!activo}>
   {#if opinion}
     <HoyTarjeta t={opinion.t} o={opinion.o} c={opinion.c} origen="foto" idx="foto">
       {#snippet cabecera()}
