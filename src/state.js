@@ -18,7 +18,9 @@ export const app = {
     ideaSeed: 0,
     noIdea: {},
     pendiente:
-      /** @type {{ wid?: string | null, dest?: string, ancla?: boolean, virtId?: string } | null} */ (null), // prenda de Hoy que se está añadiendo al armario
+      /** @type {{ wid?: string | null, dest?: string | number, ancla?: boolean, virtId?: string | null } | null} */ (
+        null
+      ), // prenda de Hoy que se está añadiendo al armario
     vuelveA: /** @type {string | null} */ (null) // pantalla a la que volver tras guardar una prenda
   },
   pinta: {} // funciones de repintado que registra cada pantalla
